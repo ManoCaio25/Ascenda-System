@@ -1,4 +1,4 @@
-import { useStore } from '@/app/store/index.js';
+import { useStore } from '../../../../store/index.js';
 
 export default function CourseLibrary() {
   const quizLibrary = useStore((state) => state.quizLibrary);

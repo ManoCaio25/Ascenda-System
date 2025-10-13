@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useStore } from '@/app/store/index.js';
+import { useStore } from '../../store/index.js';
 import { ToastContainer } from '../feedback/ToastContainer.jsx';
 
 const padrinhoNav = [

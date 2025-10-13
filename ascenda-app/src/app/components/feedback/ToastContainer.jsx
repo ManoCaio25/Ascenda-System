@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useStore } from '@/app/store/index.js';
+import { useStore } from '../../store/index.js';
 
 const variants = {
   info: 'bg-slate-800 text-slate-100 border border-slate-700',
