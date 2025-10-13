@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
-import { useStore } from '@store/index.js';
+import { useStore } from '../../store/index.js';
 
 export function EstagiarioGuard({ children }) {
   const user = useStore((state) => state.auth.user);
