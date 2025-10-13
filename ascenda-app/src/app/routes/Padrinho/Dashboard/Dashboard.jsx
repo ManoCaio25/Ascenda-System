@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '@store/index.js';
+import { useStore } from '../../../../store/index.js';
 
 export default function Dashboard() {
   const getEstagiarios = useStore((state) => state.getEstagiarios);

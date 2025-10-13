@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useStore } from '@store/index.js';
+import { useStore } from '../../../../store/index.js';
 
 export default function AscendaIA() {
   const quizLibrary = useStore((state) => state.quizLibrary);

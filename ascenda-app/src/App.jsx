@@ -1,10 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { useStore } from '@store/index.js';
-import { AppShell } from '@components/layout/AppShell.jsx';
-import { LoadingOverlay } from '@components/feedback/LoadingOverlay.jsx';
-import { PadrinhoGuard } from '@components/layout/PadrinhoGuard.jsx';
-import { EstagiarioGuard } from '@components/layout/EstagiarioGuard.jsx';
+import { useStore } from './app/store';
+import { AppShell } from './app/components/layout/AppShell.jsx';
+import { LoadingOverlay } from './app/components/feedback/LoadingOverlay.jsx';
+import { PadrinhoGuard } from './app/components/layout/PadrinhoGuard.jsx';
+import { EstagiarioGuard } from './app/components/layout/EstagiarioGuard.jsx';
 
 const Login = lazy(() => import('./app/routes/Login/Login.jsx'));
 const Loading = lazy(() => import('./app/routes/Loading/Loading.jsx'));

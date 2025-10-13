@@ -1,36 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLoginStore } from './login.store.js';
-import { useStore } from '@store/index.js';
-import { requestSoundUnlock } from '@services/notifyService.js';
+import { useStore } from '../../store/index.js';
+import { requestSoundUnlock } from '../../services/notifyService.js';
 import './login.css';
-
-const INITIAL_STATE = {
-  email: '',
-  password: ''
-};
-
-const roleCopy = {
-  padrinho: {
-    heading: 'Bem Vindo Padrinho!',
-    toggleHeading: 'Padrinho'
-  },
-  estagiario: {
-    heading: 'Bem Vindo Estagiário!',
-    toggleHeading: 'Estagiário'
-  }
-};
 
 export default function Login() {
   const navigate = useNavigate();
   const { mode, setMode } = useLoginStore();
   const login = useStore((state) => state.login);
   const user = useStore((state) => state.auth.user);
-  const [formValues, setFormValues] = useState({
-    padrinho: { ...INITIAL_STATE },
-    estagiario: { ...INITIAL_STATE }
-  });
-  const [errors, setErrors] = useState({ padrinho: '', estagiario: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -39,130 +21,113 @@ export default function Login() {
     }
   }, [user, navigate]);
 
-  const activeRole = useMemo(() => (mode === 'padrinho' ? 'padrinho' : 'estagiario'), [mode]);
-
-  useEffect(() => {
-    setErrors({ padrinho: '', estagiario: '' });
-  }, [activeRole]);
-
-  const handleInputChange = (role, field) => (event) => {
-    const value = event.target.value;
-    setFormValues((prev) => ({
-      ...prev,
-      [role]: { ...prev[role], [field]: value }
-    }));
-  };
-
-  const handleSubmit = async (event, role) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setErrors((prev) => ({ ...prev, [role]: '' }));
-    const credentials = formValues[role];
-
+    setError('');
     try {
       requestSoundUnlock();
-      const account = await login({
-        email: credentials.email,
-        password: credentials.password,
-        role
-      });
+      const account = await login({ email, password, role: mode === 'padrinho' ? 'padrinho' : 'estagiario' });
       const target = account.role === 'padrinho' ? '/padrinho' : `/estagiario/${account.slug}`;
       navigate(`/loading?to=${encodeURIComponent(target)}&duration=9000`);
-    } catch (error) {
-      setErrors((prev) => ({ ...prev, [role]: error.message || 'Erro ao realizar login.' }));
+    } catch (err) {
+      setError(err.message);
     }
   };
 
-  const handleModeChange = (role) => {
-    if (role === activeRole) return;
-    setMode(role);
-  };
-
   return (
-    <div className="ascenda-login">
-      <div className={`login-container ${activeRole === 'padrinho' ? 'active' : ''}`}>
-        <div className="form-container padrinho">
-          <form onSubmit={(event) => handleSubmit(event, 'padrinho')} noValidate>
-            <h1>{roleCopy.padrinho.heading}</h1>
-            <div className="social-icons" aria-hidden="true">
-              <span>G+</span>
+    <div className="login-screen">
+      <div className={`container ${mode === 'padrinho' ? 'active' : ''}`}>
+        <div className="form-container sign-up">
+          <form onSubmit={handleSubmit}>
+            <h1>Bem Vindo Padrinho!</h1>
+            <div className="social-icons">
+              <a href="#" className="icon" aria-label="Google login">
+                <i className="fa-brands fa-google-plus-g" />
+              </a>
             </div>
             <span>Entre com seu e-mail e senha</span>
             <input
-              id="padrinho-email"
               type="email"
               placeholder="Email"
-              value={formValues.padrinho.email}
-              onChange={handleInputChange('padrinho', 'email')}
+              value={mode === 'padrinho' ? email : ''}
+              onChange={(event) => setEmail(event.target.value)}
               autoComplete="username"
-              required
+              required={mode === 'padrinho'}
             />
             <input
-              id="padrinho-password"
               type="password"
-              placeholder="Senha"
-              value={formValues.padrinho.password}
-              onChange={handleInputChange('padrinho', 'password')}
+              placeholder="Password"
+              value={mode === 'padrinho' ? password : ''}
+              onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
-              required
+              required={mode === 'padrinho'}
             />
-            <a href="#" className="forgot-link">
-              Esqueceu sua senha?
-            </a>
-            {errors.padrinho && (
-              <p className="form-error" role="alert">
-                {errors.padrinho}
-              </p>
-            )}
+            {mode === 'padrinho' && error && <p className="text-xs text-rose-400">{error}</p>}
+            <a href="#">Esqueceu sua senha?</a>
             <button type="submit">Entrar</button>
           </form>
         </div>
-        <div className="form-container estagiario">
-          <form onSubmit={(event) => handleSubmit(event, 'estagiario')} noValidate>
-            <h1>{roleCopy.estagiario.heading}</h1>
-            <div className="social-icons" aria-hidden="true">
-              <span>G+</span>
+        <div className="form-container sign-in">
+          <form onSubmit={handleSubmit}>
+            <h1>Bem Vindo Estagiário!</h1>
+            <div className="social-icons">
+              <a href="#" className="icon" aria-label="Google login">
+                <i className="fa-brands fa-google-plus-g" />
+              </a>
             </div>
             <span>Entre com seu e-mail e senha</span>
             <input
-              id="estagiario-email"
               type="email"
               placeholder="Email"
-              value={formValues.estagiario.email}
-              onChange={handleInputChange('estagiario', 'email')}
+              value={mode === 'estagiario' ? email : ''}
+              onChange={(event) => setEmail(event.target.value)}
               autoComplete="username"
-              required
+              required={mode === 'estagiario'}
             />
             <input
-              id="estagiario-password"
               type="password"
-              placeholder="Senha"
-              value={formValues.estagiario.password}
-              onChange={handleInputChange('estagiario', 'password')}
+              placeholder="Password"
+              value={mode === 'estagiario' ? password : ''}
+              onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
-              required
+              required={mode === 'estagiario'}
             />
-            <a href="#" className="forgot-link">
-              Esqueceu sua senha?
-            </a>
-            {errors.estagiario && (
-              <p className="form-error" role="alert">
-                {errors.estagiario}
-              </p>
-            )}
+            {mode === 'estagiario' && error && <p className="text-xs text-rose-400">{error}</p>}
+            <a href="#">Esqueceu sua senha?</a>
             <button type="submit">Entrar</button>
           </form>
         </div>
         <div className="toggle-container">
           <div className="toggle">
             <div className="toggle-panel toggle-left">
-              <h1>{roleCopy.estagiario.toggleHeading}</h1>
-              <button type="button" className="toggle-button" onClick={() => handleModeChange('estagiario')}>
+              <h1>Estagiário</h1>
+              <button
+                className="hidden"
+                id="login"
+                type="button"
+                onClick={() => {
+                  setMode('estagiario');
+                  setEmail('');
+                  setPassword('');
+                  setError('');
+                }}
+              >
                 Entrar
               </button>
             </div>
             <div className="toggle-panel toggle-right">
-              <h1>{roleCopy.padrinho.toggleHeading}</h1>
-              <button type="button" className="toggle-button" onClick={() => handleModeChange('padrinho')}>
+              <h1>Padrinho</h1>
+              <button
+                className="hidden"
+                id="register"
+                type="button"
+                onClick={() => {
+                  setMode('padrinho');
+                  setEmail('');
+                  setPassword('');
+                  setError('');
+                }}
+              >
                 Entrar
               </button>
             </div>
