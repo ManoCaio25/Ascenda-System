@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useStore } from '@store';
+import { useStore } from '../../../../store/index.js';
 
 export default function Quizzes() {
   const user = useStore((state) => state.auth.user);

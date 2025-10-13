@@ -1,4 +1,4 @@
-import { useStore } from '@store';
+import { useStore } from '../../../../store/index.js';
 
 export default function Approvals() {
   const requests = useStore((state) => state.vacationRequests);
