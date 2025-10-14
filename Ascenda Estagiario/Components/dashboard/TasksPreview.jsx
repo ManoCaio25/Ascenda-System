@@ -1,10 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion"; 
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@estagiario/utils";
 import { CheckCircle, Clock, AlertCircle, ChevronRight, Target } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@estagiario/Components/ui/button";
+import { Skeleton } from "@estagiario/Components/ui/skeleton";
 import { format } from "date-fns";
 
 export default function TasksPreview({ tasks, isLoading }) {

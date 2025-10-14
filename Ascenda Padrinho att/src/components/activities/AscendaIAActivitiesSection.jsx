@@ -1,8 +1,8 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { fakeAscendaIAActivities } from "@/utils/fakeAscendaIAActivities";
+import { Button } from "@padrinho/components/ui/button";
+import { Input } from "@padrinho/components/ui/input";
+import { Textarea } from "@padrinho/components/ui/textarea";
+import { fakeAscendaIAActivities } from "@padrinho/utils/fakeAscendaIAActivities";
 import { Sparkles, Youtube, FileText, Trash2 } from "lucide-react";
 
 function formatTime(isoString) {

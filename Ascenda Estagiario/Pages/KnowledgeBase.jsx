@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Database } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@estagiario/Components/ui/input';
 
 const mockIncidents = [
   { id: 1, titulo: "React component not re-rendering on prop change", descricao_problema: "A child component was not updating when its props changed from the parent.", solucao_aplicada: "Ensured that a unique `key` prop was passed to the component when rendering a list. Also memoized the component using `React.memo` to prevent unnecessary re-renders.", area_relacionada: "Frontend" },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils';
+import { cn } from '@padrinho/utils';
 
 export const Input = React.forwardRef(function Input({ className, type = 'text', ...props }, ref) {
   return (

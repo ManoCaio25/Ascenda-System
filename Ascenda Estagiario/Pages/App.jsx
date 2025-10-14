@@ -1,8 +1,7 @@
 import React from "react";
-import Layout from "@/Layout";
-import { I18nProvider } from "@/components/utils/i18n";
-import { AccessibilityProvider } from "@/components/utils/accessibility";
-import AIChatWidget from "@/components/ai/AIChat";
+import Layout from "@estagiario/layout";
+import { I18nProvider } from "@estagiario/Components/utils/i18n";
+import { AccessibilityProvider } from "@estagiario/Components/utils/accessibility";
 
 export default function App({ children, currentPageName }) {
   return (

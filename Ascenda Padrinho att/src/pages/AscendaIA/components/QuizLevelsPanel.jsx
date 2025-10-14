@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from "@padrinho/components/ui/checkbox";
+import { Button } from "@padrinho/components/ui/button";
 import { ascendaIAStrings } from "../strings";
 
 const ACCENT_RING = {

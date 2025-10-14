@@ -9,8 +9,8 @@ import { QuizLevelsPanel } from "./components/QuizLevelsPanel";
 import { PreviewPanel } from "./components/PreviewPanel";
 import { SaveDraftBar } from "./components/SaveDraftBar";
 import { ascendaIAStrings } from "./strings";
-import { Button } from "@/components/ui/button";
-import { PAGE_URLS } from "@/utils";
+import { Button } from "@padrinho/components/ui/button";
+import { PAGE_URLS } from "@padrinho/utils";
 
 import "./styles/ascenda-quizz.css";
 

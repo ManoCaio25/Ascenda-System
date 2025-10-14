@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Task } from '@/entities/all';
+import { Task } from '@estagiario/Entities/all';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { motion } from 'framer-motion';
 import { Plus, Clock, AlertCircle, CheckCircle, Target } from 'lucide-react';

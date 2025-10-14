@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User } from "@/entities/User";
-import { useI18n } from "@/components/utils/i18n";
-import { useAccessibility } from "@/components/utils/accessibility";
+import { User } from "@estagiario/Entities/all";
+import { useI18n } from "@estagiario/Components/utils/i18n";
+import { useAccessibility } from "@estagiario/Components/utils/accessibility";
 import { 
   Settings as SettingsIcon, 
   User as UserIcon, 
@@ -17,14 +17,14 @@ import {
   Focus,
   Languages
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import AvatarWithFallback from "@/components/ui/AvatarWithFallback";
-import { avatarPlaceholders } from "@/components/utils/avatarPlaceholders";
+import { Button } from "@estagiario/Components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@estagiario/Components/ui/card";
+import { Switch } from "@estagiario/Components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@estagiario/Components/ui/select";
+import { Input } from "@estagiario/Components/ui/input";
+import { Label } from "@estagiario/Components/ui/label";
+import AvatarWithFallback from "@estagiario/Components/ui/AvatarWithFallback";
+import { avatarPlaceholders } from "@estagiario/Components/utils/avatarPlaceholders";
 
 export default function SettingsPage() {
   const { t, language, changeLanguage } = useI18n();

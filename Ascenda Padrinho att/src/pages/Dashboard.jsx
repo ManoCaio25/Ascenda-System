@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Intern } from "@/entities/Intern";
-import { Course } from "@/entities/Course";
-import { Task } from "@/entities/Task";
-import { User } from "@/entities/User";
-import { Notification } from "@/entities/Notification";
+import { Intern } from "@padrinho/entities/Intern";
+import { Course } from "@padrinho/entities/Course";
+import { Task } from "@padrinho/entities/Task";
+import { User } from "@padrinho/entities/User";
+import { Notification } from "@padrinho/entities/Notification";
 import { Users, BookOpen, ClipboardCheck, Trophy } from "lucide-react";
 import SummaryCard from "../components/dashboard/SummaryCard";
 import InternStatusCard from "../components/dashboard/InternStatusCard";

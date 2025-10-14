@@ -1,11 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils"; 
+import { createPageUrl } from "@estagiario/utils"; 
 import { BookOpen, ChevronRight, Play, FileText, ExternalLink, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@estagiario/Components/ui/button";
+import { Progress } from "@estagiario/Components/ui/progress";
+import { Skeleton } from "@estagiario/Components/ui/skeleton";
 
 export default function LearningProgress({ learningPaths, content, isLoading }) {
   const mockPath = {

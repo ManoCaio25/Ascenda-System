@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@padrinho/components/ui/button";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Card, CardContent } from "@padrinho/components/ui/card";
 import { ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isWithinInterval, addMonths, subMonths, startOfWeek, endOfWeek, isSameDay } from "date-fns";
-import { Task } from "@/entities/Task";
+import { Task } from "@padrinho/entities/Task";
 
 export default function VacationCalendar({ requests, interns }) {
   const [currentDate, setCurrentDate] = useState(new Date());

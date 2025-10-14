@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { User } from "lucide-react";
-import { getUserInitials, getRandomAvatar } from "@/components/utils/avatarPlaceholders";
+import { getUserInitials, getRandomAvatar } from "@estagiario/Components/utils/avatarPlaceholders";
 
 export default function AvatarWithFallback({ 
   user, 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Notification } from "@/entities/Notification";
+import { Button } from "@padrinho/components/ui/button";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Notification } from "@padrinho/entities/Notification";
 import NotificationCenter from "./NotificationCenter";
 import { eventBus } from "../utils/eventBus";
 

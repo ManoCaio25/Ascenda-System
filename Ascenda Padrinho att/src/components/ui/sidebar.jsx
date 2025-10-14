@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils';
+import { cn } from '@padrinho/utils';
 
 const SidebarContext = React.createContext({ isOpen: false, toggle: () => {}, setOpen: () => {} });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils';
+import { cn } from '@padrinho/utils';
 
 export const Progress = React.forwardRef(function Progress({ className, value = 0, max = 100, ...props }, ref) {
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));

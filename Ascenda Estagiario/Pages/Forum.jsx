@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ForumCategory } from '@/entities/all';
+import { ForumCategory } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { Hash, MessageSquare, Book, Users, GitBranch } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
+import { createPageUrl } from '@estagiario/utils';
 
 const categoryIcons = {
   "Technical Questions": Hash,

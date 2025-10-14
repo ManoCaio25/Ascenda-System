@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@padrinho/components/ui/card";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Button } from "@padrinho/components/ui/button";
 import { BookOpen, Clock, Users, TrendingUp, Pencil, Eye, Youtube, FileText, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
-import { CourseAssignment } from "@/entities/CourseAssignment";
+import { CourseAssignment } from "@padrinho/entities/CourseAssignment";
 
 export default function CourseCard({ course, index, onEdit, onPreview, onAssign }) {
   const [assignmentCount, setAssignmentCount] = useState(0);

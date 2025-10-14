@@ -1,7 +1,7 @@
 // AscendaIASection.jsx
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { cn } from "@/utils";
+import { cn } from "@padrinho/utils";
 
 const ACCENT_STYLES = {
   sky: {

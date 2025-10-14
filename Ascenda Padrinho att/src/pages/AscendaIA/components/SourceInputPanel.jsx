@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Upload, FileText, XCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@padrinho/components/ui/input";
+import { Button } from "@padrinho/components/ui/button";
 import { ascendaIAStrings } from "../strings";
 
 const ACCEPTED_MIME = ["text/plain"];

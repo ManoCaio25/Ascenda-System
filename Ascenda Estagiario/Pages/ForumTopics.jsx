@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { ForumTopic, ForumCategory } from '@/entities/all';
+import { createPageUrl } from '@estagiario/utils';
+import { ForumTopic, ForumCategory } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { MessageSquare, User, Calendar, Eye, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';

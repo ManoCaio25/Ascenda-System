@@ -1,7 +1,7 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@padrinho/components/ui/card";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Button } from "@padrinho/components/ui/button";
 import { Trophy, TrendingUp, MessageCircle, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { LineChart, Line, ResponsiveContainer } from "recharts";

@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@padrinho/components/ui/card";
 import { motion } from "framer-motion";
 
 export default function SummaryCard({ title, value, icon: Icon, gradient, trend, delay = 0 }) {

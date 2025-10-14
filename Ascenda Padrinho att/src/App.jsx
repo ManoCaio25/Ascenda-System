@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Layout from './Layout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -8,7 +8,7 @@ import VacationRequests from './pages/VacationRequests.jsx';
 import Reports from './pages/Reports.jsx';
 import { PAGE_URLS } from './utils/index.js';
 
-const router = createBrowserRouter([
+const routes = [
   {
     path: PAGE_URLS.Dashboard,
     element: <Layout />,
@@ -39,9 +39,17 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
 
-export default function App() {
+export default function App({ basename = '/' }) {
+  const router = useMemo(
+    () =>
+      createBrowserRouter(routes, {
+        basename,
+      }),
+    [basename]
+  );
+
   return (
     <RouterProvider
       router={router}
@@ -49,4 +57,3 @@ export default function App() {
     />
   );
 }
-

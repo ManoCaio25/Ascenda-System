@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Course } from "@/entities/Course";
+import { Course } from "@padrinho/entities/Course";
 import { motion } from "framer-motion";
 import CourseUploadForm from "../components/content/CourseUploadForm";
 import CourseCard from "../components/content/CourseCard";

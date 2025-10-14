@@ -1,19 +1,19 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@components': fileURLToPath(new URL('./src/app/components', import.meta.url)),
-      '@routes': fileURLToPath(new URL('./src/app/routes', import.meta.url)),
-      '@store': fileURLToPath(new URL('./src/app/store', import.meta.url)),
-      '@services': fileURLToPath(new URL('./src/app/services', import.meta.url)),
-      '@assets': fileURLToPath(new URL('./src/app/assets', import.meta.url)),
-      '@styles': fileURLToPath(new URL('./src/app/styles', import.meta.url))
-    }
-  }
+      "@": path.resolve(__dirname, "src"),
+      "@padrinho": path.resolve(__dirname, "../Ascenda Padrinho att/src"),
+      "@estagiario": path.resolve(__dirname, "../Ascenda Estagiario"),
+      "react-router-dom": path.resolve(__dirname, "node_modules/react-router-dom"),
+      "lucide-react": path.resolve(__dirname, "../Ascenda Padrinho att/node_modules/lucide-react"),
+      "@hello-pangea/dnd": path.resolve(__dirname, "src/shims/helloPangeaDnd.jsx"),
+      "framer-motion": path.resolve(__dirname, "node_modules/framer-motion"),
+      "date-fns": path.resolve(__dirname, "node_modules/date-fns"),
+    },
+  },
 });
-

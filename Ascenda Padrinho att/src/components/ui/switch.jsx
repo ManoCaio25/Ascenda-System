@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils';
+import { cn } from '@padrinho/utils';
 
 export const Switch = React.forwardRef(function Switch({ className, checked, defaultChecked, onCheckedChange, ...props }, ref) {
   const [value, setValue] = React.useState(defaultChecked ?? false);
