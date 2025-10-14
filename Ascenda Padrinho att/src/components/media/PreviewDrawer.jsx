@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@padrinho/components/ui/sheet";
+import { Button } from "@padrinho/components/ui/button";
 import { Download, Youtube, FileText, Image as ImageIcon, Video, ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function PreviewDrawer({ isOpen, onClose, course }) {

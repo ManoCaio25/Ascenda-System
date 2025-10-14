@@ -1,9 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Filter, Search, XCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@padrinho/components/ui/input";
+import { Button } from "@padrinho/components/ui/button";
+import { Badge } from "@padrinho/components/ui/badge";
 
 export default function LibraryFilterCard({
   t,

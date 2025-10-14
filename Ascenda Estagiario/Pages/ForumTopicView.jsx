@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ForumTopic, ForumReply } from '@/entities/all';
+import { ForumTopic, ForumReply } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { User, Calendar, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';

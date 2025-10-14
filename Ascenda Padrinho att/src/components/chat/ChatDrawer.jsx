@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@padrinho/components/ui/sheet";
+import { Button } from "@padrinho/components/ui/button";
+import { Textarea } from "@padrinho/components/ui/textarea";
 import { Send } from "lucide-react";
-import { ChatMessage } from "@/entities/ChatMessage";
+import { ChatMessage } from "@padrinho/entities/ChatMessage";
 import { format } from "date-fns";
 import { eventBus, EventTypes } from "../utils/eventBus";
 

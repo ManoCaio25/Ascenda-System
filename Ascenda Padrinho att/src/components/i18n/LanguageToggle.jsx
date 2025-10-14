@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from '@/i18n';
+import { useTranslation } from '@padrinho/i18n';
 
 const options = [
   { code: 'pt', flag: 'br', fallbackEmoji: '🇧🇷', label: 'Português' },

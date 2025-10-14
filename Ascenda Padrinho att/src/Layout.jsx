@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@padrinho/utils";
 import { 
   LayoutDashboard, 
   Users, 
@@ -10,8 +10,8 @@ import {
   Sparkles,
   LogOut
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { User } from "@/entities/User";
+import { Button } from "@padrinho/components/ui/button";
+import { User } from "@padrinho/entities/User";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
 import ThemeToggle from "./components/theme/ThemeToggle";
 import NotificationBell from "./components/notifications/NotificationBell";
@@ -28,7 +28,7 @@ import {
   SidebarFooter,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
+} from "@padrinho/components/ui/sidebar";
 
 const navigationItems = [
   {

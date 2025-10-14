@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@padrinho/components/ui/card";
+import { Button } from "@padrinho/components/ui/button";
+import { Input } from "@padrinho/components/ui/input";
+import { Textarea } from "@padrinho/components/ui/textarea";
+import { Label } from "@padrinho/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { UploadFile } from "@/integrations/Core";
+} from "@padrinho/components/ui/select";
+import { UploadFile } from "@padrinho/integrations/Core";
 import { Upload, Loader2, Youtube, Eye } from "lucide-react";
 import YouTubePreview from "./YouTubePreview";
 

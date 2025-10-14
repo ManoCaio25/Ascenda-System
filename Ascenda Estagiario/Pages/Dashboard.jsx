@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { User } from "@/entities/User";
-import { Task } from "@/entities/Task";
-import { LearningPath } from "@/entities/LearningPath";
-import { Content } from "@/entities/Content";
+import { User } from "@estagiario/Entities/all";
+import { Task } from "@estagiario/Entities/all";
+import { LearningPath } from "@estagiario/Entities/all";
+import { Content } from "@estagiario/Entities/all";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@estagiario/utils";
 import { 
   Zap, 
   CheckCircle, 
@@ -24,12 +24,12 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-import WelcomeWidget from "../components/dashboard/WelcomeWidget";
-import StatsGrid from "../components/dashboard/StatsGrid";
-import TasksPreview from "../components/dashboard/TasksPreview";
-import LearningProgress from "../components/dashboard/LearningProgress";
-import WellbeingWidget from "../components/dashboard/WellbeingWidget";
-import AvailabilityWidget from "../components/dashboard/AvailabilityWidget";
+import WelcomeWidget from "../Components/dashboard/WelcomeWidget";
+import StatsGrid from "../Components/dashboard/StatsGrid";
+import TasksPreview from "../Components/dashboard/TasksPreview";
+import LearningProgress from "../Components/dashboard/LearningProgress";
+import WellbeingWidget from "../Components/dashboard/WellbeingWidget";
+import AvailabilityWidget from "../Components/dashboard/AvailabilityWidget";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);

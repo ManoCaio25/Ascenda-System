@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, X, Bot, User, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { InvokeLLM } from "@/integrations/Core";
+import { Button } from "@estagiario/Components/ui/button";
+import { Input } from "@estagiario/Components/ui/input";
+import { InvokeLLM } from "@estagiario/integrations/Core";
 
 const AIChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Zap, Clock, Users, Coffee, Moon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@estagiario/Components/ui/button";
 
 export default function AvailabilityWidget() {
   const [selectedStatus, setSelectedStatus] = useState("tranquilo");

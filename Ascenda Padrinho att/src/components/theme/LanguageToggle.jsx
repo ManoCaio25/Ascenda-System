@@ -1,7 +1,7 @@
 import React from "react";
 import { Languages } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useLanguage, useTranslation } from "@/i18n";
+import { Button } from "@padrinho/components/ui/button";
+import { useLanguage, useTranslation } from "@padrinho/i18n";
 
 export default function LanguageToggle() {
   const { language, toggleLanguage } = useLanguage();

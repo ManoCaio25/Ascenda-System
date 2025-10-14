@@ -1,8 +1,8 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Task } from "@/entities/Task";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@padrinho/components/ui/dialog";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Task } from "@padrinho/entities/Task";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@padrinho/components/ui/tabs";
 import PerformancePanel from "../interns/PerformancePanel";
 import ActiveAssignments from "../interns/ActiveAssignments";
 import Avatar from "../ui/Avatar";

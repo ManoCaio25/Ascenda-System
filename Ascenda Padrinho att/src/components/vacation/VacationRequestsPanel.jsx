@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { VacationRequest } from "@/entities/VacationRequest";
-import { Intern } from "@/entities/Intern";
-import { Notification } from "@/entities/Notification";
-import { User } from "@/entities/User";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { VacationRequest } from "@padrinho/entities/VacationRequest";
+import { Intern } from "@padrinho/entities/Intern";
+import { Notification } from "@padrinho/entities/Notification";
+import { User } from "@padrinho/entities/User";
+import { Card, CardContent, CardHeader, CardTitle } from "@padrinho/components/ui/card";
+import { Button } from "@padrinho/components/ui/button";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@padrinho/components/ui/tabs";
+import { Textarea } from "@padrinho/components/ui/textarea";
+import { Input } from "@padrinho/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -16,19 +16,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@padrinho/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@padrinho/components/ui/select";
 import { Check, X, Calendar, CalendarCheck, AlertCircle, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { eventBus, EventTypes } from "../utils/eventBus";
 import VacationCalendar from "./VacationCalendar";
-import Avatar from "@/components/ui/Avatar";
+import Avatar from "@padrinho/components/ui/Avatar";
 
 export default function VacationRequestsPanel() {
   const [requests, setRequests] = useState([]);

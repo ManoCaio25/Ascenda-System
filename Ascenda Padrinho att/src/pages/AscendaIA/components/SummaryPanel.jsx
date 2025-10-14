@@ -1,9 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@padrinho/components/ui/button";
+import { Checkbox } from "@padrinho/components/ui/checkbox";
+import { Input } from "@padrinho/components/ui/input";
+import { Progress } from "@padrinho/components/ui/progress";
 import { ascendaIAStrings } from "../strings";
 
 function LevelRow({ level, onToggle, onCountChange }) {

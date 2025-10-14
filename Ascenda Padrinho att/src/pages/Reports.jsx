@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Intern } from "@/entities/Intern";
-import { Task } from "@/entities/Task";
-import { Course } from "@/entities/Course";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Intern } from "@padrinho/entities/Intern";
+import { Task } from "@padrinho/entities/Task";
+import { Course } from "@padrinho/entities/Course";
+import { Card, CardContent, CardHeader, CardTitle } from "@padrinho/components/ui/card";
+import { Button } from "@padrinho/components/ui/button";
 import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 import TeamPerformanceChart from "../components/reports/TeamPerformanceChart";

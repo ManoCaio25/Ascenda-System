@@ -1,8 +1,8 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@padrinho/components/ui/card";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Switch } from "@padrinho/components/ui/switch";
+import { Label } from "@padrinho/components/ui/label";
 import { Smile, Meh, Frown, Annoyed, AlertCircle, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { RadialBarChart, RadialBar, ResponsiveContainer } from "recharts";

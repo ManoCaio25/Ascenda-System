@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils';
+import { cn } from '@padrinho/utils';
 
 export const Checkbox = React.forwardRef(function Checkbox(
   { className, checked, defaultChecked, onCheckedChange, ...props },

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Intern } from "@/entities/Intern";
-import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
+import { Intern } from "@padrinho/entities/Intern";
+import { Input } from "@padrinho/components/ui/input";
 import { Search, Filter } from "lucide-react";
 import { motion } from "framer-motion";
 import InternCard from "../components/dashboard/InternCard";
-import InternDetailModal from "../components/interns/InternDetailModal";
 import ChatDrawer from "../components/chat/ChatDrawer";
 import {
   Select,
@@ -12,12 +12,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@padrinho/components/ui/select";
+
+const slugify = (value = "") =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 export default function Interns() {
+  const navigate = useNavigate();
   const [interns, setInterns] = useState([]);
-  const [selectedIntern, setSelectedIntern] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [chatIntern, setChatIntern] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,8 +37,7 @@ export default function Interns() {
 
   const loadInterns = async () => {
     const data = await Intern.list('-points');
-    
-    // Remove duplicates by keeping only unique full_name entries
+
     const uniqueInterns = [];
     const seenNames = new Set();
     for (const intern of data) {
@@ -40,13 +46,20 @@ export default function Interns() {
         uniqueInterns.push(intern);
       }
     }
-    
+
     setInterns(uniqueInterns);
   };
 
   const handleInternClick = (intern) => {
-    setSelectedIntern(intern);
-    setIsModalOpen(true);
+    const internId = slugify(intern.full_name);
+    navigate(`/estagiario/${internId}`, {
+      state: {
+        id: internId,
+        name: intern.full_name,
+        email: intern.email,
+        track: intern.track,
+      },
+    });
   };
 
   const handleChatClick = (intern) => {
@@ -134,12 +147,6 @@ export default function Interns() {
             <p className="text-muted">No interns found matching your filters</p>
           </div>
         )}
-
-        <InternDetailModal
-          intern={selectedIntern}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
 
         <ChatDrawer
           isOpen={isChatOpen}

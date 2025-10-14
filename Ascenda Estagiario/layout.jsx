@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@estagiario/utils";
 import { 
   Home, 
   BookOpen, 
@@ -18,8 +18,8 @@ import {
   Sun,
   Moon
 } from "lucide-react";
-import { User } from "@/entities/User";
-import { Button } from "@/components/ui/button";
+import { User } from "@estagiario/Entities/all";
+import { Button } from "@estagiario/Components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -33,10 +33,10 @@ import {
   SidebarFooter,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { I18nProvider } from "@/components/utils/i18n";
-import { AccessibilityProvider } from "@/components/utils/accessibility";
-import AIChatWidget from "@/components/ai/AIChat";
+} from "@estagiario/Components/ui/sidebar";
+import { I18nProvider } from "@estagiario/Components/utils/i18n";
+import { AccessibilityProvider } from "@estagiario/Components/utils/accessibility";
+import AIChatWidget from "@estagiario/Components/ai/AIChat";
 
 const navigationItems = [
   { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { CourseAssignment } from "@/entities/CourseAssignment";
-import { Course } from "@/entities/Course";
+import { Card, CardContent, CardHeader, CardTitle } from "@padrinho/components/ui/card";
+import { Badge } from "@padrinho/components/ui/badge";
+import { Button } from "@padrinho/components/ui/button";
+import { Progress } from "@padrinho/components/ui/progress";
+import { CourseAssignment } from "@padrinho/entities/CourseAssignment";
+import { Course } from "@padrinho/entities/Course";
 import { BookOpen, Calendar, Clock, CheckCircle2, PlayCircle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";

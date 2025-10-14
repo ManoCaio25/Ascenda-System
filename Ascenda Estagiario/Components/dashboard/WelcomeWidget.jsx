@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Rocket, Sparkles } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@estagiario/Components/ui/skeleton";
 
 export default function WelcomeWidget({ user, isLoading }) {
   if (isLoading) {

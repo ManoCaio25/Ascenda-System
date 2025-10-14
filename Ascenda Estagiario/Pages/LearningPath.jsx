@@ -1,16 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { LearningPath as LearningPathEntity, Content } from '@/entities/all';
+import { LearningPath as LearningPathEntity, Content } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { CheckCircle, Play, FileText, ExternalLink, BookOpen, Clock, Lock, Star } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { Progress } from '@estagiario/Components/ui/progress';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@estagiario/Components/ui/dialog";
 
 const getYoutubeVideoId = (url) => {
     if (!url) return null;

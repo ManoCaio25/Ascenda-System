@@ -1,6 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { cn } from '@/utils';
+import { cn } from '@padrinho/utils';
 
 const SheetContext = React.createContext({ open: false, onOpenChange: () => {} });
 

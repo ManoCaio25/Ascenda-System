@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Achievement, ShopItem } from '@/entities/all';
+import { User, Achievement, ShopItem } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { Trophy, ShoppingBag, User as UserIcon, Check } from 'lucide-react';
 import { useLocation } from 'react-router-dom';

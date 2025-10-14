@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils';
+import { cn } from '@padrinho/utils';
 
 export const Card = ({ className, ...props }) => (
   <div className={cn('rounded-2xl border border-border bg-surface shadow-e1', className)} {...props} />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Heart, Smile, Meh, Frown, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@estagiario/Components/ui/button";
 
 export default function WellbeingWidget() {
   const [selectedFeeling, setSelectedFeeling] = useState("good");
