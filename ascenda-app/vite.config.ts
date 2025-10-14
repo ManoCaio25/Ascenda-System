@@ -8,12 +8,22 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "src"),
       "@padrinho": path.resolve(__dirname, "../Ascenda Padrinho att/src"),
-      "@estagiario": path.resolve(__dirname, "../Ascenda Estagiario"),
-      "react-router-dom": path.resolve(__dirname, "node_modules/react-router-dom"),
-      "lucide-react": path.resolve(__dirname, "../Ascenda Padrinho att/node_modules/lucide-react"),
-      "@hello-pangea/dnd": path.resolve(__dirname, "src/shims/helloPangeaDnd.jsx"),
-      "framer-motion": path.resolve(__dirname, "node_modules/framer-motion"),
-      "date-fns": path.resolve(__dirname, "node_modules/date-fns"),
+      "@estagiario": path.resolve(__dirname, "../Ascenda Estagiario/src"),
     },
+    dedupe: ["react", "react-dom"],
+  },
+  server: {
+    fs: {
+      allow: [".."],
+    },
+  },
+  optimizeDeps: {
+    include: [
+      "lucide-react",
+      "recharts",
+      "framer-motion",
+      "date-fns",
+      "@hello-pangea/dnd",
+    ],
   },
 });
