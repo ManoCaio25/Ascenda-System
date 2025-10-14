@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "types": ["node"],
     "paths": {
       "@/*": ["src/*"],
       "@padrinho/*": ["../Ascenda Padrinho att/src/*"],
-      "@estagiario/*": ["../Ascenda Estagiario/*"],
-      "@hello-pangea/dnd": ["src/shims/helloPangeaDnd.jsx"]
+      "@estagiario/*": ["../Ascenda Estagiario/src/*"]
     }
   }
 }
