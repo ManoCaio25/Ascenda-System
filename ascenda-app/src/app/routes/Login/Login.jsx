@@ -78,6 +78,12 @@ export default function Login() {
             {mode === 'padrinho' && error && <p className="text-xs text-rose-400">{error}</p>}
             <a href="#">Esqueceu sua senha?</a>
             <button type="submit">Entrar</button>
+            <div className="alternate-login">
+              <span>É estagiário?</span>
+              <button type="button" onClick={() => handleModeChange('estagiario')}>
+                Entrar como estagiário
+              </button>
+            </div>
           </form>
         </div>
         <div className="form-container sign-in">
@@ -108,6 +114,12 @@ export default function Login() {
             {mode === 'estagiario' && error && <p className="text-xs text-rose-400">{error}</p>}
             <a href="#">Esqueceu sua senha?</a>
             <button type="submit">Entrar</button>
+            <div className="alternate-login">
+              <span>É padrinho?</span>
+              <button type="button" onClick={() => handleModeChange('padrinho')}>
+                Entrar como padrinho
+              </button>
+            </div>
           </form>
         </div>
         <div className="toggle-container">
