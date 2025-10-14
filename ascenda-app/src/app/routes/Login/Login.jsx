@@ -5,6 +5,8 @@ import { useStore } from '../../store/index.js';
 import { requestSoundUnlock } from '../../services/notifyService.js';
 import './login.css';
 
+const PADRINHO_EMAIL = 'paulo.henrique@ascenda.com';
+
 export default function Login() {
   const navigate = useNavigate();
   const { mode, setMode } = useLoginStore();
@@ -31,6 +33,17 @@ export default function Login() {
       navigate(`/loading?to=${encodeURIComponent(target)}&duration=9000`);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setPassword('');
+    setError('');
+    if (newMode === 'padrinho') {
+      setEmail(PADRINHO_EMAIL);
+    } else {
+      setEmail('');
     }
   };
 
@@ -65,6 +78,12 @@ export default function Login() {
             {mode === 'padrinho' && error && <p className="text-xs text-rose-400">{error}</p>}
             <a href="#">Esqueceu sua senha?</a>
             <button type="submit">Entrar</button>
+            <div className="alternate-login">
+              <span>É estagiário?</span>
+              <button type="button" onClick={() => handleModeChange('estagiario')}>
+                Entrar como estagiário
+              </button>
+            </div>
           </form>
         </div>
         <div className="form-container sign-in">
@@ -95,6 +114,12 @@ export default function Login() {
             {mode === 'estagiario' && error && <p className="text-xs text-rose-400">{error}</p>}
             <a href="#">Esqueceu sua senha?</a>
             <button type="submit">Entrar</button>
+            <div className="alternate-login">
+              <span>É padrinho?</span>
+              <button type="button" onClick={() => handleModeChange('padrinho')}>
+                Entrar como padrinho
+              </button>
+            </div>
           </form>
         </div>
         <div className="toggle-container">
@@ -105,12 +130,7 @@ export default function Login() {
                 className="hidden"
                 id="login"
                 type="button"
-                onClick={() => {
-                  setMode('estagiario');
-                  setEmail('');
-                  setPassword('');
-                  setError('');
-                }}
+                onClick={() => handleModeChange('estagiario')}
               >
                 Entrar
               </button>
@@ -121,12 +141,7 @@ export default function Login() {
                 className="hidden"
                 id="register"
                 type="button"
-                onClick={() => {
-                  setMode('padrinho');
-                  setEmail('');
-                  setPassword('');
-                  setError('');
-                }}
+                onClick={() => handleModeChange('padrinho')}
               >
                 Entrar
               </button>

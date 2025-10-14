@@ -75,6 +75,33 @@
   color: #ffffff;
 }
 
+.login-screen .alternate-login {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #8c84a9;
+}
+
+.login-screen .alternate-login button {
+  background: transparent;
+  border: 1px solid rgba(229, 228, 237, 0.4);
+  color: #e5e4ed;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.login-screen .alternate-login button:hover {
+  background: rgba(181, 95, 255, 0.1);
+  border-color: #b55fff;
+  color: #ffffff;
+}
+
 .login-screen .container form {
   background-color: #130b26;
   display: flex;
