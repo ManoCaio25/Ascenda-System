@@ -125,6 +125,27 @@ const pt = {
       portuguese: "Português"
     }
   },
+  contentManagement: {
+    title: "Gestão de conteúdo",
+    subtitle: "Crie e gerencie materiais de treinamento para sua equipe",
+    library: {
+      title: "Biblioteca de cursos",
+      filterLabel: "Filtrar cursos",
+      filters: {
+        all: "Todos os cursos",
+        generated: "Gerados por IA",
+        manual: "Uploads manuais",
+        video: "Recursos em vídeo",
+        document: "Documentos",
+      },
+      empty: "Nenhum curso ainda. Crie o primeiro!",
+      emptyFiltered: "Nenhum curso corresponde aos filtros. Tente outra combinação.",
+    },
+    courseCard: {
+      youtubeBadge: "YouTube",
+      activeAssignments: "{{count}} ativo{{suffix}}",
+    },
+  },
   dashboard: {
     welcome: "Bem-vindo de volta, {{name}}!",
     subtitle: "Veja o que está acontecendo com a sua equipe hoje",

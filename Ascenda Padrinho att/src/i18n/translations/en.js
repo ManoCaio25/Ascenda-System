@@ -125,6 +125,27 @@ const en = {
       portuguese: "Português"
     }
   },
+  contentManagement: {
+    title: "Content Management",
+    subtitle: "Create and manage training materials for your team",
+    library: {
+      title: "Course Library",
+      filterLabel: "Filter courses",
+      filters: {
+        all: "All courses",
+        generated: "AI generated",
+        manual: "Manual uploads",
+        video: "Video resources",
+        document: "Document resources",
+      },
+      empty: "No courses yet. Create your first one!",
+      emptyFiltered: "No courses match your filters. Try a different combination.",
+    },
+    courseCard: {
+      youtubeBadge: "YouTube",
+      activeAssignments: "{{count}} active",
+    },
+  },
   dashboard: {
     welcome: "Welcome back, {{name}}!",
     subtitle: "Here's what's happening with your team today",

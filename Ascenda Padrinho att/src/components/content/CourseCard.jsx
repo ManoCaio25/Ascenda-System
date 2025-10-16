@@ -5,13 +5,15 @@ import { Button } from "@padrinho/components/ui/button";
 import { BookOpen, Clock, Users, TrendingUp, Pencil, Eye, Youtube, FileText, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { CourseAssignment } from "@padrinho/entities/CourseAssignment";
+import { useTranslation } from "@padrinho/i18n";
 
 export default function CourseCard({ course, index, onEdit, onPreview, onAssign }) {
   const [assignmentCount, setAssignmentCount] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadAssignments = async () => {
-      const assignments = await CourseAssignment.filter({ 
+      const assignments = await CourseAssignment.filter({
         course_id: course.id,
         status: ['assigned', 'in_progress']
       });
@@ -68,7 +70,7 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
               {course.youtube_video_id && (
                 <Badge variant="outline" className="border-error/30 text-error bg-error/10">
                   <Youtube className="w-3 h-3 mr-1" />
-                  YouTube
+                  {t("contentManagement.courseCard.youtubeBadge")}
                 </Badge>
               )}
               {course.file_url && (
@@ -80,7 +82,10 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
               {assignmentCount > 0 && (
                 <Badge variant="outline" className="border-brand2/30 text-brand2 bg-brand2/10">
                   <Users className="w-3 h-3 mr-1" />
-                  {assignmentCount} active
+                  {t("contentManagement.courseCard.activeAssignments", undefined, {
+                    count: assignmentCount,
+                    suffix: assignmentCount === 1 ? "" : "s",
+                  })}
                 </Badge>
               )}
             </div>
@@ -116,7 +121,7 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
                 className="border-border hover:bg-surface2"
               >
                 <Pencil className="w-4 h-4 mr-2" />
-                Edit
+                {t("common.actions.edit")}
               </Button>
               <Button
                 variant="outline"
@@ -125,7 +130,7 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
                 className="border-brand2/30 hover:bg-brand2/10 text-brand2"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
-                Assign
+                {t("common.actions.assign")}
               </Button>
               {hasMedia && (
                 <Button
@@ -135,7 +140,7 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
                   className="col-span-2 border-brand/30 hover:bg-brand/10 text-brand"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  Preview
+                  {t("common.actions.preview")}
                 </Button>
               )}
             </div>
