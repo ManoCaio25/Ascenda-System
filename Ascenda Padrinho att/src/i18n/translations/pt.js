@@ -256,8 +256,6 @@ const pt = {
     recent: {
       title: "Atividades geradas recentemente",
       empty: "As atividades aparecerão aqui após a primeira geração.",
-      loading: "Carregando atividades geradas...",
-      error: "Não foi possível carregar as atividades geradas anteriormente.",
       assigned: "Atribuído para {{name}}",
       quizCount: "{{count}} perguntas de quiz",
       generatedAt: "Gerado em {{date}}",

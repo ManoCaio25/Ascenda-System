@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Sparkles,
@@ -10,8 +10,7 @@ import {
   FileText,
   Youtube,
   CheckCircle,
-  Trash2,
-  Loader2,
+  Trash2
 } from "lucide-react";
 import { Button } from "@padrinho/components/ui/button";
 import { Input } from "@padrinho/components/ui/input";
@@ -79,8 +78,6 @@ export default function ActivityGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [generatedActivities, setGeneratedActivities] = useState([]);
-  const [isLoadingRecent, setIsLoadingRecent] = useState(false);
-  const [recentError, setRecentError] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -90,68 +87,6 @@ export default function ActivityGenerator() {
     };
     loadInterns();
   }, []);
-
-  const internLookup = useMemo(() => {
-    const entries = new Map();
-    interns.forEach((intern) => {
-      entries.set(String(intern.id), intern);
-    });
-    return entries;
-  }, [interns]);
-
-  const loadGeneratedActivities = useCallback(async () => {
-    setIsLoadingRecent(true);
-    setRecentError(null);
-    try {
-      const [courses, assignments] = await Promise.all([
-        Course.filter({ category: "AI Generated" }, "-created_date"),
-        CourseAssignment.list("-assigned_date"),
-      ]);
-
-      const assignmentByCourse = new Map();
-      assignments.forEach((assignment) => {
-        if (!assignmentByCourse.has(assignment.course_id)) {
-          assignmentByCourse.set(assignment.course_id, assignment);
-        }
-      });
-
-      const mapped = courses.map((course) => {
-        const metadata = course.generated_metadata ?? {};
-        const assignment = assignmentByCourse.get(course.id);
-        const internId =
-          metadata.internId ?? metadata.intern_id ?? assignment?.intern_id ?? null;
-        const internRecord = internId ? internLookup.get(String(internId)) : null;
-        const internName =
-          internRecord?.full_name ?? metadata.internName ?? internId ?? "-";
-
-        const quizCount = metadata.quizCount ?? metadata.quiz_count ?? 0;
-        const generatedAt = metadata.generatedAt ?? assignment?.assigned_date ?? course.created_date;
-        const sourceType =
-          metadata.sourceType ??
-          (course.youtube_url ? "video" : course.file_url ? "document" : null);
-
-        return {
-          course,
-          internName,
-          quizCount,
-          generatedAt,
-          sourceType,
-        };
-      });
-
-      setGeneratedActivities(mapped);
-    } catch (error) {
-      console.error("Failed to load generated activities", error);
-      setRecentError(t("activityGenerator.recent.error"));
-      setGeneratedActivities([]);
-    } finally {
-      setIsLoadingRecent(false);
-    }
-  }, [internLookup, t]);
-
-  useEffect(() => {
-    loadGeneratedActivities();
-  }, [loadGeneratedActivities]);
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
@@ -286,8 +221,6 @@ export default function ActivityGenerator() {
             activityIndex: index + 1,
             generatedAt: createdAt,
             internId: selectedIntern,
-            internName: chosenIntern?.full_name || selectedIntern,
-            notes: notes.trim() || undefined,
           },
         };
 
@@ -317,7 +250,6 @@ export default function ActivityGenerator() {
           internName: chosenIntern?.full_name || selectedIntern,
           quizCount: sanitizedQuizCount,
           generatedAt: createdAt,
-          sourceType,
         });
       }
 
@@ -330,7 +262,6 @@ export default function ActivityGenerator() {
         }),
       });
       resetForm();
-      await loadGeneratedActivities();
     } catch (error) {
       console.error(error);
       setFeedback({
@@ -583,16 +514,7 @@ export default function ActivityGenerator() {
             </h2>
           </div>
 
-          {isLoadingRecent ? (
-            <div className="border border-dashed border-border rounded-2xl p-8 text-center bg-surface2/40 flex flex-col items-center gap-3 text-muted">
-              <Loader2 className="w-5 h-5 animate-spin text-brand" />
-              <p>{t("activityGenerator.recent.loading")}</p>
-            </div>
-          ) : recentError ? (
-            <div className="border border-dashed border-error/30 rounded-2xl p-8 text-center bg-error/10 text-error">
-              {recentError}
-            </div>
-          ) : generatedActivities.length === 0 ? (
+          {generatedActivities.length === 0 ? (
             <div className="border border-dashed border-border rounded-2xl p-8 text-center bg-surface2/40">
               <p className="text-muted">{t("activityGenerator.recent.empty")}</p>
             </div>
@@ -616,7 +538,7 @@ export default function ActivityGenerator() {
                         <span>{t("activityGenerator.recent.assigned", undefined, { name: item.internName })}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-secondary">
-                        {item.sourceType === "video" ? (
+                        {item.course.youtube_url ? (
                           <Youtube className="w-4 h-4 text-error" />
                         ) : (
                           <FileText className="w-4 h-4 text-brand" />

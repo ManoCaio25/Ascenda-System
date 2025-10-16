@@ -256,8 +256,6 @@ const en = {
     recent: {
       title: "Recent generated activities",
       empty: "Generated activities will appear here once you run the generator.",
-      loading: "Loading generated activities...",
-      error: "We couldn't load the previously generated activities.",
       assigned: "Assigned to {{name}}",
       quizCount: "{{count}} quiz questions",
       generatedAt: "Generated on {{date}}",
