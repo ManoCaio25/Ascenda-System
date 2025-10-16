@@ -15,6 +15,7 @@ import { User } from "@padrinho/entities/User";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
 import ThemeToggle from "./components/theme/ThemeToggle";
 import NotificationBell from "./components/notifications/NotificationBell";
+import LanguageToggle from "@padrinho/components/i18n/LanguageToggle";
 import { useTranslation } from "@padrinho/i18n";
 import {
   Sidebar,
@@ -265,9 +266,10 @@ function LayoutContent() {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-border p-4 space-y-3">
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <ThemeToggle />
               <NotificationBell />
+              <LanguageToggle />
             </div>
             {user && (
               <div className="bg-surface2 rounded-xl p-4 border border-border">
@@ -307,6 +309,7 @@ function LayoutContent() {
               <h1 className="text-xl font-bold text-primary">Ascenda</h1>
               <div className="ml-auto flex gap-2">
                 <NotificationBell />
+                <LanguageToggle />
               </div>
             </div>
           </header>
