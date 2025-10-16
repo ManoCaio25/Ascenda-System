@@ -31,7 +31,8 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
     "Leadership": "bg-purple-500/20 text-brand border-border",
     "Communication": "bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/30",
     "Design": "bg-orange-500/20 text-brand2 border-orange-500/30",
-    "Business": "bg-green-500/20 text-success border-green-500/30"
+    "Business": "bg-green-500/20 text-success border-green-500/30",
+    "AI Generated": "bg-brand/10 text-brand border-brand/30",
   };
 
   const hasMedia = course.youtube_video_id || course.file_url;
