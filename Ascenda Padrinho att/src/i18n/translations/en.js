@@ -110,6 +110,7 @@ const en = {
     nav: {
       dashboard: "Dashboard",
       interns: "Team Overview",
+      activityGenerator: "Activity Generator",
       content: "Content Management",
       ascendaIA: {
         title: "AscendaIA",
@@ -185,6 +186,82 @@ const en = {
       googleWorkspace: "Google Workspace",
       webDevelopment: "Web Development",
     }
+  },
+  activityGenerator: {
+    title: "Activity Generator",
+    subtitle: "Transform uploaded resources into ready-to-assign quizzes for your interns",
+    form: {
+      title: "Configure generation",
+      description: "Choose the learning resource, quiz volume, and intern who will receive the activities.",
+      resourceTitle: "Resource title",
+      resourceTitlePlaceholder: "Ex: Growth Mindset Workshop",
+      videoUrl: "Video link",
+      videoUrlPlaceholder: "https://www.youtube.com/watch?v=...",
+      uploadLabel: "Upload document or video",
+      descriptionLabel: "Additional context",
+      descriptionPlaceholder: "Share the focus areas or instructions for the generated activities...",
+      activityCount: "Activities to generate",
+      quizCount: "Questions per activity",
+      internLabel: "Assign to intern",
+      internPlaceholder: "Select an intern",
+      notesLabel: "Assignment notes",
+      notesPlaceholder: "Add delivery instructions, due dates, or learning focus...",
+    },
+    upload: {
+      hintTitle: "Attach your source material",
+      hintDescription: "Accepted: video, PDF, Office files. Max 25 MB recommended.",
+      selectButton: "Choose file",
+      removeButton: "Remove",
+      noResource: "No resource selected",
+    },
+    actions: {
+      generate: "Generate activities",
+      generating: "Generating...",
+    },
+    feedback: {
+      missingTitle: "Add a name for the learning resource before generating activities.",
+      missingResource: "Upload a file or paste a video link so we can build the activities.",
+      missingIntern: "Select which intern should receive the generated activities.",
+      missingCounts: "Specify at least one activity and one quiz question to generate.",
+      success: "Generated {{count}} activities for {{name}} and saved them to the course library.",
+      genericError: "We couldn't complete the generation. Please review the inputs and try again.",
+    },
+    generated: {
+      activityName: "Activity {{index}}",
+      description: "Automatically generated from {{resource}} with {{quizzes}} quiz questions.",
+    },
+    summary: {
+      title: "How it works",
+      description: "Every generation creates structured quizzes, assigns them, and stores the materials in the library.",
+      steps: {
+        upload: {
+          title: "Upload a resource",
+          description: "Share a video or document to inspire the new activities.",
+        },
+        generate: {
+          title: "Generate quizzes",
+          description: "Ascenda crafts question sets aligned to the uploaded content.",
+        },
+        assign: {
+          title: "Assign instantly",
+          description: "Your selected intern receives the activities automatically.",
+        },
+        library: {
+          title: "Save to library",
+          description: "New activities appear in the Content Management course library for reuse.",
+        },
+      },
+      currentResource: "Current selection",
+    },
+    recent: {
+      title: "Recent generated activities",
+      empty: "Generated activities will appear here once you run the generator.",
+      loading: "Loading generated activities...",
+      error: "We couldn't load the previously generated activities.",
+      assigned: "Assigned to {{name}}",
+      quizCount: "{{count}} quiz questions",
+      generatedAt: "Generated on {{date}}",
+    },
   },
   internStatus: {
     tooltip: "Well-being: {{status}}",

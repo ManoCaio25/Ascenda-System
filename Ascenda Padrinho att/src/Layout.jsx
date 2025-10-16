@@ -1,10 +1,10 @@
 import React from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { createPageUrl } from "@padrinho/utils";
-import { 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
+import {
+  LayoutDashboard,
+  Users,
+  BookOpen,
   BarChart3,
   Calendar,
   Sparkles,
@@ -15,6 +15,7 @@ import { User } from "@padrinho/entities/User";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
 import ThemeToggle from "./components/theme/ThemeToggle";
 import NotificationBell from "./components/notifications/NotificationBell";
+import { useTranslation } from "@padrinho/i18n";
 import {
   Sidebar,
   SidebarContent,
@@ -30,37 +31,49 @@ import {
   SidebarTrigger,
 } from "@padrinho/components/ui/sidebar";
 
-const navigationItems = [
+const NAVIGATION_ITEMS = [
   {
-    title: "Dashboard",
+    key: "dashboard",
     url: createPageUrl("Dashboard"),
     icon: LayoutDashboard,
+    translationKey: "layout.nav.dashboard",
   },
   {
-    title: "Team Overview",
+    key: "interns",
     url: createPageUrl("Interns"),
     icon: Users,
+    translationKey: "layout.nav.interns",
   },
   {
-    title: "Content Management",
+    key: "activityGenerator",
+    url: createPageUrl("ActivityGenerator"),
+    icon: Sparkles,
+    translationKey: "layout.nav.activityGenerator",
+  },
+  {
+    key: "content",
     url: createPageUrl("ContentManagement"),
     icon: BookOpen,
+    translationKey: "layout.nav.content",
   },
   {
-    title: "Vacation Requests",
+    key: "vacation",
     url: createPageUrl("VacationRequests"),
     icon: Calendar,
+    translationKey: "layout.nav.vacation",
   },
   {
-    title: "Reports",
+    key: "reports",
     url: createPageUrl("Reports"),
     icon: BarChart3,
+    translationKey: "layout.nav.reports",
   },
 ];
 
 function LayoutContent() {
   const location = useLocation();
   const [user, setUser] = React.useState(null);
+  const { t } = useTranslation();
 
   React.useEffect(() => {
     const loadUser = async () => {
@@ -77,6 +90,15 @@ function LayoutContent() {
   const handleLogout = React.useCallback(async () => {
     await User.logout();
   }, []);
+
+  const navigationItems = React.useMemo(
+    () =>
+      NAVIGATION_ITEMS.map((item) => ({
+        ...item,
+        title: t(item.translationKey),
+      })),
+    [t],
+  );
 
   return (
     <SidebarProvider>
@@ -203,31 +225,33 @@ function LayoutContent() {
               </div>
               <div>
                 <h2 className="font-bold text-primary">Ascenda</h2>
-                <p className="text-xs text-muted">Manager Portal</p>
+                <p className="text-xs text-muted">{t('layout.sidebarTagline')}</p>
               </div>
             </div>
           </SidebarHeader>
-          
+
           <SidebarContent className="p-3">
             <SidebarGroup>
               <SidebarGroupLabel className="text-xs font-medium text-muted uppercase tracking-wider px-3 py-2">
-                Navigation
+                {t('common.navigation')}
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item) => {
-                    const isActive = location.pathname === item.url;
+                    const isActive =
+                      location.pathname === item.url ||
+                      (item.url !== '/' && location.pathname.startsWith(`${item.url}/`));
                     return (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton 
-                          asChild 
-                          className={`transition-all duration-200 rounded-xl mb-1 ${
-                            isActive 
-                              ? 'bg-brand text-white hover:bg-brand' 
-                              : 'hover:bg-surface2 text-secondary hover:text-primary'
-                          }`}
-                        >
-                          <Link to={item.url} className="flex items-center gap-3 px-4 py-3">
+                      <SidebarMenuItem key={item.key}>
+                        <SidebarMenuButton asChild>
+                          <Link
+                            to={item.url}
+                            className={`transition-all duration-200 rounded-xl mb-1 flex items-center gap-3 px-4 py-3 ${
+                              isActive
+                                ? 'bg-brand text-white hover:bg-brand'
+                                : 'hover:bg-surface2 text-secondary hover:text-primary'
+                            }`}
+                          >
                             <item.icon className="w-5 h-5" />
                             <span className="font-medium">{item.title}</span>
                           </Link>
@@ -255,7 +279,7 @@ function LayoutContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-primary text-sm truncate">
-                      {user.full_name || 'Manager'}
+                      {user.full_name || t('common.manager')}
                     </p>
                     <p className="text-xs text-muted truncate">
                       {user.email}
@@ -269,7 +293,7 @@ function LayoutContent() {
                   className="w-full text-secondary hover:text-primary hover:bg-surface2"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                  {t('common.actions.logout')}
                 </Button>
               </div>
             )}
