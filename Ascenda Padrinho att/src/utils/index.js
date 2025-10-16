@@ -1,6 +1,7 @@
 export const PAGE_URLS = {
   Dashboard: '/',
   Interns: '/interns',
+  ActivityGenerator: '/activity-generator',
   ContentManagement: '/content',
   VacationRequests: '/vacation-requests',
   Reports: '/reports',

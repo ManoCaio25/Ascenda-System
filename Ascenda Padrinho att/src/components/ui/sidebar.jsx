@@ -109,6 +109,7 @@ export const SidebarMenuButton = React.forwardRef(function SidebarMenuButton(
       ref={ref}
       onClick={handleClick}
       className={cn('flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-secondary hover:bg-surface2 hover:text-primary', className)}
+      type="button"
       {...props}
     >
       {children}
