@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@padrinho/utils";
 import {
   LayoutDashboard,
@@ -72,6 +72,7 @@ const NAVIGATION_ITEMS = [
 
 function LayoutContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = React.useState(null);
   const { t } = useTranslation();
 
@@ -243,18 +244,17 @@ function LayoutContent() {
                       (item.url !== '/' && location.pathname.startsWith(`${item.url}/`));
                     return (
                       <SidebarMenuItem key={item.key}>
-                        <SidebarMenuButton asChild>
-                          <Link
-                            to={item.url}
-                            className={`transition-all duration-200 rounded-xl mb-1 flex items-center gap-3 px-4 py-3 ${
-                              isActive
-                                ? 'bg-brand text-white hover:bg-brand'
-                                : 'hover:bg-surface2 text-secondary hover:text-primary'
-                            }`}
-                          >
-                            <item.icon className="w-5 h-5" />
-                            <span className="font-medium">{item.title}</span>
-                          </Link>
+                        <SidebarMenuButton
+                          asChild
+                          className={`transition-all duration-200 rounded-xl mb-1 ${
+                            isActive
+                              ? 'bg-brand text-white hover:bg-brand'
+                              : 'hover:bg-surface2 text-secondary hover:text-primary'
+                          }`}
+                          onClick={() => navigate(item.url)}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <span className="font-medium">{item.title}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     );
