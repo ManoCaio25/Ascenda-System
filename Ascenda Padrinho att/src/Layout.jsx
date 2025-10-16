@@ -245,7 +245,8 @@ function LayoutContent() {
                     return (
                       <SidebarMenuItem key={item.key}>
                         <SidebarMenuButton
-                          className={`transition-all duration-200 rounded-xl mb-1 flex items-center gap-3 px-4 py-3 ${
+                          asChild
+                          className={`transition-all duration-200 rounded-xl mb-1 ${
                             isActive
                               ? 'bg-brand text-white hover:bg-brand'
                               : 'hover:bg-surface2 text-secondary hover:text-primary'
