@@ -23,6 +23,7 @@ import {
   CardHeader,
   CardTitle
 } from "@padrinho/components/ui/card";
+import { Badge } from "@padrinho/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -55,6 +56,49 @@ function parseYoutubeVideoId(url) {
   return null;
 }
 
+const STOP_WORDS = new Set([
+  "the",
+  "and",
+  "for",
+  "with",
+  "that",
+  "this",
+  "from",
+  "into",
+  "about",
+  "como",
+  "para",
+  "com",
+  "uma",
+  "das",
+  "dos",
+  "que",
+  "por",
+  "mais",
+  "when",
+  "your",
+  "have",
+  "will",
+  "them",
+  "their",
+  "sobre",
+  "entre",
+  "cada",
+  "onde",
+  "elas",
+  "eles",
+  "aqui",
+  "there",
+  "porque",
+  "does",
+  "were",
+  "essa",
+  "esse",
+  "http",
+  "https",
+  "www",
+]);
+
 function formatDate(language, isoDate) {
   if (!isoDate) return "";
   const formatter = new Intl.DateTimeFormat(language === "pt" ? "pt-BR" : "en-US", {
@@ -62,6 +106,187 @@ function formatDate(language, isoDate) {
     timeStyle: "short",
   });
   return formatter.format(new Date(isoDate));
+}
+
+function cleanFileName(name) {
+  if (!name) return "";
+  return name.replace(/\.[^/.]+$/, "").replace(/[\-_]+/g, " ").trim();
+}
+
+function extractKeywords(text, limit = 8) {
+  if (!text) return [];
+  const normalized = text
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ");
+  const tokens = normalized
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 3 && !STOP_WORDS.has(token));
+
+  const frequencies = tokens.reduce((acc, token) => {
+    acc[token] = (acc[token] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(frequencies)
+    .sort((a, b) => {
+      if (b[1] === a[1]) {
+        return a[0].localeCompare(b[0]);
+      }
+      return b[1] - a[1];
+    })
+    .slice(0, limit)
+    .map(([token]) => token.replace(/^(\p{L})/u, (match) => match.toUpperCase()));
+}
+
+function buildSummarySentences(text, fallback) {
+  if (!text) {
+    return fallback;
+  }
+  const sanitized = text.replace(/\s+/g, " ").trim();
+  if (!sanitized) {
+    return fallback;
+  }
+  const segments = sanitized.split(/(?<=[.!?])\s+/).filter(Boolean);
+  if (segments.length === 0) {
+    return fallback;
+  }
+  return segments.slice(0, 2).join(" ");
+}
+
+function analyzeResource({
+  resourceTitle,
+  description,
+  sourceType,
+  resourceFile,
+  videoUrl,
+}) {
+  const baseTitle =
+    resourceTitle.trim() ||
+    cleanFileName(resourceFile?.name) ||
+    (sourceType === "video"
+      ? (videoUrl ? "Video lesson" : "Video resource")
+      : "Learning resource");
+
+  const combinedText = [resourceTitle, description, cleanFileName(resourceFile?.name)]
+    .filter(Boolean)
+    .join(" ");
+
+  const keywords = extractKeywords(combinedText, 8);
+  const fallbackSummary =
+    sourceType === "video"
+      ? `This video explores ${baseTitle.toLowerCase()} and highlights ${keywords
+          .slice(0, 3)
+          .join(", ") || "core concepts"}.`
+      : `This material introduces ${baseTitle.toLowerCase()} with practical scenarios to apply the knowledge.`;
+
+  const summary = buildSummarySentences(description, fallbackSummary);
+
+  const highlightedKeywords = keywords.length ? keywords : [baseTitle];
+
+  return {
+    topic: baseTitle,
+    summary,
+    keywords: highlightedKeywords.slice(0, 8),
+  };
+}
+
+const activityAngles = [
+  "Foundations",
+  "Practical Application",
+  "Collaboration",
+  "Coaching",
+  "Real-world Scenario",
+  "Reflection",
+];
+
+const practicePrompts = [
+  "Create a short outline showing how {{keyword}} improves {{topic}} for our interns.",
+  "Record a quick demo or write a note that applies {{keyword}} to a real project in {{topic}}.",
+  "Prepare a checklist that a new intern can follow to master {{keyword}} while working on {{topic}}.",
+  "Draft a feedback message coaching a peer on how to use {{keyword}} inside {{topic}}.",
+  "Design a mini-challenge where the intern solves a problem using {{keyword}}.",
+  "Summarize the top pitfalls to avoid when implementing {{keyword}} in {{topic}}.",
+];
+
+const questionTemplates = [
+  "What does {{keyword}} mean in the context of {{topic}}?",
+  "How would you apply {{keyword}} to improve a delivery in {{topic}}?",
+  "List two risks when ignoring {{keyword}} and how to mitigate them.",
+  "Describe a scenario from the resource where {{keyword}} made a difference.",
+  "Which metrics show that {{keyword}} was successful within {{topic}}?",
+  "How can you coach a teammate to embrace {{keyword}} during a project?",
+];
+
+function fillTemplate(template, replacements) {
+  return template.replace(/\{\{(.*?)\}\}/g, (_, token) => {
+    const key = token.trim();
+    return replacements[key] ?? "";
+  });
+}
+
+function buildCourseDescription(blueprint) {
+  const objectives = blueprint.objectives
+    .map((objective) => `• ${objective}`)
+    .join("\n");
+  const quiz = blueprint.quizQuestions.map((question) => `• ${question}`).join("\n");
+
+  const sections = [
+    blueprint.overview,
+    objectives ? `Objectives:\n${objectives}` : null,
+    blueprint.practice ? `Practice focus:\n${blueprint.practice}` : null,
+    quiz ? `Sample questions:\n${quiz}` : null,
+  ].filter(Boolean);
+
+  return sections.join("\n\n");
+}
+
+function createActivityPlan({ analysis, activityCount, quizCount }) {
+  const plan = [];
+  const totalActivities = Math.max(1, activityCount);
+  const questionTotal = Math.max(1, quizCount);
+  const keywords = analysis.keywords.length ? analysis.keywords : [analysis.topic];
+
+  for (let index = 0; index < totalActivities; index += 1) {
+    const focusKeyword = keywords[index % keywords.length];
+    const activityLabel = activityAngles[index % activityAngles.length];
+    const replacements = {
+      keyword: focusKeyword,
+      topic: analysis.topic,
+    };
+
+    const objectives = [
+      fillTemplate("Identify the core concepts behind {{keyword}} within {{topic}}.", replacements),
+      fillTemplate("Apply {{keyword}} to a real scenario the intern may face.", replacements),
+      fillTemplate("Evaluate success criteria when using {{keyword}} in {{topic}}.", replacements),
+    ];
+
+    const practice = fillTemplate(practicePrompts[index % practicePrompts.length], replacements);
+
+    const quizQuestions = Array.from({ length: Math.min(questionTotal, questionTemplates.length) })
+      .map((_, questionIndex) =>
+        fillTemplate(questionTemplates[(index + questionIndex) % questionTemplates.length], replacements),
+      );
+
+    const overview = `${analysis.summary} This activity spotlights ${focusKeyword.toLowerCase()} through a ${activityLabel.toLowerCase()} lens.`;
+
+    plan.push({
+      title: `${analysis.topic}: ${activityLabel}`,
+      overview,
+      keyTopics: Array.from(
+        new Set([
+          focusKeyword,
+          ...keywords.filter((keyword) => keyword !== focusKeyword).slice(0, 2),
+        ]),
+      ),
+      objectives,
+      practice,
+      quizQuestions,
+    });
+  }
+
+  return plan;
 }
 
 export default function ActivityGenerator() {
@@ -75,8 +300,10 @@ export default function ActivityGenerator() {
   const [quizCount, setQuizCount] = useState(5);
   const [selectedIntern, setSelectedIntern] = useState(null);
   const [notes, setNotes] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isPlanning, setIsPlanning] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [activityPreview, setActivityPreview] = useState(null);
   const [generatedActivities, setGeneratedActivities] = useState([]);
   const fileInputRef = useRef(null);
 
@@ -186,70 +413,143 @@ export default function ActivityGenerator() {
 
     const chosenIntern = interns.find((intern) => String(intern.id) === String(selectedIntern));
 
-    setIsGenerating(true);
+    setIsPlanning(true);
+    setActivityPreview(null);
 
     try {
-      const baseTitle = resourceTitle.trim();
-      const createdAt = new Date().toISOString();
+      const analysis = analyzeResource({
+        resourceTitle,
+        description,
+        sourceType,
+        resourceFile,
+        videoUrl,
+      });
+
+      const plan = createActivityPlan({
+        analysis,
+        activityCount: sanitizedActivityCount,
+        quizCount: sanitizedQuizCount,
+      });
+
+      setActivityPreview({
+        plan,
+        analysis,
+        sanitizedActivityCount,
+        sanitizedQuizCount,
+        internId: selectedIntern,
+        internName: chosenIntern?.full_name || selectedIntern,
+        notes: notes.trim(),
+        sourceType,
+        videoUrl: videoUrl.trim() || null,
+        resourceFile: resourceFile
+          ? {
+              name: resourceFile.name,
+              size: resourceFile.size,
+              type: resourceFile.type,
+              dataUrl: resourceFile.dataUrl,
+            }
+          : null,
+        resourceTitle: resourceTitle.trim(),
+        description: description.trim(),
+        generatedAt: new Date().toISOString(),
+      });
+
+      setFeedback({
+        type: "success",
+        message: t("activityGenerator.feedback.previewReady", undefined, {
+          count: sanitizedActivityCount,
+        }),
+      });
+    } catch (error) {
+      console.error(error);
+      setFeedback({
+        type: "error",
+        message: t("activityGenerator.feedback.genericError"),
+      });
+    } finally {
+      setIsPlanning(false);
+    }
+  };
+
+  const handleConfirmSave = async () => {
+    if (!activityPreview) return;
+
+    setFeedback(null);
+    setIsSaving(true);
+
+    try {
+      const {
+        plan,
+        analysis,
+        sanitizedQuizCount,
+        internId,
+        internName,
+        notes: previewNotes,
+        sourceType: previewSource,
+        videoUrl: previewVideoUrl,
+        resourceFile: previewFile,
+        generatedAt,
+      } = activityPreview;
+
+      const createdAt = generatedAt || new Date().toISOString();
       const createdRecords = [];
 
-      for (let index = 0; index < sanitizedActivityCount; index += 1) {
-        const activityLabel = t("activityGenerator.generated.activityName", undefined, {
-          index: index + 1,
-        });
-
+      for (let index = 0; index < plan.length; index += 1) {
+        const blueprint = plan[index];
         const payload = {
-          title: `${baseTitle} • ${activityLabel}`,
-          description:
-            description.trim() ||
-            t("activityGenerator.generated.description", undefined, {
-              resource: baseTitle,
-              quizzes: sanitizedQuizCount,
-            }),
+          title: blueprint.title,
+          description: buildCourseDescription(blueprint),
           category: "AI Generated",
           difficulty: "Intermediate",
           duration_hours: Math.max(1, Math.ceil(sanitizedQuizCount * 0.5 + 1)),
           enrolled_count: 0,
           completion_rate: 0,
-          tags: [
-            "AI Generated",
-            sourceType === "video" ? "Video" : "Document",
-          ],
+          tags: Array.from(
+            new Set([
+              "AI Generated",
+              previewSource === "video" ? "Video" : "Document",
+              ...blueprint.keyTopics.slice(0, 3),
+            ]),
+          ),
           generated_metadata: {
-            sourceType,
+            sourceType: previewSource,
             quizCount: sanitizedQuizCount,
             activityIndex: index + 1,
             generatedAt: createdAt,
-            internId: selectedIntern,
+            internId,
+            blueprint,
+            analysis,
           },
         };
 
-        if (videoUrl.trim()) {
-          const parsedId = parseYoutubeVideoId(videoUrl);
-          payload.youtube_url = videoUrl.trim();
+        if (previewVideoUrl) {
+          const parsedId = parseYoutubeVideoId(previewVideoUrl);
+          payload.youtube_url = previewVideoUrl;
           if (parsedId) {
             payload.youtube_video_id = parsedId;
           }
         }
 
-        if (resourceFile) {
-          payload.file_url = resourceFile.dataUrl;
-          payload.file_name = resourceFile.name;
-          payload.file_mime = resourceFile.type;
+        if (previewFile) {
+          payload.file_url = previewFile.dataUrl;
+          payload.file_name = previewFile.name;
+          payload.file_mime = previewFile.type;
         }
 
         const createdCourse = await Course.create(payload);
         await CourseAssignment.create({
           course_id: createdCourse.id,
-          intern_id: selectedIntern,
-          notes: notes.trim() || undefined,
+          intern_id: internId,
+          notes: previewNotes || undefined,
         });
 
         createdRecords.push({
           course: createdCourse,
-          internName: chosenIntern?.full_name || selectedIntern,
+          internName,
           quizCount: sanitizedQuizCount,
           generatedAt: createdAt,
+          blueprint,
+          keyTopics: blueprint.keyTopics,
         });
       }
 
@@ -257,10 +557,11 @@ export default function ActivityGenerator() {
       setFeedback({
         type: "success",
         message: t("activityGenerator.feedback.success", undefined, {
-          count: sanitizedActivityCount,
-          name: chosenIntern?.full_name || selectedIntern,
+          count: plan.length,
+          name: internName,
         }),
       });
+      setActivityPreview(null);
       resetForm();
     } catch (error) {
       console.error(error);
@@ -269,8 +570,12 @@ export default function ActivityGenerator() {
         message: t("activityGenerator.feedback.genericError"),
       });
     } finally {
-      setIsGenerating(false);
+      setIsSaving(false);
     }
+  };
+
+  const handleClearPreview = () => {
+    setActivityPreview(null);
   };
 
   return (
@@ -446,8 +751,14 @@ export default function ActivityGenerator() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button type="submit" className="bg-brand text-white hover:bg-brand/90" disabled={isGenerating}>
-                    {isGenerating ? t("activityGenerator.actions.generating") : t("activityGenerator.actions.generate")}
+                  <Button
+                    type="submit"
+                    className="bg-brand text-white hover:bg-brand/90"
+                    disabled={isPlanning || isSaving}
+                  >
+                    {isPlanning
+                      ? t("activityGenerator.actions.preparing")
+                      : t("activityGenerator.actions.generatePreview")}
                   </Button>
                 </div>
               </form>
@@ -506,6 +817,155 @@ export default function ActivityGenerator() {
           </Card>
         </div>
 
+        {activityPreview && (
+          <Card className="border-brand/40 shadow-e1 bg-surface">
+            <CardHeader>
+              <CardTitle>{t("activityGenerator.preview.title")}</CardTitle>
+              <CardDescription>
+                {t("activityGenerator.preview.description", undefined, {
+                  count: activityPreview.plan.length,
+                  name: activityPreview.internName,
+                  activityLabel: t(
+                    activityPreview.plan.length === 1
+                      ? "activityGenerator.preview.activitySingular"
+                      : "activityGenerator.preview.activityPlural",
+                  ),
+                })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="uppercase tracking-wide text-xs">
+                    {t(
+                      `activityGenerator.preview.sourceType.${activityPreview.sourceType || "description"}`,
+                    )}
+                  </Badge>
+                  <Badge variant="outline">
+                    {t("activityGenerator.preview.quizCountBadge", undefined, {
+                      count: activityPreview.sanitizedQuizCount,
+                    })}
+                  </Badge>
+                  <Badge variant="outline">
+                    {t("activityGenerator.preview.assignee", undefined, {
+                      name: activityPreview.internName,
+                    })}
+                  </Badge>
+                </div>
+                <p className="text-sm text-secondary leading-relaxed">
+                  {activityPreview.analysis.summary}
+                </p>
+                {activityPreview.analysis.keywords.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                      {t("activityGenerator.preview.keyTopicsTitle")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {activityPreview.analysis.keywords.map((keyword) => (
+                        <Badge
+                          key={keyword}
+                          className="bg-brand/10 text-brand border-brand/20"
+                        >
+                          {keyword}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-5">
+                {activityPreview.plan.map((blueprint, index) => (
+                  <div
+                    key={`${blueprint.title}-${index}`}
+                    className="rounded-2xl border border-border bg-surface2/60 p-5 space-y-4"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-brand">
+                        <span>
+                          {t("activityGenerator.preview.activityHeading", undefined, {
+                            index: index + 1,
+                          })}
+                        </span>
+                        <span className="h-1 w-1 rounded-full bg-brand" />
+                        <span>{blueprint.title}</span>
+                      </div>
+                      <p className="text-sm text-secondary leading-relaxed">{blueprint.overview}</p>
+                      {blueprint.keyTopics.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {blueprint.keyTopics.map((topic) => (
+                            <Badge key={topic} variant="outline" className="bg-surface text-secondary">
+                              {topic}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-semibold text-primary">
+                          {t("activityGenerator.preview.objectivesTitle")}
+                        </p>
+                        <ul className="list-disc pl-5 text-sm text-secondary space-y-1">
+                          {blueprint.objectives.map((objective, objectiveIndex) => (
+                            <li key={`${objective}-${objectiveIndex}`}>{objective}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-primary">
+                          {t("activityGenerator.preview.practiceTitle")}
+                        </p>
+                        <p className="text-sm text-secondary leading-relaxed">{blueprint.practice}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-primary">
+                          {t("activityGenerator.preview.quizTitle", undefined, {
+                            count: blueprint.quizQuestions.length,
+                            questionLabel: t(
+                              blueprint.quizQuestions.length === 1
+                                ? "activityGenerator.preview.questionSingular"
+                                : "activityGenerator.preview.questionPlural",
+                            ),
+                          })}
+                        </p>
+                        <ul className="list-disc pl-5 text-sm text-secondary space-y-1">
+                          {blueprint.quizQuestions.map((question, questionIndex) => (
+                            <li key={`${question}-${questionIndex}`}>{question}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleClearPreview}
+                  disabled={isSaving}
+                  className="text-muted hover:text-error"
+                >
+                  {t("activityGenerator.actions.clearPreview")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleConfirmSave}
+                  className="bg-brand text-white hover:bg-brand/90"
+                  disabled={isSaving}
+                >
+                  {isSaving
+                    ? t("activityGenerator.actions.saving")
+                    : t("activityGenerator.actions.confirm")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <ClipboardList className="w-5 h-5 text-brand" />
@@ -553,6 +1013,52 @@ export default function ActivityGenerator() {
                           date: formatDate(language, item.generatedAt),
                         })}</span>
                       </div>
+                      {item.keyTopics?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {item.keyTopics.map((topic) => (
+                            <Badge key={topic} variant="outline" className="bg-surface2 text-secondary">
+                              {topic}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      {item.blueprint && (
+                        <div className="space-y-3 border-t border-border/60 pt-3">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              {t("activityGenerator.preview.objectivesTitle")}
+                            </p>
+                            <ul className="list-disc pl-5 text-xs text-secondary space-y-1">
+                              {item.blueprint.objectives.map((objective, objectiveIndex) => (
+                                <li key={`${item.course.id}-objective-${objectiveIndex}`}>{objective}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              {t("activityGenerator.preview.practiceTitle")}
+                            </p>
+                            <p className="text-xs text-secondary leading-relaxed">{item.blueprint.practice}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              {t("activityGenerator.preview.quizTitle", undefined, {
+                                count: item.blueprint.quizQuestions.length,
+                                questionLabel: t(
+                                  item.blueprint.quizQuestions.length === 1
+                                    ? "activityGenerator.preview.questionSingular"
+                                    : "activityGenerator.preview.questionPlural",
+                                ),
+                              })}
+                            </p>
+                            <ul className="list-disc pl-5 text-xs text-secondary space-y-1">
+                              {item.blueprint.quizQuestions.map((question, questionIndex) => (
+                                <li key={`${item.course.id}-question-${questionIndex}`}>{question}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
