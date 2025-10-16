@@ -3,6 +3,8 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import Layout from './Layout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Interns from './pages/Interns.jsx';
+import InternProfile from './pages/InternProfile.jsx';
+import ActivityGenerator from './pages/ActivityGenerator.jsx';
 import ContentManagement from './pages/ContentManagement.jsx';
 import VacationRequests from './pages/VacationRequests.jsx';
 import Reports from './pages/Reports.jsx';
@@ -20,6 +22,18 @@ const routes = [
       {
         path: PAGE_URLS.Interns.replace(/^\//, ''),
         element: <Interns />,
+      },
+      {
+        path: `${PAGE_URLS.Interns.replace(/^\//, '')}/:internId`,
+        element: <InternProfile />,
+      },
+      {
+        path: 'estagiario/:internId',
+        element: <InternProfile />,
+      },
+      {
+        path: PAGE_URLS.ActivityGenerator.replace(/^\//, ''),
+        element: <ActivityGenerator />,
       },
       {
         path: PAGE_URLS.ContentManagement.replace(/^\//, ''),

@@ -110,6 +110,7 @@ const pt = {
     nav: {
       dashboard: "Dashboard",
       interns: "Equipe",
+      activityGenerator: "Gerador de atividades",
       content: "Gestão de conteúdo",
       ascendaIA: {
         title: "AscendaIA",
@@ -185,6 +186,80 @@ const pt = {
       googleWorkspace: "Google Workspace",
       webDevelopment: "Desenvolvimento Web",
     }
+  },
+  activityGenerator: {
+    title: "Gerador de atividades",
+    subtitle: "Transforme recursos enviados em quizzes prontos para o seu estagiário",
+    form: {
+      title: "Configurar geração",
+      description: "Escolha o material, a quantidade de quizzes e o estagiário que receberá as atividades.",
+      resourceTitle: "Título do recurso",
+      resourceTitlePlaceholder: "Ex.: Workshop de Mentalidade de Crescimento",
+      videoUrl: "Link do vídeo",
+      videoUrlPlaceholder: "https://www.youtube.com/watch?v=...",
+      uploadLabel: "Envie documento ou vídeo",
+      descriptionLabel: "Contexto adicional",
+      descriptionPlaceholder: "Compartilhe pontos de atenção ou instruções para as atividades...",
+      activityCount: "Atividades para gerar",
+      quizCount: "Perguntas por atividade",
+      internLabel: "Atribuir para",
+      internPlaceholder: "Selecione um estagiário",
+      notesLabel: "Observações para o estagiário",
+      notesPlaceholder: "Inclua instruções, datas limite ou foco de aprendizagem...",
+    },
+    upload: {
+      hintTitle: "Anexe o material base",
+      hintDescription: "Aceitamos: vídeo, PDF, arquivos do Office. Recomenda-se até 25 MB.",
+      selectButton: "Escolher arquivo",
+      removeButton: "Remover",
+      noResource: "Nenhum recurso selecionado",
+    },
+    actions: {
+      generate: "Gerar atividades",
+      generating: "Gerando...",
+    },
+    feedback: {
+      missingTitle: "Informe um nome para o recurso antes de gerar as atividades.",
+      missingResource: "Envie um arquivo ou cole um link de vídeo para gerar as atividades.",
+      missingIntern: "Selecione qual estagiário deve receber as atividades.",
+      missingCounts: "Defina pelo menos uma atividade e uma pergunta de quiz para gerar.",
+      success: "Geramos {{count}} atividades para {{name}} e salvamos na biblioteca de cursos.",
+      genericError: "Não foi possível concluir a geração. Revise os dados e tente novamente.",
+    },
+    generated: {
+      activityName: "Atividade {{index}}",
+      description: "Gerado automaticamente a partir de {{resource}} com {{quizzes}} perguntas de quiz.",
+    },
+    summary: {
+      title: "Como funciona",
+      description: "Cada geração cria quizzes estruturados, atribui automaticamente e salva o material na biblioteca.",
+      steps: {
+        upload: {
+          title: "Envie um recurso",
+          description: "Compartilhe um vídeo ou documento para inspirar as atividades.",
+        },
+        generate: {
+          title: "Gere quizzes",
+          description: "A Ascenda cria conjuntos de perguntas alinhados ao conteúdo.",
+        },
+        assign: {
+          title: "Atribua instantaneamente",
+          description: "O estagiário escolhido recebe as atividades na hora.",
+        },
+        library: {
+          title: "Salve na biblioteca",
+          description: "As novas atividades ficam disponíveis na biblioteca de cursos para reutilização.",
+        },
+      },
+      currentResource: "Recurso selecionado",
+    },
+    recent: {
+      title: "Atividades geradas recentemente",
+      empty: "As atividades aparecerão aqui após a primeira geração.",
+      assigned: "Atribuído para {{name}}",
+      quizCount: "{{count}} perguntas de quiz",
+      generatedAt: "Gerado em {{date}}",
+    },
   },
   internStatus: {
     tooltip: "Bem-estar: {{status}}",
