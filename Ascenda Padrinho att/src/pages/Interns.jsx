@@ -6,6 +6,7 @@ import { Search, Filter } from "lucide-react";
 import { motion } from "framer-motion";
 import InternCard from "../components/dashboard/InternCard";
 import ChatDrawer from "../components/chat/ChatDrawer";
+import { PAGE_URLS } from "@padrinho/utils";
 import {
   Select,
   SelectContent,
@@ -51,8 +52,8 @@ export default function Interns() {
   };
 
   const handleInternClick = (intern) => {
-    const internId = slugify(intern.full_name);
-    navigate(`/estagiario/${internId}`, {
+    const internId = intern?.id ? String(intern.id) : slugify(intern.full_name);
+    navigate(`${PAGE_URLS.Interns}/${internId}`, {
       state: {
         id: internId,
         name: intern.full_name,

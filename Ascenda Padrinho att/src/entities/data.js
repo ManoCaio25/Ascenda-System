@@ -263,6 +263,59 @@ export const tasks = [
   }
 ];
 
+export const feedbackEntries = [
+  {
+    id: 1,
+    intern_id: 'caio',
+    title: 'Revisão da Sprint 18',
+    message: 'Ótima evolução nas métricas de performance. Continue explorando memoization no próximo ciclo.',
+    sentiment: 'positive',
+    status: 'acknowledged',
+    author: 'Helena Prado',
+    created_at: '2024-08-12T14:30:00.000Z'
+  },
+  {
+    id: 2,
+    intern_id: 'caio',
+    title: 'Feedback de Code Review',
+    message: 'Ajustar nomenclaturas e adicionar testes para o hook de analytics antes do merge.',
+    sentiment: 'action',
+    status: 'pending',
+    author: 'Helena Prado',
+    created_at: '2024-08-15T09:10:00.000Z'
+  },
+  {
+    id: 3,
+    intern_id: 'gabriela',
+    title: 'Workshop PMO',
+    message: 'Excelente facilitação do workshop. Documentar aprendizados no Confluence até sexta-feira.',
+    sentiment: 'positive',
+    status: 'acknowledged',
+    author: 'João Freitas',
+    created_at: '2024-08-10T11:45:00.000Z'
+  },
+  {
+    id: 4,
+    intern_id: 'leticia',
+    title: 'Painel de BI',
+    message: 'Validar se os filtros cruzados estão entregando os números esperados antes da apresentação.',
+    sentiment: 'neutral',
+    status: 'in_progress',
+    author: 'Marina Costa',
+    created_at: '2024-08-14T17:05:00.000Z'
+  },
+  {
+    id: 5,
+    intern_id: 'lucas',
+    title: 'Protótipo Assistente IA',
+    message: 'Reforçar casos de teste voltados a dados sensíveis e alinhar com o time de segurança.',
+    sentiment: 'action',
+    status: 'pending',
+    author: 'Ana Ribeiro',
+    created_at: '2024-08-16T15:20:00.000Z'
+  }
+];
+
 export const notifications = [
   {
     id: 1,
