@@ -10,7 +10,8 @@ import {
   FileText,
   Youtube,
   CheckCircle,
-  Trash2
+  Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@padrinho/components/ui/button";
 import { Input } from "@padrinho/components/ui/input";
@@ -23,6 +24,7 @@ import {
   CardHeader,
   CardTitle
 } from "@padrinho/components/ui/card";
+import { Badge } from "@padrinho/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -55,6 +57,214 @@ function parseYoutubeVideoId(url) {
   return null;
 }
 
+const STOP_WORDS = new Set([
+  "the",
+  "and",
+  "for",
+  "with",
+  "that",
+  "this",
+  "from",
+  "into",
+  "about",
+  "como",
+  "para",
+  "com",
+  "uma",
+  "das",
+  "dos",
+  "que",
+  "por",
+  "mais",
+  "when",
+  "your",
+  "have",
+  "will",
+  "them",
+  "their",
+  "sobre",
+  "entre",
+  "cada",
+  "onde",
+  "elas",
+  "eles",
+  "aqui",
+  "there",
+  "porque",
+  "does",
+  "were",
+  "essa",
+  "esse",
+  "http",
+  "https",
+  "www",
+]);
+
+const TEXT_FILE_EXTENSIONS = [
+  ".txt",
+  ".md",
+  ".markdown",
+  ".csv",
+  ".json",
+  ".html",
+  ".htm",
+  ".rtf",
+];
+
+const TEXT_MIME_PREFIXES = [/^text\//i, /^application\/(json|xml|csv)$/i];
+
+const MAX_ANALYSIS_CHARACTERS = 6000;
+
+const decoderUtf8 = new TextDecoder("utf-8", { fatal: false });
+const decoderLatin = new TextDecoder("iso-8859-1", { fatal: false });
+
+function isTextLikeFile(file) {
+  if (!file) return false;
+  if (TEXT_MIME_PREFIXES.some((pattern) => pattern.test(file.type))) {
+    return true;
+  }
+  const loweredName = file.name?.toLowerCase() ?? "";
+  return TEXT_FILE_EXTENSIONS.some((extension) => loweredName.endsWith(extension));
+}
+
+function decodePdfString(raw) {
+  return raw
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/\\t/g, "\t")
+    .replace(/\\f/g, "\f")
+    .replace(/\\b/g, "\b")
+    .replace(/\\\(/g, "(")
+    .replace(/\\\)/g, ")")
+    .replace(/\\\\/g, "\\")
+    .replace(/\\(\d{1,3})/g, (_, value) => {
+      const parsed = parseInt(value, 8);
+      if (Number.isNaN(parsed)) {
+        return "";
+      }
+      return String.fromCharCode(parsed);
+    });
+}
+
+function decodeBufferToText(buffer) {
+  if (!buffer) return "";
+  const utf8Text = decoderUtf8.decode(buffer);
+  const utf8ReplacementCount = (utf8Text.match(/\uFFFD/g) || []).length;
+
+  if (utf8ReplacementCount === 0) {
+    return utf8Text;
+  }
+
+  const latinText = decoderLatin.decode(buffer);
+  const latinReplacementCount = (latinText.match(/\uFFFD/g) || []).length;
+
+  if (latinReplacementCount < utf8ReplacementCount) {
+    return latinText;
+  }
+
+  return utf8Text;
+}
+
+function extractTextFromPdfBuffer(buffer) {
+  if (!buffer) return "";
+  try {
+    const raw = decoderLatin.decode(buffer);
+    const sections = raw
+      .split(/BT(?:\s|\r|\n)/)
+      .slice(1)
+      .map((section) => section.split(/\sET/)[0])
+      .join(" ");
+
+    const matches = sections.match(/\(([^)\\]*(?:\\.[^)\\]*)*)\)/g);
+    if (!matches) {
+      return "";
+    }
+
+    const decoded = matches
+      .map((match) => decodePdfString(match.slice(1, -1)))
+      .join(" ");
+
+    return decoded.replace(/\s+/g, " ").trim();
+  } catch (error) {
+    console.warn("Failed to decode PDF", error);
+    return "";
+  }
+}
+
+async function extractTextFromFile(file) {
+  if (!file) return "";
+  try {
+    if (isTextLikeFile(file)) {
+      const buffer = await file.arrayBuffer();
+      return decodeBufferToText(buffer);
+    }
+
+    if (file.type === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf")) {
+      const buffer = await file.arrayBuffer();
+      return extractTextFromPdfBuffer(buffer);
+    }
+  } catch (error) {
+    console.warn("Unable to read file", error);
+  }
+
+  return "";
+}
+
+function normalizeContent(text) {
+  if (!text) return "";
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/[\t\f\v]+/g, " ")
+    .replace(/\u00A0/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function limitTextLength(text, limit = MAX_ANALYSIS_CHARACTERS) {
+  if (!text) return "";
+  if (text.length <= limit) {
+    return text;
+  }
+  return `${text.slice(0, limit)}...`;
+}
+
+function buildContextSnippet(text, limit = 420) {
+  if (!text) return "";
+  const sanitized = text.replace(/\s+/g, " ").trim();
+  if (!sanitized) return "";
+
+  const sentences = sanitized.split(/(?<=[.!?])\s+/).filter(Boolean);
+  const combined = sentences.slice(0, 3).join(" ");
+
+  if (combined.length <= limit) {
+    return combined;
+  }
+
+  return `${combined.slice(0, limit)}...`;
+}
+
+function mergeContentSections(sections) {
+  return sections
+    .filter((section) => typeof section === "string" && section.trim().length > 0)
+    .map((section) => section.trim())
+    .join("\n\n");
+}
+
+function computeWordCount(text) {
+  if (!text) return 0;
+  return text.split(/\s+/).filter(Boolean).length;
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error || new Error("file_read_error"));
+    reader.readAsDataURL(file);
+  });
+}
+
 function formatDate(language, isoDate) {
   if (!isoDate) return "";
   const formatter = new Intl.DateTimeFormat(language === "pt" ? "pt-BR" : "en-US", {
@@ -64,6 +274,279 @@ function formatDate(language, isoDate) {
   return formatter.format(new Date(isoDate));
 }
 
+function cleanFileName(name) {
+  if (!name) return "";
+  return name.replace(/\.[^/.]+$/, "").replace(/[\-_]+/g, " ").trim();
+}
+
+function extractKeywords(text, limit = 8) {
+  if (!text) return [];
+  const truncated = limitTextLength(text, MAX_ANALYSIS_CHARACTERS);
+  const normalized = truncated
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ");
+  const tokens = normalized
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 3 && !STOP_WORDS.has(token));
+
+  const frequencies = tokens.reduce((acc, token) => {
+    acc[token] = (acc[token] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(frequencies)
+    .sort((a, b) => {
+      if (b[1] === a[1]) {
+        return a[0].localeCompare(b[0]);
+      }
+      return b[1] - a[1];
+    })
+    .slice(0, limit)
+    .map(([token]) => token.replace(/^(\p{L})/u, (match) => match.toUpperCase()));
+}
+
+function buildSummarySentences(text, fallback) {
+  if (!text) {
+    return fallback;
+  }
+  const truncated = limitTextLength(text, 800);
+  const sanitized = truncated.replace(/\s+/g, " ").trim();
+  if (!sanitized) {
+    return fallback;
+  }
+  const segments = sanitized.split(/(?<=[.!?])\s+/).filter(Boolean);
+  if (segments.length === 0) {
+    return fallback;
+  }
+  return segments.slice(0, 2).join(" ");
+}
+
+function analyzeResource({
+  resourceTitle,
+  description,
+  sourceType,
+  resourceFile,
+  videoUrl,
+  contentText,
+  transcriptText,
+}) {
+  const baseTitle =
+    resourceTitle.trim() ||
+    cleanFileName(resourceFile?.name) ||
+    (sourceType === "video"
+      ? videoUrl
+        ? "Video lesson"
+        : "Video resource"
+      : "Learning resource");
+
+  const normalizedContent = normalizeContent(contentText);
+  const normalizedTranscript = normalizeContent(transcriptText);
+  const normalizedDescription = normalizeContent(description);
+
+  const combinedContent = mergeContentSections([
+    resourceTitle,
+    normalizedDescription,
+    normalizedContent,
+    normalizedTranscript,
+    cleanFileName(resourceFile?.name),
+  ]);
+
+  const truncatedCombined = limitTextLength(combinedContent, MAX_ANALYSIS_CHARACTERS);
+  const keywords = extractKeywords(truncatedCombined, 12);
+
+  const summarySource = normalizedContent || normalizedTranscript || normalizedDescription;
+  const fallbackSummary =
+    sourceType === "video"
+      ? `This video explores ${baseTitle.toLowerCase()} and highlights ${
+          keywords.slice(0, 3).join(", ") || "core concepts"
+        }.`
+      : `This material introduces ${baseTitle.toLowerCase()} with practical scenarios to apply the knowledge.`;
+
+  const summary = buildSummarySentences(summarySource || truncatedCombined, fallbackSummary);
+  const referenceSnippet = buildContextSnippet(summarySource || truncatedCombined);
+
+  const highlightedKeywords = keywords.length ? keywords : [baseTitle];
+  const textSource = normalizedContent
+    ? "document"
+    : normalizedTranscript
+    ? "transcript"
+    : normalizedDescription
+    ? "description"
+    : "title";
+
+  return {
+    topic: baseTitle,
+    summary,
+    keywords: highlightedKeywords.slice(0, 8),
+    referenceSnippet,
+    textSource,
+    totalWords: computeWordCount(summarySource || truncatedCombined),
+    transcriptUsed: Boolean(normalizedTranscript),
+    contentUsed: Boolean(normalizedContent),
+  };
+}
+
+const activityAngles = [
+  "Foundations",
+  "Practical Application",
+  "Collaboration",
+  "Coaching",
+  "Real-world Scenario",
+  "Reflection",
+];
+
+const practicePrompts = [
+  "Create a short outline showing how {{keyword}} improves {{topic}} for our interns.",
+  "Record a quick demo or write a note that applies {{keyword}} to a real project in {{topic}}.",
+  "Prepare a checklist that a new intern can follow to master {{keyword}} while working on {{topic}}.",
+  "Draft a feedback message coaching a peer on how to use {{keyword}} inside {{topic}}.",
+  "Design a mini-challenge where the intern solves a problem using {{keyword}}.",
+  "Summarize the top pitfalls to avoid when implementing {{keyword}} in {{topic}}.",
+];
+
+const questionTemplates = [
+  "What does {{keyword}} mean in the context of {{topic}}?",
+  "How would you apply {{keyword}} to improve a delivery in {{topic}}?",
+  "List two risks when ignoring {{keyword}} and how to mitigate them.",
+  "Describe a scenario from the resource where {{keyword}} made a difference.",
+  "Which metrics show that {{keyword}} was successful within {{topic}}?",
+  "How can you coach a teammate to embrace {{keyword}} during a project?",
+];
+
+function fillTemplate(template, replacements) {
+  return template.replace(/\{\{(.*?)\}\}/g, (_, token) => {
+    const key = token.trim();
+    return replacements[key] ?? "";
+  });
+}
+
+function buildCourseDescription(blueprint) {
+  const objectives = blueprint.objectives
+    .map((objective) => `• ${objective}`)
+    .join("\n");
+  const quiz = blueprint.quizQuestions.map((question) => `• ${question}`).join("\n");
+
+  const sections = [
+    blueprint.overview,
+    objectives ? `Objectives:\n${objectives}` : null,
+    blueprint.practice ? `Practice focus:\n${blueprint.practice}` : null,
+    quiz ? `Sample questions:\n${quiz}` : null,
+  ].filter(Boolean);
+
+  return sections.join("\n\n");
+}
+
+function createActivityPlan({ analysis, activityCount, quizCount }) {
+  const plan = [];
+  const totalActivities = Math.max(1, activityCount);
+  const questionTotal = Math.max(1, quizCount);
+  const keywords = analysis.keywords.length ? analysis.keywords : [analysis.topic];
+
+  for (let index = 0; index < totalActivities; index += 1) {
+    const focusKeyword = keywords[index % keywords.length];
+    const activityLabel = activityAngles[index % activityAngles.length];
+    const replacements = {
+      keyword: focusKeyword,
+      topic: analysis.topic,
+    };
+
+    const objectives = [
+      fillTemplate("Identify the core concepts behind {{keyword}} within {{topic}}.", replacements),
+      fillTemplate("Apply {{keyword}} to a real scenario the intern may face.", replacements),
+      fillTemplate("Evaluate success criteria when using {{keyword}} in {{topic}}.", replacements),
+    ];
+
+    const practice = fillTemplate(practicePrompts[index % practicePrompts.length], replacements);
+
+    const quizQuestions = Array.from({ length: Math.min(questionTotal, questionTemplates.length) })
+      .map((_, questionIndex) =>
+        fillTemplate(questionTemplates[(index + questionIndex) % questionTemplates.length], replacements),
+      );
+
+    const overview = `${analysis.summary} This activity spotlights ${focusKeyword.toLowerCase()} through a ${activityLabel.toLowerCase()} lens.`;
+
+    plan.push({
+      title: `${analysis.topic}: ${activityLabel}`,
+      overview,
+      keyTopics: Array.from(
+        new Set([
+          focusKeyword,
+          ...keywords.filter((keyword) => keyword !== focusKeyword).slice(0, 2),
+        ]),
+      ),
+      objectives,
+      practice,
+      quizQuestions,
+    });
+  }
+
+  return plan;
+}
+
+async function fetchVideoTranscript(videoId) {
+  if (!videoId) {
+    return { transcript: "", source: null, segments: 0 };
+  }
+
+  const endpoints = [
+    `https://r.jina.ai/https://youtubetranscript.com/?server_vid2=${videoId}`,
+    `https://r.jina.ai/http://youtubetranscript.com/?server_vid2=${videoId}`,
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const payloadText = await response.text();
+      let payload;
+
+      try {
+        payload = JSON.parse(payloadText);
+      } catch (error) {
+        continue;
+      }
+
+      const transcriptEntries = Array.isArray(payload?.transcripts)
+        ? payload.transcripts
+        : Array.isArray(payload)
+        ? payload
+        : [];
+
+      if (!Array.isArray(transcriptEntries) || transcriptEntries.length === 0) {
+        continue;
+      }
+
+      const combined = normalizeContent(
+        transcriptEntries
+          .map((entry) => (typeof entry.text === "string" ? entry.text : ""))
+          .join(" "),
+      );
+
+      if (combined) {
+        return {
+          transcript: combined,
+          source: typeof payload?.title === "string" ? payload.title : null,
+          segments: transcriptEntries.length,
+        };
+      }
+    } catch (error) {
+      console.warn("Unable to fetch transcript", error);
+    }
+  }
+
+  return { transcript: "", source: null, segments: 0 };
+}
+
 export default function ActivityGenerator() {
   const { t, language } = useTranslation();
   const [interns, setInterns] = useState([]);
@@ -71,14 +554,21 @@ export default function ActivityGenerator() {
   const [description, setDescription] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [resourceFile, setResourceFile] = useState(null);
+  const [resourceContent, setResourceContent] = useState("");
+  const [resourceContentWords, setResourceContentWords] = useState(0);
+  const [resourceContentSource, setResourceContentSource] = useState(null);
+  const [isExtractingContent, setIsExtractingContent] = useState(false);
   const [activityCount, setActivityCount] = useState(3);
   const [quizCount, setQuizCount] = useState(5);
   const [selectedIntern, setSelectedIntern] = useState(null);
   const [notes, setNotes] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isPlanning, setIsPlanning] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [activityPreview, setActivityPreview] = useState(null);
   const [generatedActivities, setGeneratedActivities] = useState([]);
   const fileInputRef = useRef(null);
+  const transcriptCacheRef = useRef(new Map());
 
   useEffect(() => {
     const loadInterns = async () => {
@@ -88,27 +578,64 @@ export default function ActivityGenerator() {
     loadInterns();
   }, []);
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
+    setFeedback(null);
+
     if (!file) {
       setResourceFile(null);
+      setResourceContent("");
+      setResourceContentWords(0);
+      setResourceContentSource(null);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
+    setIsExtractingContent(true);
+
+    try {
+      const [dataUrl, extractedText] = await Promise.all([
+        readFileAsDataUrl(file),
+        extractTextFromFile(file),
+      ]);
+
+      const normalizedExtracted = normalizeContent(extractedText);
+      const derivedSource = file.type?.startsWith("video/") ? "video" : "document";
       setResourceFile({
         name: file.name,
         size: file.size,
         type: file.type,
-        dataUrl: reader.result,
+        dataUrl,
       });
-    };
-    reader.readAsDataURL(file);
+      setResourceContent(extractedText || "");
+      setResourceContentWords(computeWordCount(normalizedExtracted));
+      setResourceContentSource(derivedSource === "document" ? "document" : null);
+
+      if (derivedSource === "document" && !normalizedExtracted && isTextLikeFile(file)) {
+        setFeedback({
+          type: "error",
+          message: t("activityGenerator.feedback.emptyDocument"),
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      setFeedback({
+        type: "error",
+        message: t("activityGenerator.feedback.unableToReadFile"),
+      });
+      setResourceFile(null);
+      setResourceContent("");
+      setResourceContentWords(0);
+      setResourceContentSource(null);
+    } finally {
+      setIsExtractingContent(false);
+    }
   };
 
   const handleRemoveFile = () => {
     setResourceFile(null);
+    setResourceContent("");
+    setResourceContentWords(0);
+    setResourceContentSource(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -119,6 +646,9 @@ export default function ActivityGenerator() {
     setDescription("");
     setVideoUrl("");
     setResourceFile(null);
+    setResourceContent("");
+    setResourceContentWords(0);
+    setResourceContentSource(null);
     setActivityCount(3);
     setQuizCount(5);
     setSelectedIntern(null);
@@ -129,14 +659,29 @@ export default function ActivityGenerator() {
   };
 
   const resourceSummary = useMemo(() => {
+    if (isExtractingContent) {
+      return t("activityGenerator.upload.extracting");
+    }
     if (resourceFile) {
-      return `${resourceFile.name} · ${(resourceFile.size / 1024).toFixed(1)} KB`;
+      const sizeLabel = `${resourceFile.name} · ${(resourceFile.size / 1024).toFixed(1)} KB`;
+      if (resourceContentWords > 0) {
+        return `${sizeLabel} · ${t("activityGenerator.upload.wordCount", undefined, {
+          count: resourceContentWords,
+        })}`;
+      }
+      return sizeLabel;
     }
     if (videoUrl.trim()) {
       return videoUrl.trim();
     }
     return t("activityGenerator.upload.noResource");
-  }, [resourceFile, videoUrl, t]);
+  }, [
+    isExtractingContent,
+    resourceFile,
+    resourceContentWords,
+    videoUrl,
+    t,
+  ]);
 
   const sourceType = useMemo(() => {
     if (videoUrl.trim()) return "video";
@@ -151,6 +696,14 @@ export default function ActivityGenerator() {
 
     const sanitizedActivityCount = Number(activityCount) || 0;
     const sanitizedQuizCount = Number(quizCount) || 0;
+
+    if (isExtractingContent) {
+      setFeedback({
+        type: "error",
+        message: t("activityGenerator.feedback.processingFile"),
+      });
+      return;
+    }
 
     if (!resourceTitle.trim()) {
       setFeedback({
@@ -186,70 +739,200 @@ export default function ActivityGenerator() {
 
     const chosenIntern = interns.find((intern) => String(intern.id) === String(selectedIntern));
 
-    setIsGenerating(true);
+    setIsPlanning(true);
+    setActivityPreview(null);
 
     try {
-      const baseTitle = resourceTitle.trim();
-      const createdAt = new Date().toISOString();
+      let transcriptText = "";
+      let transcriptSource = null;
+      let transcriptSegments = 0;
+
+      if (sourceType === "video") {
+        const parsedVideoId = parseYoutubeVideoId(videoUrl.trim());
+        if (parsedVideoId) {
+          const cachedTranscript = transcriptCacheRef.current.get(parsedVideoId);
+          if (cachedTranscript) {
+            ({
+              transcript: transcriptText,
+              source: transcriptSource,
+              segments: transcriptSegments,
+            } = cachedTranscript);
+          } else {
+            const fetchedTranscript = await fetchVideoTranscript(parsedVideoId);
+            transcriptCacheRef.current.set(parsedVideoId, fetchedTranscript);
+            transcriptText = fetchedTranscript.transcript;
+            transcriptSource = fetchedTranscript.source;
+            transcriptSegments = fetchedTranscript.segments;
+          }
+        }
+      }
+
+      const analysis = analyzeResource({
+        resourceTitle,
+        description,
+        sourceType,
+        resourceFile,
+        videoUrl,
+        contentText: resourceContent,
+        transcriptText,
+      });
+
+      const plan = createActivityPlan({
+        analysis,
+        activityCount: sanitizedActivityCount,
+        quizCount: sanitizedQuizCount,
+      });
+
+      setActivityPreview({
+        plan,
+        analysis,
+        sanitizedActivityCount,
+        sanitizedQuizCount,
+        internId: selectedIntern,
+        internName: chosenIntern?.full_name || selectedIntern,
+        notes: notes.trim(),
+        sourceType,
+        videoUrl: videoUrl.trim() || null,
+        resourceFile: resourceFile
+          ? {
+              name: resourceFile.name,
+              size: resourceFile.size,
+              type: resourceFile.type,
+              dataUrl: resourceFile.dataUrl,
+            }
+          : null,
+        resourceTitle: resourceTitle.trim(),
+        description: description.trim(),
+        generatedAt: new Date().toISOString(),
+        transcriptText,
+        transcriptSource,
+        transcriptSegments,
+        resourceContentWords,
+        resourceContentSource,
+      });
+
+      const previewFeedbackKey =
+        sourceType === "video" && !transcriptText
+          ? "activityGenerator.feedback.previewReadyNoTranscript"
+          : resourceContentSource === "document" && resourceContentWords === 0
+          ? "activityGenerator.feedback.previewReadyNoDocument"
+          : "activityGenerator.feedback.previewReady";
+
+      setFeedback({
+        type: "success",
+        message: t(previewFeedbackKey, undefined, {
+          count: sanitizedActivityCount,
+        }),
+      });
+    } catch (error) {
+      console.error(error);
+      setFeedback({
+        type: "error",
+        message: t("activityGenerator.feedback.genericError"),
+      });
+    } finally {
+      setIsPlanning(false);
+    }
+  };
+
+  const handleConfirmSave = async () => {
+    if (!activityPreview) return;
+
+    setFeedback(null);
+    setIsSaving(true);
+
+    try {
+      const {
+        plan,
+        analysis,
+        sanitizedQuizCount,
+        internId,
+        internName,
+        notes: previewNotes,
+        sourceType: previewSource,
+        videoUrl: previewVideoUrl,
+        resourceFile: previewFile,
+        generatedAt,
+        transcriptText,
+        transcriptSource,
+        transcriptSegments,
+        resourceContentWords: previewContentWords,
+        resourceContentSource: previewContentSource,
+      } = activityPreview;
+
+      const createdAt = generatedAt || new Date().toISOString();
       const createdRecords = [];
 
-      for (let index = 0; index < sanitizedActivityCount; index += 1) {
-        const activityLabel = t("activityGenerator.generated.activityName", undefined, {
-          index: index + 1,
-        });
-
+      for (let index = 0; index < plan.length; index += 1) {
+        const blueprint = plan[index];
         const payload = {
-          title: `${baseTitle} • ${activityLabel}`,
-          description:
-            description.trim() ||
-            t("activityGenerator.generated.description", undefined, {
-              resource: baseTitle,
-              quizzes: sanitizedQuizCount,
-            }),
+          title: blueprint.title,
+          description: buildCourseDescription(blueprint),
           category: "AI Generated",
           difficulty: "Intermediate",
           duration_hours: Math.max(1, Math.ceil(sanitizedQuizCount * 0.5 + 1)),
           enrolled_count: 0,
           completion_rate: 0,
-          tags: [
-            "AI Generated",
-            sourceType === "video" ? "Video" : "Document",
-          ],
+          tags: Array.from(
+            new Set([
+              "AI Generated",
+              previewSource === "video" ? "Video" : "Document",
+              ...blueprint.keyTopics.slice(0, 3),
+            ]),
+          ),
           generated_metadata: {
-            sourceType,
+            sourceType: previewSource,
             quizCount: sanitizedQuizCount,
             activityIndex: index + 1,
             generatedAt: createdAt,
-            internId: selectedIntern,
+            internId,
+            blueprint,
+            analysis,
+            transcriptSource,
+            transcriptSegments,
+            transcriptPreview: transcriptText ? transcriptText.slice(0, 500) : null,
+            contentWordCount: previewContentWords,
+            contentSource: previewContentSource,
+            textSource: analysis.textSource,
+            summaryWordCount: analysis.totalWords,
+            referenceSnippet: analysis.referenceSnippet,
+            transcriptUsed: analysis.transcriptUsed,
+            contentUsed: analysis.contentUsed,
           },
         };
 
-        if (videoUrl.trim()) {
-          const parsedId = parseYoutubeVideoId(videoUrl);
-          payload.youtube_url = videoUrl.trim();
+        if (previewVideoUrl) {
+          const parsedId = parseYoutubeVideoId(previewVideoUrl);
+          payload.youtube_url = previewVideoUrl;
           if (parsedId) {
             payload.youtube_video_id = parsedId;
           }
         }
 
-        if (resourceFile) {
-          payload.file_url = resourceFile.dataUrl;
-          payload.file_name = resourceFile.name;
-          payload.file_mime = resourceFile.type;
+        if (previewFile) {
+          payload.file_url = previewFile.dataUrl;
+          payload.file_name = previewFile.name;
+          payload.file_mime = previewFile.type;
         }
 
         const createdCourse = await Course.create(payload);
         await CourseAssignment.create({
           course_id: createdCourse.id,
-          intern_id: selectedIntern,
-          notes: notes.trim() || undefined,
+          intern_id: internId,
+          notes: previewNotes || undefined,
         });
 
         createdRecords.push({
           course: createdCourse,
-          internName: chosenIntern?.full_name || selectedIntern,
+          internName,
           quizCount: sanitizedQuizCount,
           generatedAt: createdAt,
+          blueprint,
+          keyTopics: blueprint.keyTopics,
+          analysis,
+          transcriptUsed: analysis.transcriptUsed,
+          textSource: analysis.textSource,
+          contentWordCount: previewContentWords,
         });
       }
 
@@ -257,10 +940,11 @@ export default function ActivityGenerator() {
       setFeedback({
         type: "success",
         message: t("activityGenerator.feedback.success", undefined, {
-          count: sanitizedActivityCount,
-          name: chosenIntern?.full_name || selectedIntern,
+          count: plan.length,
+          name: internName,
         }),
       });
+      setActivityPreview(null);
       resetForm();
     } catch (error) {
       console.error(error);
@@ -269,8 +953,12 @@ export default function ActivityGenerator() {
         message: t("activityGenerator.feedback.genericError"),
       });
     } finally {
-      setIsGenerating(false);
+      setIsSaving(false);
     }
+  };
+
+  const handleClearPreview = () => {
+    setActivityPreview(null);
   };
 
   return (
@@ -446,8 +1134,16 @@ export default function ActivityGenerator() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button type="submit" className="bg-brand text-white hover:bg-brand/90" disabled={isGenerating}>
-                    {isGenerating ? t("activityGenerator.actions.generating") : t("activityGenerator.actions.generate")}
+                  <Button
+                    type="submit"
+                    className="bg-brand text-white hover:bg-brand/90"
+                    disabled={isPlanning || isSaving || isExtractingContent}
+                  >
+                    {isExtractingContent
+                      ? t("activityGenerator.actions.processingFile")
+                      : isPlanning
+                      ? t("activityGenerator.actions.preparing")
+                      : t("activityGenerator.actions.generatePreview")}
                   </Button>
                 </div>
               </form>
@@ -506,6 +1202,195 @@ export default function ActivityGenerator() {
           </Card>
         </div>
 
+        {activityPreview && (
+          <Card className="border-brand/40 shadow-e1 bg-surface">
+            <CardHeader>
+              <CardTitle>{t("activityGenerator.preview.title")}</CardTitle>
+              <CardDescription>
+                {t("activityGenerator.preview.description", undefined, {
+                  count: activityPreview.plan.length,
+                  name: activityPreview.internName,
+                  activityLabel: t(
+                    activityPreview.plan.length === 1
+                      ? "activityGenerator.preview.activitySingular"
+                      : "activityGenerator.preview.activityPlural",
+                  ),
+                })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="uppercase tracking-wide text-xs">
+                    {t(
+                      `activityGenerator.preview.sourceType.${activityPreview.sourceType || "description"}`,
+                    )}
+                  </Badge>
+                  <Badge variant="outline">
+                    {t("activityGenerator.preview.quizCountBadge", undefined, {
+                      count: activityPreview.sanitizedQuizCount,
+                    })}
+                  </Badge>
+                  <Badge variant="outline">
+                    {t("activityGenerator.preview.assignee", undefined, {
+                      name: activityPreview.internName,
+                    })}
+                  </Badge>
+                  <Badge variant="outline" className="bg-surface text-secondary">
+                    {t("activityGenerator.preview.analysisSource", undefined, {
+                      source: t(
+                        `activityGenerator.preview.sourceLabels.${activityPreview.analysis.textSource}`,
+                      ),
+                    })}
+                  </Badge>
+                </div>
+                <p className="text-sm text-secondary leading-relaxed">
+                  {activityPreview.analysis.summary}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
+                  <span>
+                    {t("activityGenerator.preview.wordCount", undefined, {
+                      count: activityPreview.analysis.totalWords,
+                    })}
+                  </span>
+                  {activityPreview.transcriptText && (
+                    <span>
+                      {t("activityGenerator.preview.transcriptSegments", undefined, {
+                        count: activityPreview.transcriptSegments,
+                      })}
+                    </span>
+                  )}
+                </div>
+                {activityPreview.sourceType === "video" && !activityPreview.analysis.transcriptUsed && (
+                  <p className="text-xs text-muted">
+                    {t("activityGenerator.preview.transcriptMissing")}
+                  </p>
+                )}
+                {activityPreview.analysis.referenceSnippet && (
+                  <div className="rounded-lg border border-border bg-surface2/60 p-3 space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                      {t("activityGenerator.preview.referenceTitle", undefined, {
+                        source: t(
+                          `activityGenerator.preview.sourceLabels.${activityPreview.analysis.textSource}`,
+                        ),
+                      })}
+                    </p>
+                    <p className="text-sm text-secondary leading-relaxed">
+                      {activityPreview.analysis.referenceSnippet}
+                    </p>
+                  </div>
+                )}
+                {activityPreview.analysis.keywords.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                      {t("activityGenerator.preview.keyTopicsTitle")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {activityPreview.analysis.keywords.map((keyword) => (
+                        <Badge
+                          key={keyword}
+                          className="bg-brand/10 text-brand border-brand/20"
+                        >
+                          {keyword}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-5">
+                {activityPreview.plan.map((blueprint, index) => (
+                  <div
+                    key={`${blueprint.title}-${index}`}
+                    className="rounded-2xl border border-border bg-surface2/60 p-5 space-y-4"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-brand">
+                        <span>
+                          {t("activityGenerator.preview.activityHeading", undefined, {
+                            index: index + 1,
+                          })}
+                        </span>
+                        <span className="h-1 w-1 rounded-full bg-brand" />
+                        <span>{blueprint.title}</span>
+                      </div>
+                      <p className="text-sm text-secondary leading-relaxed">{blueprint.overview}</p>
+                      {blueprint.keyTopics.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {blueprint.keyTopics.map((topic) => (
+                            <Badge key={topic} variant="outline" className="bg-surface text-secondary">
+                              {topic}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-semibold text-primary">
+                          {t("activityGenerator.preview.objectivesTitle")}
+                        </p>
+                        <ul className="list-disc pl-5 text-sm text-secondary space-y-1">
+                          {blueprint.objectives.map((objective, objectiveIndex) => (
+                            <li key={`${objective}-${objectiveIndex}`}>{objective}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-primary">
+                          {t("activityGenerator.preview.practiceTitle")}
+                        </p>
+                        <p className="text-sm text-secondary leading-relaxed">{blueprint.practice}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-primary">
+                          {t("activityGenerator.preview.quizTitle", undefined, {
+                            count: blueprint.quizQuestions.length,
+                            questionLabel: t(
+                              blueprint.quizQuestions.length === 1
+                                ? "activityGenerator.preview.questionSingular"
+                                : "activityGenerator.preview.questionPlural",
+                            ),
+                          })}
+                        </p>
+                        <ul className="list-disc pl-5 text-sm text-secondary space-y-1">
+                          {blueprint.quizQuestions.map((question, questionIndex) => (
+                            <li key={`${question}-${questionIndex}`}>{question}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleClearPreview}
+                  disabled={isSaving}
+                  className="text-muted hover:text-error"
+                >
+                  {t("activityGenerator.actions.clearPreview")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleConfirmSave}
+                  className="bg-brand text-white hover:bg-brand/90"
+                  disabled={isSaving}
+                >
+                  {isSaving
+                    ? t("activityGenerator.actions.saving")
+                    : t("activityGenerator.actions.confirm")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <ClipboardList className="w-5 h-5 text-brand" />
@@ -553,6 +1438,68 @@ export default function ActivityGenerator() {
                           date: formatDate(language, item.generatedAt),
                         })}</span>
                       </div>
+                      <div className="flex items-center gap-2 text-xs text-muted">
+                        <BookOpen className="w-4 h-4 text-brand2" />
+                        <span>
+                          {t("activityGenerator.recent.analysisSource", undefined, {
+                            source: t(
+                              `activityGenerator.preview.sourceLabels.${item.textSource || "description"}`,
+                            ),
+                          })}
+                        </span>
+                      </div>
+                      {item.course.youtube_url && item.transcriptUsed === false && (
+                        <div className="flex items-center gap-2 text-xs text-error">
+                          <AlertCircle className="w-4 h-4" />
+                          <span>{t("activityGenerator.recent.transcriptMissing")}</span>
+                        </div>
+                      )}
+                      {item.keyTopics?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {item.keyTopics.map((topic) => (
+                            <Badge key={topic} variant="outline" className="bg-surface2 text-secondary">
+                              {topic}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      {item.blueprint && (
+                        <div className="space-y-3 border-t border-border/60 pt-3">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              {t("activityGenerator.preview.objectivesTitle")}
+                            </p>
+                            <ul className="list-disc pl-5 text-xs text-secondary space-y-1">
+                              {item.blueprint.objectives.map((objective, objectiveIndex) => (
+                                <li key={`${item.course.id}-objective-${objectiveIndex}`}>{objective}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              {t("activityGenerator.preview.practiceTitle")}
+                            </p>
+                            <p className="text-xs text-secondary leading-relaxed">{item.blueprint.practice}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              {t("activityGenerator.preview.quizTitle", undefined, {
+                                count: item.blueprint.quizQuestions.length,
+                                questionLabel: t(
+                                  item.blueprint.quizQuestions.length === 1
+                                    ? "activityGenerator.preview.questionSingular"
+                                    : "activityGenerator.preview.questionPlural",
+                                ),
+                              })}
+                            </p>
+                            <ul className="list-disc pl-5 text-xs text-secondary space-y-1">
+                              {item.blueprint.quizQuestions.map((question, questionIndex) => (
+                                <li key={`${item.course.id}-question-${questionIndex}`}>{question}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
