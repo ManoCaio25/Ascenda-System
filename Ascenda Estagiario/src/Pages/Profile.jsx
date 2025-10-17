@@ -274,8 +274,8 @@ export default function Profile() {
     const fetchData = async () => {
       const currentUser = await User.me().catch(() => ({
         id: 'intern-1',
-        full_name: 'Alex Cosmos',
-        email: 'alex@ascenda.com',
+        full_name: 'Caio Menezes',
+        email: 'caio.alvarenga@ascenda.com',
         pontos_gamificacao: 2847,
         avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face',
         area_atuacao: 'Frontend Development',

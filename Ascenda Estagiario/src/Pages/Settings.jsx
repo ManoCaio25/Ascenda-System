@@ -53,8 +53,8 @@ export default function SettingsPage() {
     } catch (error) {
       // Mock user for demo
       setUser({
-        full_name: "Alex Cosmos",
-        email: "alex@ascenda.com",
+        full_name: "Caio Menezes",
+        email: "caio.alvarenga@ascenda.com",
         avatar_url: "",
         area_atuacao: "Frontend Development",
         pontos_gamificacao: 2847

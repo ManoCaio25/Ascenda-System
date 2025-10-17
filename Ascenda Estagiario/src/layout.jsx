@@ -135,8 +135,8 @@ export default function Layout({ children, currentPageName }) {
     } catch (error) {
       // User not logged in, create a default user
       setUser({
-        full_name: "Alex Cosmos",
-        email: "alex@ascenda.com",
+        full_name: "Caio Menezes",
+        email: "caio.alvarenga@ascenda.com",
         pontos_gamificacao: 2847,
         avatar_url: "", // Changed to empty string for fallback test
         area_atuacao: "Frontend Development",
