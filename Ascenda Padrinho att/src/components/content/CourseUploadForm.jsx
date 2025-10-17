@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@padrinho/components/ui/card";
 import { Button } from "@padrinho/components/ui/button";
 import { Input } from "@padrinho/components/ui/input";
@@ -14,6 +14,7 @@ import {
 import { UploadFile } from "@padrinho/integrations/Core";
 import { Upload, Loader2, Youtube, Eye } from "lucide-react";
 import YouTubePreview from "./YouTubePreview";
+import { useTranslation } from "@padrinho/i18n";
 
 export default function CourseUploadForm({ onSuccess, onPreview }) {
   const [formData, setFormData] = useState({
@@ -29,6 +30,27 @@ export default function CourseUploadForm({ onSuccess, onPreview }) {
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState(null);
   const [previewData, setPreviewData] = useState(null);
+  const { t } = useTranslation();
+
+  const categoryOptions = useMemo(
+    () => [
+      { value: "Technical", label: t("contentManagement.categories.technical") },
+      { value: "Leadership", label: t("contentManagement.categories.leadership") },
+      { value: "Communication", label: t("contentManagement.categories.communication") },
+      { value: "Design", label: t("contentManagement.categories.design") },
+      { value: "Business", label: t("contentManagement.categories.business") },
+    ],
+    [t],
+  );
+
+  const difficultyOptions = useMemo(
+    () => [
+      { value: "Beginner", label: t("contentManagement.difficulties.beginner") },
+      { value: "Intermediate", label: t("contentManagement.difficulties.intermediate") },
+      { value: "Advanced", label: t("contentManagement.difficulties.advanced") },
+    ],
+    [t],
+  );
 
   const handleFileChange = React.useCallback(async (e) => {
     const selectedFile = e.target.files[0];
@@ -121,30 +143,34 @@ export default function CourseUploadForm({ onSuccess, onPreview }) {
       <CardHeader>
         <CardTitle className="text-primary flex items-center gap-2">
           <Upload className="w-5 h-5" />
-          Add New Course
+          {t("contentManagement.form.header")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title" className="text-secondary">Course Title *</Label>
+            <Label htmlFor="title" className="text-secondary">
+              {t("contentManagement.form.titleLabel")}
+            </Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., Advanced React Patterns"
+              placeholder={t("common.placeholders.courseTitleExample")}
               required
               className="bg-surface2 border-border text-primary placeholder:text-muted"
             />
           </div>
 
           <div>
-            <Label htmlFor="description" className="text-secondary">Description *</Label>
+            <Label htmlFor="description" className="text-secondary">
+              {t("contentManagement.form.descriptionLabel")}
+            </Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="What will interns learn?"
+              placeholder={t("common.placeholders.courseDescription")}
               required
               className="bg-surface2 border-border text-primary placeholder:text-muted h-24"
             />
@@ -152,44 +178,52 @@ export default function CourseUploadForm({ onSuccess, onPreview }) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="category" className="text-secondary">Category</Label>
+              <Label htmlFor="category" className="text-secondary">
+                {t("contentManagement.form.categoryLabel")}
+              </Label>
               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                 <SelectTrigger className="bg-surface2 border-border text-primary">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-surface border-border">
-                  <SelectItem value="Technical">Technical</SelectItem>
-                  <SelectItem value="Leadership">Leadership</SelectItem>
-                  <SelectItem value="Communication">Communication</SelectItem>
-                  <SelectItem value="Design">Design</SelectItem>
-                  <SelectItem value="Business">Business</SelectItem>
+                  {categoryOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="difficulty" className="text-secondary">Difficulty</Label>
+              <Label htmlFor="difficulty" className="text-secondary">
+                {t("contentManagement.form.difficultyLabel")}
+              </Label>
               <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
                 <SelectTrigger className="bg-surface2 border-border text-primary">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-surface border-border">
-                  <SelectItem value="Beginner">Beginner</SelectItem>
-                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                  <SelectItem value="Advanced">Advanced</SelectItem>
+                  {difficultyOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="duration" className="text-secondary">Duration (hours)</Label>
+              <Label htmlFor="duration" className="text-secondary">
+                {t("common.labels.durationHours")}
+              </Label>
               <Input
                 id="duration"
                 type="number"
                 step="0.5"
                 value={formData.duration_hours}
                 onChange={(e) => setFormData({ ...formData, duration_hours: e.target.value })}
-                placeholder="5.5"
+                placeholder={t("contentManagement.form.durationPlaceholder")}
                 className="bg-surface2 border-border text-primary placeholder:text-muted"
               />
             </div>
@@ -198,29 +232,31 @@ export default function CourseUploadForm({ onSuccess, onPreview }) {
           <div>
             <Label htmlFor="youtube" className="text-secondary flex items-center gap-2">
               <Youtube className="w-4 h-4 text-error" />
-              YouTube Link (Optional)
+              {t("common.labels.youtubeOptional")}
             </Label>
             <Input
               id="youtube"
               value={formData.youtube_url}
               onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder={t("common.placeholders.youtubeUrl")}
               className="bg-surface2 border-border text-primary placeholder:text-muted"
             />
-            <YouTubePreview 
-              url={formData.youtube_url} 
+            <YouTubePreview
+              url={formData.youtube_url}
               onVideoIdChange={handleVideoIdChange}
             />
           </div>
 
           <div>
-            <Label htmlFor="file" className="text-secondary">Course Materials (Optional)</Label>
+            <Label htmlFor="file" className="text-secondary">
+              {t("common.labels.materialsOptional")}
+            </Label>
             <div className="mt-2">
               <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand transition-colors bg-surface2">
                 <div className="text-center">
                   <Upload className="w-8 h-8 mx-auto mb-2 text-brand" />
                   <span className="text-sm text-muted">
-                    {file ? file.name : "Click to upload PDF, video, image, or Office file"}
+                    {file ? file.name : t("common.placeholders.uploadPrompt")}
                   </span>
                   {file && (
                     <span className="text-xs text-muted block mt-1">
@@ -247,7 +283,7 @@ export default function CourseUploadForm({ onSuccess, onPreview }) {
               className="w-full border-brand/30 hover:bg-brand/10 text-brand"
             >
               <Eye className="w-4 h-4 mr-2" />
-              Preview Document
+              {t("contentManagement.form.previewDocument")}
             </Button>
           )}
 
@@ -259,10 +295,10 @@ export default function CourseUploadForm({ onSuccess, onPreview }) {
             {isUploading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading...
+                {t("common.actions.uploading")}
               </>
             ) : (
-              "Add Course"
+              t("common.actions.upload")
             )}
           </Button>
         </form>
