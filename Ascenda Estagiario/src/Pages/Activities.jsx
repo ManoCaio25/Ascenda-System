@@ -58,8 +58,8 @@ export default function ActivitiesPage() {
       .then(setUser)
       .catch(() =>
         setUser({
-          full_name: 'Alex Cosmos',
-          email: 'alex@ascenda.com',
+          full_name: 'Caio Menezes',
+          email: 'caio.alvarenga@ascenda.com',
         }),
       )
       .finally(() => setLoading(false));

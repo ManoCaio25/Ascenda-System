@@ -1,8 +1,8 @@
 export const users = [
   {
     id: 'intern-1',
-    full_name: 'Alex Cosmos',
-    email: 'alex@ascenda.com',
+    full_name: 'Caio Menezes',
+    email: 'caio.alvarenga@ascenda.com',
     avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=face',
     area_atuacao: 'Frontend Development',
     pontos_gamificacao: 2847,
@@ -278,7 +278,7 @@ export const activities = [
     respostas: [
       {
         id: 'response-2',
-        autor: 'Alex Cosmos',
+        autor: 'Caio Menezes',
         conteudo: 'Foquei em mapear padrões antes de prototipar telas isoladas – ajudou no reuso!',
         created_date: '2024-11-16T18:12:00.000Z',
         tipo: 'intern'
