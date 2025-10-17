@@ -39,6 +39,10 @@ export const User = {
   async update(id, updates) {
     return userStore.update(id, updates);
   },
+  subscribe(handler) {
+    const unsubscribe = userStore.subscribe('change', handler);
+    return typeof unsubscribe === 'function' ? unsubscribe : () => {};
+  },
 };
 
 export const Task = {
