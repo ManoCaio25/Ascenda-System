@@ -24,6 +24,15 @@ const writeStorage = (key, value) => {
   }
 };
 
+const dispatchEvent = (key, eventName, detail) => {
+  if (!isBrowser) return;
+  try {
+    window.dispatchEvent(new CustomEvent(`${key}:${eventName}`, { detail }));
+  } catch (error) {
+    console.warn(`Failed to dispatch ${eventName} event for ${key}:`, error);
+  }
+};
+
 const sortBy = (items, sort) => {
   if (!sort) return items;
   const desc = sort.startsWith('-');
@@ -121,6 +130,9 @@ export function createEntityStore(storageKey, initialData = []) {
     }
     data = [...data, item];
     persist();
+    const payload = { record: clone(item) };
+    dispatchEvent(storageKey, 'create', payload);
+    dispatchEvent(storageKey, 'change', { ...payload, type: 'create' });
     return clone(item);
   };
 
@@ -136,6 +148,11 @@ export function createEntityStore(storageKey, initialData = []) {
     });
     if (!updated) return null;
     persist();
+    if (updated) {
+      const payload = { id, record: clone(updated) };
+      dispatchEvent(storageKey, 'update', payload);
+      dispatchEvent(storageKey, 'change', { ...payload, type: 'update' });
+    }
     return clone(updated);
   };
 
@@ -144,9 +161,23 @@ export function createEntityStore(storageKey, initialData = []) {
     data = data.filter((item) => String(item.id) !== String(id));
     if (data.length !== previousLength) {
       persist();
+      const payload = { id };
+      dispatchEvent(storageKey, 'remove', payload);
+      dispatchEvent(storageKey, 'change', { ...payload, type: 'remove' });
       return true;
     }
     return false;
+  };
+
+  const subscribe = (eventName, handler) => {
+    if (!isBrowser || typeof handler !== 'function') {
+      return () => {};
+    }
+
+    const eventKey = `${storageKey}:${eventName}`;
+    const listener = (event) => handler(event.detail);
+    window.addEventListener(eventKey, listener);
+    return () => window.removeEventListener(eventKey, listener);
   };
 
   return {
@@ -156,5 +187,6 @@ export function createEntityStore(storageKey, initialData = []) {
     create,
     update,
     remove,
+    subscribe,
   };
 }

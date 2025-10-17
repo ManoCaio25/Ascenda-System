@@ -128,6 +128,38 @@ export default function Layout({ children, currentPageName }) {
     loadUser();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = User.subscribe((change) => {
+      if (!change) return;
+
+      setUser((previous) => {
+        if (change.type === 'remove') {
+          if (!previous || (change.id && String(previous.id) !== String(change.id))) {
+            return previous;
+          }
+          return null;
+        }
+
+        const updatedUser = change.record;
+        if (!updatedUser) {
+          return previous;
+        }
+
+        if (!previous || String(previous.id) === String(updatedUser.id)) {
+          return updatedUser;
+        }
+
+        return previous;
+      });
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, []);
+
   const loadUser = async () => {
     try {
       const currentUser = await User.me();
