@@ -62,10 +62,25 @@ export function LanguageProvider({ children }) {
     language,
     setLanguage: changeLanguage,
     t: (key, fallback, values) => {
-      const message = getNestedTranslation(language, key) ?? fallback ?? key;
-      if (typeof message === 'string') {
-        return interpolate(message, values);
+      let resolvedFallback = fallback;
+      let interpolationValues = values;
+
+      if (
+        typeof fallback === 'object' &&
+        fallback !== null &&
+        !Array.isArray(fallback) &&
+        values === undefined
+      ) {
+        interpolationValues = fallback;
+        resolvedFallback = undefined;
       }
+
+      const message = getNestedTranslation(language, key) ?? resolvedFallback ?? key;
+
+      if (typeof message === 'string') {
+        return interpolate(message, interpolationValues);
+      }
+
       return message;
     },
   }), [language, changeLanguage]);
