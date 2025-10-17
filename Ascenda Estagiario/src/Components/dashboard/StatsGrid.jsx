@@ -2,40 +2,42 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Zap, CheckCircle, BookOpen, Flame } from "lucide-react";
 import { Skeleton } from "@estagiario/Components/ui/skeleton";
+import { useI18n } from "@estagiario/Components/utils/i18n";
 
 export default function StatsGrid({ stats, isLoading }) {
+  const { t } = useI18n();
   const statCards = [
     {
-      title: "Cosmic Points",
+      title: t('statsPoints'),
       value: stats.totalPoints,
       icon: Zap,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-500/20",
-      trend: "+120 this week"
+      trend: t('statsTrendPoints')
     },
     {
-      title: "Active Tasks", 
+      title: t('activeTasks'),
       value: stats.pendingTasks,
       icon: CheckCircle,
-      color: "from-blue-500 to-blue-600", 
+      color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-500/20",
-      trend: "2 due today"
+      trend: t('statsTrendTasks')
     },
     {
-      title: "Courses Completed",
+      title: t('coursesCompleted'),
       value: stats.completedCourses,
       icon: BookOpen,
       color: "from-green-500 to-green-600",
-      bgColor: "bg-green-500/20", 
-      trend: "3 this month"
+      bgColor: "bg-green-500/20",
+      trend: t('statsTrendCourses')
     },
     {
-      title: "Learning Streak",
-      value: `${stats.currentStreak} days`,
+      title: t('learningStreak'),
+      value: t('days', { count: stats.currentStreak }),
       icon: Flame,
       color: "from-orange-500 to-red-500",
       bgColor: "bg-orange-500/20",
-      trend: "Keep it up!"
+      trend: t('statsTrendStreak')
     }
   ];
 
@@ -65,16 +67,16 @@ export default function StatsGrid({ stats, isLoading }) {
         >
           <div className="flex items-start justify-between mb-4">
             <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-              <stat.icon className="w-6 h-6 text-white" />
+              <stat.icon className="w-6 h-6 text-text-primary" />
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-2xl font-bold text-text-primary mb-1">
                 {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
               </div>
-              <div className="text-sm text-slate-400">{stat.title}</div>
+              <div className="text-sm text-text-secondary">{stat.title}</div>
             </div>
           </div>
-          <div className="text-xs text-slate-500">{stat.trend}</div>
+          <div className="text-xs text-text-secondary/80">{stat.trend}</div>
         </motion.div>
       ))}
     </div>
