@@ -680,6 +680,15 @@ const en = {
       managerFallback: "Manager",
       managerNotePrefix: "Note:",
     },
+    internOverview: {
+      title: "Intern overview",
+      subtitle: "Track who has upcoming time off and create requests quickly.",
+      none: "No vacation requests yet",
+      latest: "Latest: {{status}} · {{range}}",
+      create: "Add request",
+      createAria: "Add vacation request for {{name}}",
+      count: "{{count}} intern{{suffix}}",
+    },
     calendar: {
       months: {
         conflict: "{{count}} Scheduling Conflict{{suffix}} Detected",
