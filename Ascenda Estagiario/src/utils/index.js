@@ -7,7 +7,6 @@ const PAGE_URLS = {
   ForumTopics: '/forum/topics',
   ForumTopicView: '/forum/topic',
   Calendar: '/calendar',
-  KnowledgeBase: '/knowledge-base',
   Profile: '/profile',
   Settings: '/settings',
 };
