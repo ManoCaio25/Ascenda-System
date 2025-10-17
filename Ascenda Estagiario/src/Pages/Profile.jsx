@@ -23,7 +23,6 @@ const ProfileTab = ({ user, onAvatarUpload, isUploading, t }) => {
     if (file) {
       onAvatarUpload(file);
     }
-    event.target.value = '';
   };
 
   return (
@@ -307,28 +306,8 @@ export default function Profile() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const avatarUrl = reader.result;
-        setUser((current) => (current ? { ...current, avatar_url: avatarUrl } : current));
-
-        let updatedUser = null;
-        try {
-          updatedUser = await User.update(user.id, { avatar_url: avatarUrl });
-        } catch (error) {
-          console.error('Avatar update failed', error);
-        }
-
-        const nextUser = updatedUser || { ...user, avatar_url: avatarUrl };
-        setUser(nextUser);
-
-        if (!updatedUser && typeof window !== 'undefined') {
-          const detail = { id: nextUser.id, record: nextUser };
-          window.dispatchEvent(new CustomEvent('ascenda_estagiario_users:update', { detail }));
-          window.dispatchEvent(new CustomEvent('ascenda_estagiario_users:change', { detail: { ...detail, type: 'update' } }));
-        }
-
-        setIsUploading(false);
-      };
-      reader.onerror = (errorEvent) => {
-        console.error('Avatar upload failed', errorEvent);
+        const updated = await User.update(user.id, { avatar_url: avatarUrl }).catch(() => ({ ...user, avatar_url: avatarUrl }));
+        setUser(updated || { ...user, avatar_url: avatarUrl });
         setIsUploading(false);
       };
       reader.readAsDataURL(file);

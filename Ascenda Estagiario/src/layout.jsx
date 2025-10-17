@@ -169,34 +169,6 @@ export default function Layout({ children, currentPageName }) {
     };
   }, []);
 
-  const ensureDefaultProfile = async (record) => {
-    if (!record) return record;
-
-    const updates = {};
-
-    if (!record.full_name || record.full_name === "Alex Cosmos") {
-      updates.full_name = defaultUser.full_name;
-    }
-    if (!record.email || record.email === "alex.cosmos@ascenda.com") {
-      updates.email = defaultUser.email;
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return record;
-    }
-
-    try {
-      const updated = await User.update(record.id, updates);
-      if (updated) {
-        return updated;
-      }
-    } catch (error) {
-      console.warn("Failed to persist default profile overrides", error);
-    }
-
-    return { ...record, ...updates };
-  };
-
   const loadUser = async () => {
     try {
       let currentUser = await User.me();
@@ -204,13 +176,14 @@ export default function Layout({ children, currentPageName }) {
       setUser(currentUser);
     } catch (error) {
       // User not logged in, create a default user
-      try {
-        const created = await User.create(defaultUser);
-        setUser(created);
-      } catch (creationError) {
-        console.warn("Failed to seed default user", creationError);
-        setUser(defaultUser);
-      }
+      setUser({
+        full_name: "Caio Menezes",
+        email: "caio.alvarenga@ascenda.com",
+        pontos_gamificacao: 2847,
+        avatar_url: "", // Changed to empty string for fallback test
+        area_atuacao: "Frontend Development",
+        equipped_tag: "🚀 Cosmic Explorer"
+      });
     }
   };
 
@@ -415,13 +388,7 @@ export default function Layout({ children, currentPageName }) {
                       onClick={() => changeLanguage('pt')}
                       className="flex items-center gap-2"
                     >
-                      <img
-                        src="https://flagcdn.com/w20/br.png"
-                        srcSet="https://flagcdn.com/w40/br.png 2x"
-                        alt="Português"
-                        className="h-4 w-6 rounded shadow-sm"
-                        loading="lazy"
-                      />
+                      <span role="img" aria-label="Português">🇧🇷</span>
                       <span>PT</span>
                     </Button>
                     <Button
@@ -430,13 +397,7 @@ export default function Layout({ children, currentPageName }) {
                       onClick={() => changeLanguage('en')}
                       className="flex items-center gap-2"
                     >
-                      <img
-                        src="https://flagcdn.com/w20/us.png"
-                        srcSet="https://flagcdn.com/w40/us.png 2x"
-                        alt="English"
-                        className="h-4 w-6 rounded shadow-sm"
-                        loading="lazy"
-                      />
+                      <span role="img" aria-label="English">🇺🇸</span>
                       <span>EN</span>
                     </Button>
                   </div>
