@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@padrinho/components/ui/sheet";
 import { Button } from "@padrinho/components/ui/button";
 import { Download, Youtube, FileText, Image as ImageIcon, Video, ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "@padrinho/i18n";
 
 export default function PreviewDrawer({ isOpen, onClose, course }) {
   const [zoom, setZoom] = useState(100);
   const [pdfPage, setPdfPage] = useState(1);
   const [pdfTotal, setPdfTotal] = useState(1);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isOpen && course) {
@@ -37,7 +39,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-error">
             <Youtube className="w-5 h-5" />
-            <span className="font-medium">YouTube Video</span>
+            <span className="font-medium">{t("contentManagement.preview.youtubeLabel")}</span>
           </div>
           <div className="relative rounded-xl overflow-hidden bg-black">
             <iframe
@@ -45,7 +47,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
               src={`https://www.youtube.com/embed/${course.youtube_video_id}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              title="YouTube Preview"
+              title={t("contentManagement.preview.youtubeFrameTitle")}
             />
           </div>
         </div>
@@ -61,7 +63,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-brand">
                 <Video className="w-5 h-5" />
-                <span className="font-medium">Video File</span>
+                <span className="font-medium">{t("contentManagement.preview.videoLabel")}</span>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -71,7 +73,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   className="border-border"
                 >
                   <Maximize2 className="w-4 h-4 mr-2" />
-                  Fullscreen
+                  {t("contentManagement.preview.openFullscreen")}
                 </Button>
               </div>
             </div>
@@ -82,7 +84,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                 src={course.file_url}
                 style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
               >
-                Your browser does not support the video tag.
+                {t("contentManagement.preview.videoFallback")}
               </video>
             </div>
           </div>
@@ -95,7 +97,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-brand">
                 <ImageIcon className="w-5 h-5" />
-                <span className="font-medium">Image</span>
+                <span className="font-medium">{t("contentManagement.preview.imageLabel")}</span>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -103,7 +105,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   size="sm"
                   onClick={handleZoomOut}
                   className="border-border"
-                  aria-label="Zoom out"
+                  aria-label={t("contentManagement.preview.zoomOut")}
                 >
                   <ZoomOut className="w-4 h-4" />
                 </Button>
@@ -113,7 +115,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   size="sm"
                   onClick={handleZoomIn}
                   className="border-border"
-                  aria-label="Zoom in"
+                  aria-label={t("contentManagement.preview.zoomIn")}
                 >
                   <ZoomIn className="w-4 h-4" />
                 </Button>
@@ -122,7 +124,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   size="sm"
                   onClick={handleFullscreen}
                   className="border-border"
-                  aria-label="Open fullscreen"
+                  aria-label={t("contentManagement.preview.openFullscreen")}
                 >
                   <Maximize2 className="w-4 h-4" />
                 </Button>
@@ -132,7 +134,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
               <div className="overflow-auto max-h-[600px]">
                 <img
                   src={course.file_url}
-                  alt={course.file_name || 'Preview'}
+                  alt={course.file_name || t("contentManagement.preview.imageFallbackAlt")}
                   className="w-full object-contain"
                   style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
                 />
@@ -148,7 +150,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-error">
                 <FileText className="w-5 h-5" />
-                <span className="font-medium">PDF Document</span>
+                <span className="font-medium">{t("contentManagement.preview.pdfLabel")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -157,12 +159,12 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   onClick={() => setPdfPage(prev => Math.max(1, prev - 1))}
                   disabled={pdfPage === 1}
                   className="border-border"
-                  aria-label="Previous page"
+                  aria-label={t("contentManagement.preview.previousPage")}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <span className="text-sm text-secondary px-2">
-                  Page {pdfPage} / {pdfTotal}
+                  {t("contentManagement.preview.pdfPage", undefined, { current: pdfPage, total: pdfTotal })}
                 </span>
                 <Button
                   variant="outline"
@@ -170,7 +172,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   onClick={() => setPdfPage(prev => Math.min(pdfTotal, prev + 1))}
                   disabled={pdfPage === pdfTotal}
                   className="border-border"
-                  aria-label="Next page"
+                  aria-label={t("contentManagement.preview.nextPage")}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>
@@ -179,7 +181,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   size="sm"
                   onClick={handleZoomOut}
                   className="border-border"
-                  aria-label="Zoom out"
+                  aria-label={t("contentManagement.preview.zoomOut")}
                 >
                   <ZoomOut className="w-4 h-4" />
                 </Button>
@@ -189,7 +191,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   size="sm"
                   onClick={handleZoomIn}
                   className="border-border"
-                  aria-label="Zoom in"
+                  aria-label={t("contentManagement.preview.zoomIn")}
                 >
                   <ZoomIn className="w-4 h-4" />
                 </Button>
@@ -198,7 +200,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
                   size="sm"
                   onClick={handleFullscreen}
                   className="border-border"
-                  aria-label="Open fullscreen"
+                  aria-label={t("contentManagement.preview.openFullscreen")}
                 >
                   <Maximize2 className="w-4 h-4" />
                 </Button>
@@ -208,7 +210,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
               <iframe
                 src={`${course.file_url}#page=${pdfPage}&zoom=${zoom}`}
                 className="w-full h-[600px]"
-                title="PDF Preview"
+                title={t("contentManagement.preview.pdfFrameTitle")}
               />
             </div>
           </div>
@@ -220,25 +222,27 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-success">
               <FileText className="w-5 h-5" />
-              <span className="font-medium">Spreadsheet (Excel)</span>
+              <span className="font-medium">{t("contentManagement.preview.spreadsheetLabel")}</span>
             </div>
             <div className="p-6 rounded-xl border border-border bg-surface2 text-center">
               <FileText className="w-16 h-16 mx-auto mb-4 text-muted" />
-              <p className="text-primary font-medium mb-2">{course.file_name || 'Spreadsheet'}</p>
+              <p className="text-primary font-medium mb-2">
+                {course.file_name || t("contentManagement.preview.spreadsheetFallback")}
+              </p>
               {course.file_size && (
                 <p className="text-sm text-muted mb-4">
                   {(course.file_size / 1024 / 1024).toFixed(2)} MB
                 </p>
               )}
               <p className="text-sm text-secondary mb-4">
-                Excel files can be downloaded and opened in Microsoft Excel or Google Sheets
+                {t("contentManagement.preview.spreadsheetDescription")}
               </p>
               <Button
                 onClick={handleDownload}
                 className="bg-brand hover:bg-brand/90 text-white"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Download Spreadsheet
+                {t("contentManagement.preview.spreadsheetButton")}
               </Button>
             </div>
           </div>
@@ -250,25 +254,27 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-brand">
               <FileText className="w-5 h-5" />
-              <span className="font-medium">Word Document</span>
+              <span className="font-medium">{t("contentManagement.preview.wordLabel")}</span>
             </div>
             <div className="p-6 rounded-xl border border-border bg-surface2 text-center">
               <FileText className="w-16 h-16 mx-auto mb-4 text-muted" />
-              <p className="text-primary font-medium mb-2">{course.file_name || 'Document'}</p>
+              <p className="text-primary font-medium mb-2">
+                {course.file_name || t("contentManagement.preview.wordFallback")}
+              </p>
               {course.file_size && (
                 <p className="text-sm text-muted mb-4">
                   {(course.file_size / 1024 / 1024).toFixed(2)} MB
                 </p>
               )}
               <p className="text-sm text-secondary mb-4">
-                Word documents can be downloaded and opened in Microsoft Word or Google Docs
+                {t("contentManagement.preview.wordDescription")}
               </p>
               <Button
                 onClick={handleDownload}
                 className="bg-brand hover:bg-brand/90 text-white"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Download Document
+                {t("contentManagement.preview.wordButton")}
               </Button>
             </div>
           </div>
@@ -279,11 +285,13 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-brand">
             <FileText className="w-5 h-5" />
-            <span className="font-medium">File Attachment</span>
+            <span className="font-medium">{t("contentManagement.preview.genericLabel")}</span>
           </div>
           <div className="p-6 rounded-xl border border-border bg-surface2 text-center">
             <FileText className="w-16 h-16 mx-auto mb-4 text-muted" />
-            <p className="text-primary font-medium mb-2">{course.file_name || 'Course Material'}</p>
+            <p className="text-primary font-medium mb-2">
+              {course.file_name || t("contentManagement.preview.genericFallback")}
+            </p>
             {course.file_size && (
               <p className="text-sm text-muted mb-4">
                 {(course.file_size / 1024 / 1024).toFixed(2)} MB
@@ -294,7 +302,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
               className="bg-brand hover:bg-brand/90 text-white"
             >
               <Download className="w-4 h-4 mr-2" />
-              Download File
+              {t("contentManagement.preview.genericButton")}
             </Button>
           </div>
         </div>
@@ -326,7 +334,7 @@ export default function PreviewDrawer({ isOpen, onClose, course }) {
               className="w-full border-border hover:bg-surface2"
             >
               <Download className="w-4 h-4 mr-2" />
-              Download Material
+              {t("contentManagement.preview.downloadMaterial")}
             </Button>
           </div>
         )}

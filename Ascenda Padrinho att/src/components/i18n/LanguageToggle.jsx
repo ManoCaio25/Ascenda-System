@@ -1,13 +1,15 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from '@padrinho/i18n';
+import BrazilFlag from '@padrinho/assets/flags/brazil.svg';
+import UsaFlag from '@padrinho/assets/flags/usa.svg';
 
 export default function LanguageToggle() {
   const { language, setLanguage, t } = useTranslation();
 
   const options = useMemo(
     () => [
-      { code: 'pt', emoji: '🇧🇷', label: t('layout.languageToggle.portuguese') },
-      { code: 'en', emoji: '🇺🇸', label: t('layout.languageToggle.english') },
+      { code: 'pt', image: BrazilFlag, label: t('layout.languageToggle.portuguese') },
+      { code: 'en', image: UsaFlag, label: t('layout.languageToggle.english') },
     ],
     [t],
   );
@@ -30,9 +32,11 @@ export default function LanguageToggle() {
             aria-label={option.label}
             title={option.label}
           >
-            <span aria-hidden="true" role="img" className="text-lg leading-none">
-              {option.emoji}
-            </span>
+            <img
+              src={option.image}
+              alt={option.label}
+              className="h-5 w-5 rounded-full object-cover"
+            />
           </button>
         );
       })}
