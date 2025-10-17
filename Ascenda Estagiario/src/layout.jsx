@@ -8,10 +8,8 @@ import {
   ListTodo,
   MessageSquare,
   Calendar,
-  Database,
   Settings,
   LogOut,
-  User as UserIcon,
   Trophy,
   ShoppingBag,
   Star,
@@ -46,7 +44,6 @@ const navigationConfig = [
   { key: "activities", page: "Activities", icon: ListTodo },
   { key: "forum", page: "Forum", icon: MessageSquare },
   { key: "calendar", page: "Calendar", icon: Calendar },
-  { key: "knowledgeBase", page: "KnowledgeBase", icon: Database },
 ];
 
 // Helper component for Avatar with Fallback
@@ -90,6 +87,15 @@ export default function Layout({ children, currentPageName }) {
   const [isFocusMode, setIsFocusMode] = useState(false); // New state for focus mode
   const { t, language, changeLanguage } = useI18n();
 
+  const defaultUser = useMemo(() => ({
+    full_name: "Caio Menezes",
+    email: "caio.alvarenga@ascenda.com",
+    pontos_gamificacao: 2847,
+    avatar_url: "",
+    area_atuacao: "Frontend Development",
+    equipped_tag: "🚀 Cosmic Explorer",
+  }), []);
+
   const navigationItems = useMemo(
     () =>
       navigationConfig.map((item) => ({
@@ -131,20 +137,80 @@ export default function Layout({ children, currentPageName }) {
     loadUser();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = User.subscribe((change) => {
+      if (!change) return;
+
+      setUser((previous) => {
+        if (change.type === 'remove') {
+          if (!previous || (change.id && String(previous.id) !== String(change.id))) {
+            return previous;
+          }
+          return null;
+        }
+
+        const updatedUser = change.record;
+        if (!updatedUser) {
+          return previous;
+        }
+
+        if (!previous || String(previous.id) === String(updatedUser.id)) {
+          return updatedUser;
+        }
+
+        return previous;
+      });
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, []);
+
+  const ensureDefaultProfile = async (record) => {
+    if (!record) return record;
+
+    const updates = {};
+
+    if (!record.full_name || record.full_name === "Alex Cosmos") {
+      updates.full_name = defaultUser.full_name;
+    }
+    if (!record.email || record.email === "alex.cosmos@ascenda.com") {
+      updates.email = defaultUser.email;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return record;
+    }
+
+    try {
+      const updated = await User.update(record.id, updates);
+      if (updated) {
+        return updated;
+      }
+    } catch (error) {
+      console.warn("Failed to persist default profile overrides", error);
+    }
+
+    return { ...record, ...updates };
+  };
+
   const loadUser = async () => {
     try {
-      const currentUser = await User.me();
+      let currentUser = await User.me();
+      currentUser = await ensureDefaultProfile(currentUser);
       setUser(currentUser);
     } catch (error) {
       // User not logged in, create a default user
-      setUser({
-        full_name: "Alex Cosmos",
-        email: "alex@ascenda.com",
-        pontos_gamificacao: 2847,
-        avatar_url: "", // Changed to empty string for fallback test
-        area_atuacao: "Frontend Development",
-        equipped_tag: "🚀 Cosmic Explorer"
-      });
+      try {
+        const created = await User.create(defaultUser);
+        setUser(created);
+      } catch (creationError) {
+        console.warn("Failed to seed default user", creationError);
+        setUser(defaultUser);
+      }
     }
   };
 
@@ -243,7 +309,7 @@ export default function Layout({ children, currentPageName }) {
                       <h2 className="font-bold text-2xl bg-gradient-to-r from-purple-400 to-orange-400 bg-clip-text text-transparent">
                         Ascenda
                       </h2>
-                      <p className="text-xs text-text-secondary">Elevating Innovation</p>
+                      <p className="text-xs text-text-secondary">{t('companyMotto')}</p>
                     </div>
                   </div>
             </SidebarHeader>
@@ -271,7 +337,7 @@ export default function Layout({ children, currentPageName }) {
                           <span className="text-orange-400 font-bold">
                             {user.pontos_gamificacao || 2847}
                           </span>
-                          <span className="text-text-secondary">points</span>
+                          <span className="text-text-secondary">{t('points')}</span>
                         </div>
                       </div>
                     </div>
@@ -325,11 +391,11 @@ export default function Layout({ children, currentPageName }) {
                       <span>{t('avatarShop')}</span>
                     </Link>
                     <Link
-                      to={createPageUrl("Activities")}
+                      to={createPageUrl("Tasks")}
                       className="flex items-center gap-2 text-sm text-text-secondary hover:text-purple-300 transition-colors py-2"
                     >
                       <Star className="w-4 h-4" />
-                      <span>{t('activities')}</span>
+                      <span>{t('myTasks')}</span>
                     </Link>
                   </div>
                 </SidebarGroupContent>
@@ -347,15 +413,31 @@ export default function Layout({ children, currentPageName }) {
                       variant={language === 'pt' ? 'gradient' : 'ghost'}
                       size="sm"
                       onClick={() => changeLanguage('pt')}
+                      className="flex items-center gap-2"
                     >
-                      PT
+                      <img
+                        src="https://flagcdn.com/w20/br.png"
+                        srcSet="https://flagcdn.com/w40/br.png 2x"
+                        alt="Português"
+                        className="h-4 w-6 rounded shadow-sm"
+                        loading="lazy"
+                      />
+                      <span>PT</span>
                     </Button>
                     <Button
                       variant={language === 'en' ? 'gradient' : 'ghost'}
                       size="sm"
                       onClick={() => changeLanguage('en')}
+                      className="flex items-center gap-2"
                     >
-                      EN
+                      <img
+                        src="https://flagcdn.com/w20/us.png"
+                        srcSet="https://flagcdn.com/w40/us.png 2x"
+                        alt="English"
+                        className="h-4 w-6 rounded shadow-sm"
+                        loading="lazy"
+                      />
+                      <span>EN</span>
                     </Button>
                   </div>
                 </div>

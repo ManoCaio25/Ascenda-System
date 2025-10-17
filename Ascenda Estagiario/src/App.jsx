@@ -15,7 +15,6 @@ import Forum from './Pages/Forum.jsx';
 import ForumTopics from './Pages/ForumTopics.jsx';
 import ForumTopicView from './Pages/ForumTopicView.jsx';
 import Calendar from './Pages/Calendar.jsx';
-import KnowledgeBase from './Pages/KnowledgeBase.jsx';
 import Profile from './Pages/Profile.jsx';
 import Settings from './Pages/Settings.jsx';
 import { I18nProvider } from './Components/utils/i18n.jsx';
@@ -79,10 +78,6 @@ function EstagiarioRouter({ fallbackIntern }) {
       <Route
         path="calendar"
         element={<Page pageName="Calendar" intern={intern}><Calendar /></Page>}
-      />
-      <Route
-        path="knowledge-base"
-        element={<Page pageName="KnowledgeBase" intern={intern}><KnowledgeBase /></Page>}
       />
       <Route
         path="profile"

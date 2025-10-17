@@ -36,8 +36,15 @@ export const User = {
   async list() {
     return userStore.list();
   },
+  async create(record) {
+    return userStore.create(record);
+  },
   async update(id, updates) {
     return userStore.update(id, updates);
+  },
+  subscribe(handler) {
+    const unsubscribe = userStore.subscribe('change', handler);
+    return typeof unsubscribe === 'function' ? unsubscribe : () => {};
   },
 };
 
@@ -75,6 +82,9 @@ export const ForumCategory = {
   async get(id) {
     return forumCategoryStore.findById(id);
   },
+  async update(id, updates) {
+    return forumCategoryStore.update(id, updates);
+  },
 };
 
 export const ForumTopic = {
@@ -86,6 +96,12 @@ export const ForumTopic = {
   },
   async get(id) {
     return forumTopicStore.findById(id);
+  },
+  async create(record) {
+    return forumTopicStore.create(record);
+  },
+  async update(id, updates) {
+    return forumTopicStore.update(id, updates);
   },
 };
 
