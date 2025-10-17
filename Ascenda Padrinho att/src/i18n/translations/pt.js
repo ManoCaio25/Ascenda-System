@@ -682,9 +682,11 @@ const pt = {
     },
     internOverview: {
       title: "Visão geral dos estagiários",
-      subtitle: "Acompanhe quem terá folga e veja o status mais recente de cada solicitação.",
+      subtitle: "Acompanhe quem terá folga e crie solicitações rapidamente.",
       none: "Nenhuma solicitação de férias",
       latest: "Última: {{status}} · {{range}}",
+      create: "Adicionar solicitação",
+      createAria: "Adicionar solicitação de férias para {{name}}",
       count: "{{count}} estagiário{{suffix}}",
     },
     calendar: {
