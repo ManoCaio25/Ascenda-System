@@ -70,6 +70,34 @@ export default function ContentManagement() {
     loadCourses();
   }, [loadCourses]);
 
+  const handleDelete = useCallback(async (course) => {
+    if (!course) return;
+
+    const confirmed = window.confirm(
+      t("contentManagement.library.confirmDelete", undefined, { title: course.title }),
+    );
+
+    if (!confirmed) return;
+
+    await Course.remove(course.id);
+    await loadCourses();
+
+    if (editingCourse?.id === course.id) {
+      setIsEditModalOpen(false);
+      setEditingCourse(null);
+    }
+
+    if (previewCourse?.id === course.id) {
+      setIsPreviewOpen(false);
+      setPreviewCourse(null);
+    }
+
+    if (assigningCourse?.id === course.id) {
+      setIsAssignModalOpen(false);
+      setAssigningCourse(null);
+    }
+  }, [assigningCourse?.id, editingCourse?.id, loadCourses, previewCourse?.id, t]);
+
   const filterOptions = useMemo(
     () => [
       { value: "all", label: t("contentManagement.library.filters.all") },
@@ -176,6 +204,7 @@ export default function ContentManagement() {
                   onEdit={handleEdit}
                   onPreview={handlePreview}
                   onAssign={handleAssign}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>

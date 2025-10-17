@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@padrinho/components/ui/dialog";
 import { Button } from "@padrinho/components/ui/button";
 import { Input } from "@padrinho/components/ui/input";
@@ -13,6 +13,7 @@ import {
 } from "@padrinho/components/ui/select";
 import { Loader2, Youtube } from "lucide-react";
 import YouTubePreview from "./YouTubePreview";
+import { useTranslation } from "@padrinho/i18n";
 
 export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -25,6 +26,27 @@ export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
     youtube_video_id: ""
   });
   const [isSaving, setIsSaving] = useState(false);
+  const { t } = useTranslation();
+
+  const categoryOptions = useMemo(
+    () => [
+      { value: "Technical", label: t("contentManagement.categories.technical") },
+      { value: "Leadership", label: t("contentManagement.categories.leadership") },
+      { value: "Communication", label: t("contentManagement.categories.communication") },
+      { value: "Design", label: t("contentManagement.categories.design") },
+      { value: "Business", label: t("contentManagement.categories.business") },
+    ],
+    [t],
+  );
+
+  const difficultyOptions = useMemo(
+    () => [
+      { value: "Beginner", label: t("contentManagement.difficulties.beginner") },
+      { value: "Intermediate", label: t("contentManagement.difficulties.intermediate") },
+      { value: "Advanced", label: t("contentManagement.difficulties.advanced") },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     if (course) {
@@ -80,12 +102,16 @@ export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-surface border-border text-primary">
         <DialogHeader>
-          <DialogTitle className="text-primary">Edit Course</DialogTitle>
+          <DialogTitle className="text-primary">
+            {t("contentManagement.editModal.title")}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="edit-title" className="text-secondary">Course Title *</Label>
+            <Label htmlFor="edit-title" className="text-secondary">
+              {t("contentManagement.form.titleLabel")}
+            </Label>
             <Input
               id="edit-title"
               value={formData.title}
@@ -96,7 +122,9 @@ export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
           </div>
 
           <div>
-            <Label htmlFor="edit-description" className="text-secondary">Description *</Label>
+            <Label htmlFor="edit-description" className="text-secondary">
+              {t("contentManagement.form.descriptionLabel")}
+            </Label>
             <Textarea
               id="edit-description"
               value={formData.description}
@@ -108,37 +136,45 @@ export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="edit-category" className="text-secondary">Category</Label>
+              <Label htmlFor="edit-category" className="text-secondary">
+                {t("contentManagement.form.categoryLabel")}
+              </Label>
               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                 <SelectTrigger className="bg-surface2 border-border text-primary">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-surface border-border">
-                  <SelectItem value="Technical">Technical</SelectItem>
-                  <SelectItem value="Leadership">Leadership</SelectItem>
-                  <SelectItem value="Communication">Communication</SelectItem>
-                  <SelectItem value="Design">Design</SelectItem>
-                  <SelectItem value="Business">Business</SelectItem>
+                  {categoryOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="edit-difficulty" className="text-secondary">Difficulty</Label>
+              <Label htmlFor="edit-difficulty" className="text-secondary">
+                {t("contentManagement.form.difficultyLabel")}
+              </Label>
               <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
                 <SelectTrigger className="bg-surface2 border-border text-primary">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-surface border-border">
-                  <SelectItem value="Beginner">Beginner</SelectItem>
-                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                  <SelectItem value="Advanced">Advanced</SelectItem>
+                  {difficultyOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="edit-duration" className="text-secondary">Duration (hours)</Label>
+              <Label htmlFor="edit-duration" className="text-secondary">
+                {t("common.labels.durationHours")}
+              </Label>
               <Input
                 id="edit-duration"
                 type="number"
@@ -153,17 +189,17 @@ export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
           <div>
             <Label htmlFor="edit-youtube" className="text-secondary flex items-center gap-2">
               <Youtube className="w-4 h-4 text-error" />
-              YouTube Link (Optional)
+              {t("common.labels.youtubeOptional")}
             </Label>
             <Input
               id="edit-youtube"
               value={formData.youtube_url}
               onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder={t("common.placeholders.youtubeUrl")}
               className="bg-surface2 border-border text-primary placeholder:text-muted"
             />
-            <YouTubePreview 
-              url={formData.youtube_url} 
+            <YouTubePreview
+              url={formData.youtube_url}
               onVideoIdChange={handleVideoIdChange}
             />
           </div>
@@ -175,7 +211,7 @@ export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
               onClick={onClose}
               className="border-border"
             >
-              Cancel
+              {t("common.actions.cancel")}
             </Button>
             <Button
               type="submit"
@@ -185,10 +221,10 @@ export default function CourseEditModal({ course, isOpen, onClose, onSave }) {
               {isSaving ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
+                  {t("common.actions.saving")}
                 </>
               ) : (
-                "Save Changes"
+                t("common.actions.saveChanges")
               )}
             </Button>
           </DialogFooter>
