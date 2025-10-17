@@ -8,10 +8,8 @@ import {
   ListTodo,
   MessageSquare,
   Calendar,
-  Database,
   Settings,
   LogOut,
-  User as UserIcon,
   Trophy,
   ShoppingBag,
   Star,
@@ -46,7 +44,6 @@ const navigationConfig = [
   { key: "activities", page: "Activities", icon: ListTodo },
   { key: "forum", page: "Forum", icon: MessageSquare },
   { key: "calendar", page: "Calendar", icon: Calendar },
-  { key: "knowledgeBase", page: "KnowledgeBase", icon: Database },
 ];
 
 // Helper component for Avatar with Fallback
@@ -243,7 +240,7 @@ export default function Layout({ children, currentPageName }) {
                       <h2 className="font-bold text-2xl bg-gradient-to-r from-purple-400 to-orange-400 bg-clip-text text-transparent">
                         Ascenda
                       </h2>
-                      <p className="text-xs text-text-secondary">Elevating Innovation</p>
+                      <p className="text-xs text-text-secondary">{t('companyMotto')}</p>
                     </div>
                   </div>
             </SidebarHeader>
@@ -271,7 +268,7 @@ export default function Layout({ children, currentPageName }) {
                           <span className="text-orange-400 font-bold">
                             {user.pontos_gamificacao || 2847}
                           </span>
-                          <span className="text-text-secondary">points</span>
+                          <span className="text-text-secondary">{t('points')}</span>
                         </div>
                       </div>
                     </div>
@@ -325,11 +322,11 @@ export default function Layout({ children, currentPageName }) {
                       <span>{t('avatarShop')}</span>
                     </Link>
                     <Link
-                      to={createPageUrl("Activities")}
+                      to={createPageUrl("Tasks")}
                       className="flex items-center gap-2 text-sm text-text-secondary hover:text-purple-300 transition-colors py-2"
                     >
                       <Star className="w-4 h-4" />
-                      <span>{t('activities')}</span>
+                      <span>{t('myTasks')}</span>
                     </Link>
                   </div>
                 </SidebarGroupContent>
@@ -347,15 +344,19 @@ export default function Layout({ children, currentPageName }) {
                       variant={language === 'pt' ? 'gradient' : 'ghost'}
                       size="sm"
                       onClick={() => changeLanguage('pt')}
+                      className="flex items-center gap-2"
                     >
-                      PT
+                      <span role="img" aria-label="Português">🇧🇷</span>
+                      <span>PT</span>
                     </Button>
                     <Button
                       variant={language === 'en' ? 'gradient' : 'ghost'}
                       size="sm"
                       onClick={() => changeLanguage('en')}
+                      className="flex items-center gap-2"
                     >
-                      EN
+                      <span role="img" aria-label="English">🇺🇸</span>
+                      <span>EN</span>
                     </Button>
                   </div>
                 </div>
