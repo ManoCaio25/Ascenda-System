@@ -103,34 +103,9 @@ export default function VacationRequestsPanel() {
     rejected: requests.filter((req) => req.status === 'rejected').length,
   }), [requests]);
 
-  const requestsByIntern = useMemo(() => {
-    const map = new Map();
-    requests.forEach((request) => {
-      const key = String(request.intern_id);
-      const existing = map.get(key);
-      if (!existing) {
-        map.set(key, request);
-        return;
-      }
-      const existingDate = existing.start_date ? new Date(existing.start_date) : new Date(existing.created_date);
-      const nextDate = request.start_date ? new Date(request.start_date) : new Date(request.created_date);
-      if (existingDate < nextDate) {
-        map.set(key, request);
-      }
-    });
-    return map;
-  }, [requests]);
-
   const sortedInterns = useMemo(() => {
     return [...interns].sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''));
   }, [interns]);
-
-  const internSummaries = useMemo(() => {
-    return sortedInterns.map((intern) => ({
-      intern,
-      latest: requestsByIntern.get(String(intern.id)) || null,
-    }));
-  }, [sortedInterns, requestsByIntern]);
 
   const openEmojiEditor = useCallback((intern) => {
     if (!intern) return;
@@ -713,68 +688,6 @@ export default function VacationRequestsPanel() {
                 </div>
               </section>
 
-              <section className="p-4 border border-border rounded-xl bg-surface2">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-primary">
-                    {t('vacation.internOverview.title')}
-                  </h3>
-                  <span className="text-xs text-muted">
-                    {t('vacation.internOverview.count', {
-                      count: interns.length,
-                      suffix: interns.length !== 1 ? 's' : '',
-                    })}
-                  </span>
-                </div>
-                <p className="text-xs text-muted mt-1">
-                  {t('vacation.internOverview.subtitle')}
-                </p>
-                <div className="mt-3 space-y-3 max-h-[360px] overflow-y-auto pr-1">
-                  {internSummaries.map(({ intern, latest }) => (
-                    <div
-                      key={intern.id}
-                      className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-surface p-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-primary truncate">
-                          {intern.full_name}
-                        </p>
-                        {latest ? (
-                          <p className="text-xs text-muted mt-1">
-                            {t('vacation.internOverview.latest', {
-                              status: getStatusLabel(latest.status),
-                              range: t('vacation.stats.range', {
-                                start: format(new Date(latest.start_date), 'MMM d'),
-                                end: format(new Date(latest.end_date), 'MMM d'),
-                              }),
-                            })}
-                          </p>
-                        ) : (
-                          <p className="text-xs text-muted mt-1">
-                            {t('vacation.internOverview.none')}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {latest && (
-                          <Badge className={`${statusColors[latest.status]} border hidden sm:inline-flex`}>
-                            {getStatusLabel(latest.status)}
-                          </Badge>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-border"
-                          onClick={() => openCreateDialog(intern.id)}
-                          aria-label={t('vacation.internOverview.createAria', { name: intern.full_name })}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          {t('vacation.internOverview.create')}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
             </aside>
           </div>
         </CardContent>
