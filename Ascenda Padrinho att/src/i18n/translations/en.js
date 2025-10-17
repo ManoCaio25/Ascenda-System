@@ -588,43 +588,112 @@ const en = {
     panelTitle: "Vacation Requests",
     tabs: {
       list: "Requests List",
-      calendar: "Calendar View"
+      calendar: "Calendar View",
     },
     filterPlaceholder: "Filter",
+    filters: {
+      allStatus: "All Requests",
+      internPlaceholder: "Filter by intern",
+      allInterns: "All interns",
+      searchPlaceholder: "Search by intern or reason",
+    },
+    listCount: "{{count}} request{{suffix}}",
+    listCountSuffix: {
+      single: "",
+      plural: "s",
+    },
     none: "No vacation requests found",
     approve: "Approve",
     reject: "Reject",
     rejectTitle: "Reject Vacation Request",
     rejectDescription: "Are you sure you want to reject this vacation request? You can optionally add a note.",
     rejectConfirm: "Reject Request",
+    rejectPlaceholder: "Explain the reason for rejection...",
     managerNoteOptional: "Manager Note (Optional)",
+    actions: {
+      cancel: "Cancel",
+    },
+    unknownIntern: "Unknown intern",
     labels: {
       from: "From:",
       to: "To:",
       reason: "Reason:",
       managerNote: "Manager note:",
-      requested: "Requested {{date}}"
+      requested: "Requested {{date}}",
+      track: "Track: {{track}}",
+      trackUnknown: "Not specified",
     },
     aria: {
       request: "Vacation request from {{name}}",
       approve: "Approve vacation request for {{name}}",
-      reject: "Reject vacation request for {{name}}"
+      reject: "Reject vacation request for {{name}}",
     },
     emoji: {
       title: "Update Profile Emoji",
       description: "Choose an emoji or paste an image URL for {{name}}.",
       preview: "Preview",
-      cancel: "Cancel"
+      placeholder: "Try 😀 or paste an image URL",
+      helper: "Emojis render beautifully across the app and you can swap them anytime. Image URLs are also supported.",
+      cancel: "Cancel",
+      save: "Save Emoji",
+      open: "Update profile emoji for {{name}}",
     },
-    conflictLegend: {
-      approved: "Approved",
+    stats: {
+      total: "Total Requests",
       pending: "Pending",
-      conflict: "Conflict"
+      approved: "Approved",
+      rejected: "Rejected",
+      upcomingTitle: "Upcoming vacations",
+      range: "{{start}} – {{end}}",
+      startsIn: "Starts in {{count}} day{{suffix}}",
+      startsToday: "Starts today",
+      inProgress: "Currently on vacation",
+      noUpcoming: "No upcoming vacations",
+    },
+    create: {
+      open: "New request",
+      openAria: "Create a new vacation request",
+      title: "Create vacation request",
+      description: "Schedule time off for an intern and keep the team informed.",
+      confirm: "Create request",
+      errors: {
+        intern: "Select an intern to continue.",
+        dates: "Provide both a start and end date.",
+        order: "The end date must be after the start date.",
+      },
+      fields: {
+        intern: "Intern",
+        internPlaceholder: "Select an intern",
+        start: "Start date",
+        end: "End date",
+        reason: "Reason",
+        reasonPlaceholder: "Add context or notes for this absence",
+      },
+    },
+    notifications: {
+      createdTitle: "Vacation Request Submitted",
+      createdBody: "A vacation request from {{start}} to {{end}} has been submitted on your behalf.",
+      approvedTitle: "Vacation Request Approved",
+      approvedBody: "Your vacation request from {{start}} to {{end}} has been approved.",
+      rejectedTitle: "Vacation Request Rejected",
+      rejectedBody: "Your vacation request from {{start}} to {{end}} has been rejected.{{note}}",
+      managerFallback: "Manager",
+      managerNotePrefix: "Note:",
+    },
+    internOverview: {
+      title: "Intern overview",
+      subtitle: "Track who has upcoming time off and create requests quickly.",
+      none: "No vacation requests yet",
+      latest: "Latest: {{status}} · {{range}}",
+      create: "Add request",
+      createAria: "Add vacation request for {{name}}",
+      count: "{{count}} intern{{suffix}}",
     },
     calendar: {
       months: {
-        conflict: "{{count}} Scheduling Conflict{{suffix}} Detected"
+        conflict: "{{count}} Scheduling Conflict{{suffix}} Detected",
       },
+      weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       approved: "Approved",
       pending: "Pending",
       conflict: "Conflict",
@@ -632,7 +701,10 @@ const en = {
       previousMonth: "Previous month",
       nextMonth: "Next month",
       more: "...and {{count}} more",
-      conflictDetail: "{{name}} has task \"{{task}}\" due on {{date}} during vacation"
+      conflictDetail: "{{name}} has task \"{{task}}\" due on {{date}} during vacation",
+      approvedTitle: "{{name}} – {{reason}}",
+      pendingTitle: "{{name}} – Pending: {{reason}}",
+      noReason: "No reason provided",
     }
   },
   notifications: {

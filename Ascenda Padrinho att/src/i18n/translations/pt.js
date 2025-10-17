@@ -588,43 +588,112 @@ const pt = {
     panelTitle: "Solicitações de férias",
     tabs: {
       list: "Lista de solicitações",
-      calendar: "Visão em calendário"
+      calendar: "Visão em calendário",
     },
     filterPlaceholder: "Filtrar",
+    filters: {
+      allStatus: "Todas as solicitações",
+      internPlaceholder: "Filtrar por estagiário",
+      allInterns: "Todos os estagiários",
+      searchPlaceholder: "Busque por estagiário ou motivo",
+    },
+    listCount: "{{count}} solicitaç{{suffix}}",
+    listCountSuffix: {
+      single: "ão",
+      plural: "ões",
+    },
     none: "Nenhuma solicitação de férias encontrada",
     approve: "Aprovar",
     reject: "Rejeitar",
     rejectTitle: "Rejeitar solicitação de férias",
     rejectDescription: "Tem certeza de que deseja rejeitar esta solicitação? Você pode adicionar uma observação.",
     rejectConfirm: "Rejeitar solicitação",
+    rejectPlaceholder: "Explique o motivo da rejeição...",
     managerNoteOptional: "Nota do gestor (opcional)",
+    actions: {
+      cancel: "Cancelar",
+    },
+    unknownIntern: "Estagiário desconhecido",
     labels: {
       from: "De:",
       to: "Até:",
       reason: "Motivo:",
       managerNote: "Nota do gestor:",
-      requested: "Solicitado em {{date}}"
+      requested: "Solicitado em {{date}}",
+      track: "Trilha: {{track}}",
+      trackUnknown: "Não informada",
     },
     aria: {
       request: "Solicitação de férias de {{name}}",
       approve: "Aprovar solicitação de férias de {{name}}",
-      reject: "Rejeitar solicitação de férias de {{name}}"
+      reject: "Rejeitar solicitação de férias de {{name}}",
     },
     emoji: {
       title: "Atualizar emoji do perfil",
       description: "Escolha um emoji ou cole uma URL de imagem para {{name}}.",
       preview: "Pré-visualização",
-      cancel: "Cancelar"
+      placeholder: "Experimente 😀 ou cole uma URL de imagem",
+      helper: "Os emojis ficam ótimos em todo o app e você pode trocá-los quando quiser. URLs de imagem também são aceitas.",
+      cancel: "Cancelar",
+      save: "Salvar emoji",
+      open: "Atualizar emoji de {{name}}",
     },
-    conflictLegend: {
-      approved: "Aprovado",
-      pending: "Pendente",
-      conflict: "Conflito"
+    stats: {
+      total: "Solicitações totais",
+      pending: "Pendentes",
+      approved: "Aprovadas",
+      rejected: "Rejeitadas",
+      upcomingTitle: "Próximas férias",
+      range: "{{start}} – {{end}}",
+      startsIn: "Começa em {{count}} dia{{suffix}}",
+      startsToday: "Começa hoje",
+      inProgress: "Em férias agora",
+      noUpcoming: "Nenhuma férias próximas",
+    },
+    create: {
+      open: "Nova solicitação",
+      openAria: "Criar nova solicitação de férias",
+      title: "Criar solicitação de férias",
+      description: "Agende o período de ausência do estagiário e mantenha a equipe informada.",
+      confirm: "Criar solicitação",
+      errors: {
+        intern: "Selecione um estagiário para continuar.",
+        dates: "Informe a data de início e de término.",
+        order: "A data de término deve ser após a data de início.",
+      },
+      fields: {
+        intern: "Estagiário",
+        internPlaceholder: "Selecione um estagiário",
+        start: "Data de início",
+        end: "Data de término",
+        reason: "Motivo",
+        reasonPlaceholder: "Adicione contexto ou observações sobre a ausência",
+      },
+    },
+    notifications: {
+      createdTitle: "Solicitação de férias enviada",
+      createdBody: "Uma solicitação de férias de {{start}} a {{end}} foi registrada para você.",
+      approvedTitle: "Solicitação de férias aprovada",
+      approvedBody: "Sua solicitação de férias de {{start}} a {{end}} foi aprovada.",
+      rejectedTitle: "Solicitação de férias rejeitada",
+      rejectedBody: "Sua solicitação de férias de {{start}} a {{end}} foi rejeitada.{{note}}",
+      managerFallback: "Gestor",
+      managerNotePrefix: "Observação:",
+    },
+    internOverview: {
+      title: "Visão geral dos estagiários",
+      subtitle: "Acompanhe quem terá folga e crie solicitações rapidamente.",
+      none: "Nenhuma solicitação de férias",
+      latest: "Última: {{status}} · {{range}}",
+      create: "Adicionar solicitação",
+      createAria: "Adicionar solicitação de férias para {{name}}",
+      count: "{{count}} estagiário{{suffix}}",
     },
     calendar: {
       months: {
-        conflict: "{{count}} conflito{{suffix}} de agenda detectado"
+        conflict: "{{count}} conflito{{suffix}} de agenda detectado",
       },
+      weekdays: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
       approved: "Aprovado",
       pending: "Pendente",
       conflict: "Conflito",
@@ -632,7 +701,10 @@ const pt = {
       previousMonth: "Mês anterior",
       nextMonth: "Próximo mês",
       more: "...e mais {{count}}",
-      conflictDetail: "{{name}} tem a tarefa \"{{task}}\" com prazo em {{date}} durante as férias"
+      conflictDetail: "{{name}} tem a tarefa \"{{task}}\" com prazo em {{date}} durante as férias",
+      approvedTitle: "{{name}} – {{reason}}",
+      pendingTitle: "{{name}} – Pendente: {{reason}}",
+      noReason: "Motivo não informado",
     }
   },
   notifications: {
