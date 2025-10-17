@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@estagiario/utils";
-import { 
-  Home, 
-  BookOpen, 
-  CheckSquare, 
-  MessageSquare, 
+import {
+  Home,
+  BookOpen,
+  CheckSquare,
+  ListTodo,
+  MessageSquare,
   Calendar,
   Database,
   Settings,
@@ -16,7 +17,8 @@ import {
   Star,
   Zap,
   Sun,
-  Moon
+  Moon,
+  Languages
 } from "lucide-react";
 import { User } from "@estagiario/Entities/all";
 import { Button } from "@estagiario/Components/ui/button";
@@ -34,17 +36,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@estagiario/Components/ui/sidebar";
-import { I18nProvider } from "@estagiario/Components/utils/i18n";
-import { AccessibilityProvider } from "@estagiario/Components/utils/accessibility";
+import { useI18n } from "@estagiario/Components/utils/i18n";
 import AIChatWidget from "@estagiario/Components/ai/AIChat";
 
-const navigationItems = [
-  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
-  { title: "Learning Path", url: createPageUrl("LearningPath"), icon: BookOpen },
-  { title: "My Tasks", url: createPageUrl("Tasks"), icon: CheckSquare },
-  { title: "Forum", url: createPageUrl("Forum"), icon: MessageSquare },
-  { title: "Calendar", url: createPageUrl("Calendar"), icon: Calendar },
-  { title: "Knowledge Base", url: createPageUrl("KnowledgeBase"), icon: Database },
+const navigationConfig = [
+  { key: "dashboard", page: "Dashboard", icon: Home },
+  { key: "learningPath", page: "LearningPath", icon: BookOpen },
+  { key: "myTasks", page: "Tasks", icon: CheckSquare },
+  { key: "activities", page: "Activities", icon: ListTodo },
+  { key: "forum", page: "Forum", icon: MessageSquare },
+  { key: "calendar", page: "Calendar", icon: Calendar },
+  { key: "knowledgeBase", page: "KnowledgeBase", icon: Database },
 ];
 
 // Helper component for Avatar with Fallback
@@ -86,6 +88,17 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState('dark'); // Can be 'dark', 'light', 'high-contrast'
   const [isFocusMode, setIsFocusMode] = useState(false); // New state for focus mode
+  const { t, language, changeLanguage } = useI18n();
+
+  const navigationItems = useMemo(
+    () =>
+      navigationConfig.map((item) => ({
+        title: t(item.key),
+        url: createPageUrl(item.page),
+        icon: item.icon,
+      })),
+    [language, t]
+  );
 
   useEffect(() => {
     // Load initial theme and focus mode from local storage
@@ -144,10 +157,8 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
-    <I18nProvider>
-      <AccessibilityProvider>
-        <div className="min-h-screen bg-background text-text-primary transition-colors duration-300">
-          <style>{`
+    <div className="min-h-screen bg-background text-text-primary transition-colors duration-300">
+      <style>{`
             :root.light {
               --background: #f1f5f9; /* slate-100 */
               --sidebar-bg: #ffffff;
@@ -216,11 +227,11 @@ export default function Layout({ children, currentPageName }) {
               outline-offset: 2px !important;
             }
           `}</style>
-          
-          <SidebarProvider>
-            <div className="flex min-h-screen w-full">
-              <Sidebar className="border-r border-default sidebar-bg">
-                <SidebarHeader className="border-b border-default p-6">
+
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <Sidebar className="border-r border-default sidebar-bg">
+            <SidebarHeader className="border-b border-default p-6">
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <div className="w-12 h-12 cosmic-gradient rounded-xl flex items-center justify-center cosmic-glow">
@@ -235,130 +246,161 @@ export default function Layout({ children, currentPageName }) {
                       <p className="text-xs text-text-secondary">Elevating Innovation</p>
                     </div>
                   </div>
-                </SidebarHeader>
+            </SidebarHeader>
 
-                <SidebarContent className="p-4">
-                  {user && (
-                    <div className="cosmic-card rounded-xl p-4 mb-6 cosmic-glow">
-                      <Link to={createPageUrl("Profile")} className="block">
-                        <div className="flex items-center gap-3">
-                          <div className="relative">
-                            <AvatarWithFallback user={user} size="md" />
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2" style={{ borderColor: 'var(--sidebar-bg)' }}></div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <p className="font-semibold text-text-primary text-sm truncate">
-                                  {user.full_name}
-                                </p>
-                                {user.equipped_tag && (
-                                  <span className="text-xs font-bold px-2 py-0.5 rounded-full cosmic-gradient text-white truncate">{user.equipped_tag}</span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-1 text-xs">
-                              <Zap className="w-3 h-3 text-orange-400" />
-                              <span className="text-orange-400 font-bold">
-                                {user.pontos_gamificacao || 2847}
-                              </span>
-                              <span className="text-text-secondary">points</span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
-                  )}
-
-                  <SidebarGroup>
-                    <SidebarGroupLabel className="text-xs font-medium text-purple-400 uppercase tracking-wider px-2 py-2">
-                      Navigation
-                    </SidebarGroupLabel>
-                    <SidebarGroupContent>
-                      <SidebarMenu className="space-y-1">
-                        {navigationItems.map((item) => (
-                          <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton 
-                              asChild 
-                              className={`text-text-secondary hover:text-text-primary transition-all duration-200 rounded-lg dark:hover:bg-purple-800/20 light:hover:bg-violet-100 ${
-                                location.pathname === item.url ? 'dark:bg-purple-800/30 dark:text-purple-300 light:bg-violet-100 light:text-violet-700 cosmic-glow' : ''
-                              }`}
-                            >
-                              <Link to={item.url} className="flex items-center gap-3 px-3 py-3">
-                                <item.icon className="w-5 h-5" />
-                                <span className="font-medium">{item.title}</span>
-                              </Link>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        ))}
-                      </SidebarMenu>
-                    </SidebarGroupContent>
-                  </SidebarGroup>
-
-                  <SidebarGroup className="mt-6">
-                    <SidebarGroupLabel className="text-xs font-medium text-purple-400 uppercase tracking-wider px-2 py-2">
-                      Quick Actions
-                    </SidebarGroupLabel>
-                    <SidebarGroupContent>
-                      <div className="space-y-2 px-2">
-                        <Link to={createPageUrl("Profile?tab=badges")} 
-                              className="flex items-center gap-2 text-sm text-text-secondary hover:text-purple-400 transition-colors py-2">
-                          <Trophy className="w-4 h-4" />
-                          <span>My Badges</span>
-                        </Link>
-                        <Link to={createPageUrl("Profile?tab=shop")} 
-                              className="flex items-center gap-2 text-sm text-text-secondary hover:text-orange-400 transition-colors py-2">
-                          <ShoppingBag className="w-4 h-4" />
-                          <span>Avatar Shop</span>
-                        </Link>
+            <SidebarContent className="p-4">
+              {user && (
+                <div className="cosmic-card rounded-xl p-4 mb-6 cosmic-glow">
+                  <Link to={createPageUrl("Profile")} className="block">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <AvatarWithFallback user={user} size="md" />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2" style={{ borderColor: 'var(--sidebar-bg)' }}></div>
                       </div>
-                    </SidebarGroupContent>
-                  </SidebarGroup>
-                </SidebarContent>
-
-                <SidebarFooter className="border-t border-default p-4">
-                  <div className="space-y-2">
-                    <Button 
-                        variant="ghost" 
-                        onClick={toggleTheme}
-                        className="w-full justify-start text-text-secondary hover:text-text-primary dark:hover:bg-slate-800/50 light:hover:bg-slate-100"
-                    >
-                      {theme === 'dark' || theme === 'high-contrast' ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
-                      {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                    </Button>
-                    <Link to={createPageUrl("Settings")}>
-                      <Button variant="ghost" className="w-full justify-start text-text-secondary hover:text-text-primary dark:hover:bg-slate-800/50 light:hover:bg-slate-100">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Settings
-                      </Button>
-                    </Link>
-                    <Button 
-                      variant="ghost" 
-                      onClick={handleLogout}
-                      className="w-full justify-start text-text-secondary hover:text-text-primary dark:hover:bg-slate-800/50 light:hover:bg-slate-100"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </Button>
-                  </div>
-                </SidebarFooter>
-              </Sidebar>
-
-              <main className="flex-1 flex flex-col">
-                <header className="card-bg backdrop-blur-sm border-b border-default px-6 py-4 md:hidden">
-                  <div className="flex items-center gap-4">
-                    <SidebarTrigger className="hover:bg-hover-bg p-2 rounded-lg transition-colors duration-200" />
-                    <h1 className="text-xl font-semibold text-text-primary">Ascenda</h1>
-                  </div>
-                </header>
-                
-                <div className="flex-1 overflow-auto">
-                  {children}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-text-primary text-sm truncate">
+                            {user.full_name}
+                          </p>
+                          {user.equipped_tag && (
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full cosmic-gradient text-white truncate">{user.equipped_tag}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs">
+                          <Zap className="w-3 h-3 text-orange-400" />
+                          <span className="text-orange-400 font-bold">
+                            {user.pontos_gamificacao || 2847}
+                          </span>
+                          <span className="text-text-secondary">points</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
                 </div>
-              </main>
+              )}
+
+              <SidebarGroup>
+                <SidebarGroupLabel className="text-xs font-medium text-purple-400 uppercase tracking-wider px-2 py-2">
+                  {t('navigation')}
+                </SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu className="space-y-1">
+                    {navigationItems.map((item) => (
+                      <SidebarMenuItem key={item.url}>
+                        <SidebarMenuButton
+                          asChild
+                          className={`text-text-secondary hover:text-text-primary transition-all duration-200 rounded-lg dark:hover:bg-purple-800/20 light:hover:bg-violet-100 ${
+                            location.pathname === item.url ? 'dark:bg-purple-800/30 dark:text-purple-300 light:bg-violet-100 light:text-violet-700 cosmic-glow' : ''
+                          }`}
+                        >
+                          <Link to={item.url} className="flex items-center gap-3 px-3 py-3">
+                            <item.icon className="w-5 h-5" />
+                            <span className="font-medium">{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+
+              <SidebarGroup className="mt-6">
+                <SidebarGroupLabel className="text-xs font-medium text-purple-400 uppercase tracking-wider px-2 py-2">
+                  {t('quickActions')}
+                </SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <div className="space-y-2 px-2">
+                    <Link
+                      to={createPageUrl("Profile?tab=badges")}
+                      className="flex items-center gap-2 text-sm text-text-secondary hover:text-purple-400 transition-colors py-2"
+                    >
+                      <Trophy className="w-4 h-4" />
+                      <span>{t('myBadges')}</span>
+                    </Link>
+                    <Link
+                      to={createPageUrl("Profile?tab=shop")}
+                      className="flex items-center gap-2 text-sm text-text-secondary hover:text-orange-400 transition-colors py-2"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      <span>{t('avatarShop')}</span>
+                    </Link>
+                    <Link
+                      to={createPageUrl("Activities")}
+                      className="flex items-center gap-2 text-sm text-text-secondary hover:text-purple-300 transition-colors py-2"
+                    >
+                      <Star className="w-4 h-4" />
+                      <span>{t('activities')}</span>
+                    </Link>
+                  </div>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+
+            <SidebarFooter className="border-t border-default p-4">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-text-secondary flex items-center gap-2">
+                    <Languages className="w-4 h-4" /> {t('language')}
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <Button
+                      variant={language === 'pt' ? 'gradient' : 'ghost'}
+                      size="sm"
+                      onClick={() => changeLanguage('pt')}
+                    >
+                      PT
+                    </Button>
+                    <Button
+                      variant={language === 'en' ? 'gradient' : 'ghost'}
+                      size="sm"
+                      onClick={() => changeLanguage('en')}
+                    >
+                      EN
+                    </Button>
+                  </div>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  onClick={toggleTheme}
+                  className="w-full justify-start text-text-secondary hover:text-text-primary dark:hover:bg-slate-800/50 light:hover:bg-slate-100"
+                >
+                  {theme === 'dark' || theme === 'high-contrast' ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+                  {theme === 'dark' ? t('lightMode') : t('darkMode')}
+                </Button>
+                <Link to={createPageUrl("Settings")}>
+                  <Button className="w-full justify-start text-text-secondary hover:text-text-primary dark:hover:bg-slate-800/50 light:hover:bg-slate-100" variant="ghost">
+                    <Settings className="w-4 h-4 mr-2" />
+                    {t('settings')}
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="w-full justify-start text-text-secondary hover:text-text-primary dark:hover:bg-slate-800/50 light:hover:bg-slate-100"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {t('logout')}
+                </Button>
+              </div>
+            </SidebarFooter>
+          </Sidebar>
+
+          <main className="flex-1 flex flex-col">
+            <header className="card-bg backdrop-blur-sm border-b border-default px-6 py-4 md:hidden">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger className="hover:bg-hover-bg p-2 rounded-lg transition-colors duration-200" />
+                <h1 className="text-xl font-semibold text-text-primary">Ascenda</h1>
+              </div>
+            </header>
+
+            <div className="flex-1 overflow-auto">
+              {children}
             </div>
-          </SidebarProvider>
-          <AIChatWidget />
+          </main>
         </div>
-      </AccessibilityProvider>
-    </I18nProvider>
+      </SidebarProvider>
+      <AIChatWidget />
+    </div>
   );
 }

@@ -226,6 +226,64 @@ export const calendarEvents = [
     data_hora_inicio: '2024-11-25T18:00:00.000Z',
     data_hora_fim: '2024-11-25T19:30:00.000Z',
     tipo_evento: 'community'
+  },
+  {
+    id: 'event-4',
+    titulo_evento: 'Focus Sprint',
+    descricao: 'Heads-down time reserved for prototype polish.',
+    data_hora_inicio: '2024-11-27T09:00:00.000Z',
+    data_hora_fim: '2024-11-27T12:00:00.000Z',
+    tipo_evento: 'focus'
+  }
+];
+
+export const activities = [
+  {
+    id: 'activity-1',
+    titulo: 'Daily Orbital Check-in',
+    descricao: 'Compartilhe seu destaque do dia, um aprendizado e um possível bloqueio.',
+    prazo_resposta: '2024-11-19T17:00:00.000Z',
+    mentor: 'Isabela Novaes',
+    status: 'open',
+    categoria: 'ritual',
+    respostas: [
+      {
+        id: 'response-1',
+        autor: 'Isabela Novaes',
+        conteudo: 'Lembre-se de anexar links úteis – isso ajuda toda a tripulação.',
+        created_date: '2024-11-18T21:30:00.000Z',
+        tipo: 'mentor'
+      }
+    ]
+  },
+  {
+    id: 'activity-2',
+    titulo: 'Mini Projeto: Landing Page Animada',
+    descricao: 'Crie uma landing page simples usando framer-motion e compartilhe um GIF com o resultado.',
+    prazo_resposta: '2024-11-22T23:59:00.000Z',
+    mentor: 'Ravi Sol',
+    status: 'in_progress',
+    categoria: 'project',
+    recursos_sugeridos: ['https://www.framer.com/motion/', 'https://refactoringui.com/'],
+    respostas: []
+  },
+  {
+    id: 'activity-3',
+    titulo: 'Diário de Aprendizado',
+    descricao: 'Escreva três parágrafos sobre como você aplicaria Atomic Design no produto da Ascenda.',
+    prazo_resposta: '2024-11-24T20:00:00.000Z',
+    mentor: 'Marina Orion',
+    status: 'open',
+    categoria: 'reflection',
+    respostas: [
+      {
+        id: 'response-2',
+        autor: 'Alex Cosmos',
+        conteudo: 'Foquei em mapear padrões antes de prototipar telas isoladas – ajudou no reuso!',
+        created_date: '2024-11-16T18:12:00.000Z',
+        tipo: 'intern'
+      }
+    ]
   }
 ];
 
@@ -234,19 +292,33 @@ export const achievements = [
     id: 'ach-1',
     nome_conquista: 'Cosmic Collaborator',
     descricao: 'Contributed to three peer reviews in a week.',
-    url_icone: '🌌'
+    url_icone: '🌌',
+    raridade: 'epic',
+    progresso: 100
   },
   {
     id: 'ach-2',
     nome_conquista: 'Prototype Wizard',
     descricao: 'Shipped a high fidelity concept in record time.',
-    url_icone: '🧙‍♀️'
+    url_icone: '🧙‍♀️',
+    raridade: 'rare',
+    progresso: 80
   },
   {
     id: 'ach-3',
     nome_conquista: 'Feedback Beacon',
     descricao: 'Facilitated a retrospective with actionable outcomes.',
-    url_icone: '🛸'
+    url_icone: '🛸',
+    raridade: 'uncommon',
+    progresso: 45
+  },
+  {
+    id: 'ach-4',
+    nome_conquista: 'Design System Cartographer',
+    descricao: 'Documentou 10 componentes reutilizáveis com tokens da marca.',
+    url_icone: '🗺️',
+    raridade: 'legendary',
+    progresso: 20
   }
 ];
 
@@ -257,7 +329,9 @@ export const shopItems = [
     descricao: 'Glow-in-the-dark hoodie for late night coding sessions.',
     url_imagem: '✨',
     custo_pontos: 320,
-    tipo_item: 'Cosmetic'
+    tipo_item: 'Cosmetic',
+    raridade: 'epic',
+    estoque: 'limited'
   },
   {
     id: 'item-2',
@@ -265,7 +339,9 @@ export const shopItems = [
     descricao: 'Badge that celebrates fearless experimentation.',
     url_imagem: '🚀',
     custo_pontos: 180,
-    tipo_item: 'Tag'
+    tipo_item: 'Tag',
+    raridade: 'rare',
+    estoque: 'available'
   },
   {
     id: 'item-3',
@@ -273,6 +349,18 @@ export const shopItems = [
     descricao: 'Decorate your workstation with cosmic vibes.',
     url_imagem: '🌠',
     custo_pontos: 90,
-    tipo_item: 'Cosmetic'
+    tipo_item: 'Cosmetic',
+    raridade: 'common',
+    estoque: 'available'
+  },
+  {
+    id: 'item-4',
+    nome_item: 'Aurora Workspace Theme',
+    descricao: 'Tema exclusivo para o VSCode inspirado em nebulosas.',
+    url_imagem: '🌌',
+    custo_pontos: 210,
+    tipo_item: 'Digital',
+    raridade: 'legendary',
+    estoque: 'limited'
   }
 ];
