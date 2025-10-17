@@ -682,11 +682,9 @@ const en = {
     },
     internOverview: {
       title: "Intern overview",
-      subtitle: "Track who has upcoming time off and create requests quickly.",
+      subtitle: "Track upcoming time off and stay on top of each request's status.",
       none: "No vacation requests yet",
       latest: "Latest: {{status}} · {{range}}",
-      create: "Add request",
-      createAria: "Add vacation request for {{name}}",
       count: "{{count}} intern{{suffix}}",
     },
     calendar: {

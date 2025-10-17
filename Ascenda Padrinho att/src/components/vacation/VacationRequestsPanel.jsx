@@ -350,9 +350,8 @@ export default function VacationRequestsPanel() {
             ))}
           </div>
 
-          <div className="space-y-6">
-            <Tabs defaultValue="list" className="w-full">
-              <TabsList className="mb-6 bg-surface2">
+          <Tabs defaultValue="list" className="w-full">
+            <TabsList className="mb-6 bg-surface2">
                 <TabsTrigger value="list" className="data-[state=active]:bg-surface">
                   <CalendarCheck className="w-4 h-4 mr-2" />
                   {t('vacation.tabs.list')}
@@ -363,7 +362,7 @@ export default function VacationRequestsPanel() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="list" className="space-y-4">
+            <TabsContent value="list" className="space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:justify-between">
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -548,6 +547,55 @@ export default function VacationRequestsPanel() {
                     </div>
                   )}
                 </div>
+
+                <section className="p-4 border border-border rounded-xl bg-surface2 space-y-3">
+                  <h3 className="text-sm font-semibold text-primary">
+                    {t('vacation.stats.upcomingTitle')}
+                  </h3>
+                  <div className="space-y-3">
+                    {upcomingRequests.length > 0 ? (
+                      upcomingRequests.map((request) => {
+                        const intern = internsById[request.intern_id];
+                        const today = startOfToday();
+                        const daysUntil = differenceInCalendarDays(new Date(request.start_date), today);
+                        let timelineLabel = t('vacation.stats.startsToday');
+                        if (daysUntil > 0) {
+                          timelineLabel = t('vacation.stats.startsIn', {
+                            count: daysUntil,
+                            suffix: daysUntil !== 1 ? 's' : '',
+                          });
+                        }
+                        if (daysUntil < 0 && new Date(request.end_date) >= today) {
+                          timelineLabel = t('vacation.stats.inProgress');
+                        }
+
+                        return (
+                          <div key={request.id} className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-brand2 flex items-center justify-center text-xl">
+                              {intern?.avatar_url || '👤'}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-primary truncate">
+                                {intern?.full_name || t('vacation.unknownIntern')}
+                              </p>
+                              <p className="text-xs text-muted">
+                                {t('vacation.stats.range', {
+                                  start: format(new Date(request.start_date), 'MMM d'),
+                                  end: format(new Date(request.end_date), 'MMM d'),
+                                })}
+                              </p>
+                              <p className="text-xs text-secondary mt-1">{timelineLabel}</p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-sm text-muted">
+                        {t('vacation.stats.noUpcoming')}
+                      </p>
+                    )}
+                  </div>
+                </section>
               </TabsContent>
 
               <TabsContent value="calendar">
@@ -556,107 +604,60 @@ export default function VacationRequestsPanel() {
                   interns={interns}
                 />
               </TabsContent>
-            </Tabs>
-
-            <section className="p-4 border border-border rounded-xl bg-surface2">
-              <h3 className="text-sm font-semibold text-primary mb-3">
-                {t('vacation.stats.upcomingTitle')}
-              </h3>
-              <div className="space-y-3">
-                {upcomingRequests.length > 0 ? (
-                  upcomingRequests.map((request) => {
-                    const intern = internsById[request.intern_id];
-                    const today = startOfToday();
-                    const daysUntil = differenceInCalendarDays(new Date(request.start_date), today);
-                    let timelineLabel = t('vacation.stats.startsToday');
-                    if (daysUntil > 0) {
-                      timelineLabel = t('vacation.stats.startsIn', {
-                        count: daysUntil,
-                        suffix: daysUntil !== 1 ? 's' : '',
-                      });
-                    }
-                    if (daysUntil < 0 && new Date(request.end_date) >= today) {
-                      timelineLabel = t('vacation.stats.inProgress');
-                    }
-
-                    return (
-                      <div key={request.id} className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-brand2 flex items-center justify-center text-xl">
-                          {intern?.avatar_url || '👤'}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-primary truncate">
-                            {intern?.full_name || t('vacation.unknownIntern')}
-                          </p>
-                          <p className="text-xs text-muted">
-                            {t('vacation.stats.range', {
-                              start: format(new Date(request.start_date), 'MMM d'),
-                              end: format(new Date(request.end_date), 'MMM d'),
-                            })}
-                          </p>
-                          <p className="text-xs text-secondary mt-1">{timelineLabel}</p>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-sm text-muted">
-                    {t('vacation.stats.noUpcoming')}
+          </Tabs>
+        </CardContent>
+      </Card>
+      <Card className="border-border bg-surface shadow-e1 mt-6">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-primary text-base">
+              {t('vacation.internOverview.title')}
+            </CardTitle>
+            <span className="text-xs text-muted">
+              {t('vacation.internOverview.count', {
+                count: interns.length,
+                suffix: interns.length !== 1 ? 's' : '',
+              })}
+            </span>
+          </div>
+          <p className="text-xs text-muted">
+            {t('vacation.internOverview.subtitle')}
+          </p>
+        </CardHeader>
+        <CardContent className="mt-2">
+          <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+            {internSummaries.map(({ intern, latest }) => (
+              <div
+                key={intern.id}
+                className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-surface2 p-3"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-primary truncate">
+                    {intern.full_name}
                   </p>
+                  {latest ? (
+                    <p className="text-xs text-muted mt-1">
+                      {t('vacation.internOverview.latest', {
+                        status: getStatusLabel(latest.status),
+                        range: t('vacation.stats.range', {
+                          start: format(new Date(latest.start_date), 'MMM d'),
+                          end: format(new Date(latest.end_date), 'MMM d'),
+                        }),
+                      })}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted mt-1">
+                      {t('vacation.internOverview.none')}
+                    </p>
+                  )}
+                </div>
+                {latest && (
+                  <Badge className={`${statusColors[latest.status]} border hidden sm:inline-flex`}>
+                    {getStatusLabel(latest.status)}
+                  </Badge>
                 )}
               </div>
-            </section>
-
-            <section className="p-4 border border-border rounded-xl bg-surface2">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-primary">
-                  {t('vacation.internOverview.title')}
-                </h3>
-                <span className="text-xs text-muted">
-                  {t('vacation.internOverview.count', {
-                    count: interns.length,
-                    suffix: interns.length !== 1 ? 's' : '',
-                  })}
-                </span>
-              </div>
-              <p className="text-xs text-muted mt-1">
-                {t('vacation.internOverview.subtitle')}
-              </p>
-              <div className="mt-3 space-y-3 max-h-[360px] overflow-y-auto pr-1">
-                {internSummaries.map(({ intern, latest }) => (
-                  <div
-                    key={intern.id}
-                    className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-surface p-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-primary truncate">
-                        {intern.full_name}
-                      </p>
-                      {latest ? (
-                        <p className="text-xs text-muted mt-1">
-                          {t('vacation.internOverview.latest', {
-                            status: getStatusLabel(latest.status),
-                            range: t('vacation.stats.range', {
-                              start: format(new Date(latest.start_date), 'MMM d'),
-                              end: format(new Date(latest.end_date), 'MMM d'),
-                            }),
-                          })}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-muted mt-1">
-                          {t('vacation.internOverview.none')}
-                        </p>
-                      )}
-                    </div>
-                    {latest && (
-                      <Badge className={`${statusColors[latest.status]} border hidden sm:inline-flex`}>
-                        {getStatusLabel(latest.status)}
-                      </Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
+            ))}
           </div>
         </CardContent>
       </Card>
