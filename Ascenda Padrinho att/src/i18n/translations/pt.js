@@ -211,38 +211,49 @@ const pt = {
     },
   },
   dashboard: {
-    welcome: "Bem-vindo de volta, {{name}}!",
-    subtitle: "Veja o que está acontecendo com a sua equipe hoje",
+    greeting: "Bem-vindo de volta, {{name}}!",
+    subtitle: "Veja o que está acontecendo com sua equipe hoje",
     summary: {
-      totalInterns: "Total de estagiários",
-      courses: "Cursos disponíveis",
-      reviews: "Revisões pendentes",
-      points: "Pontos da equipe",
-      trend: "+2 este mês",
-      pointsTrend: "+15%"
+      totalInterns: {
+        title: "Total de Estagiários",
+        trend: "+2 neste mês",
+      },
+      coursesAvailable: {
+        title: "Cursos Disponíveis",
+      },
+      pendingReviews: {
+        title: "Revisões Pendentes",
+      },
+      teamPoints: {
+        title: "Pontos da Equipe",
+        trend: "+15%",
+      },
     },
-    sectionTitle: "Status e bem-estar dos estagiários",
-    status: {
-      heading: "Status e bem-estar dos estagiários",
-      count: "{{count}} estagiário{{suffix}}",
-      progressLabel: "Progresso do estágio",
-      daysLeft: "{{count}} dias restantes",
-      systemStatus: "Status do sistema",
-      active: "Ativo",
-      paused: "Pausado",
-    },
-    performanceChart: {
-      noData: "Nenhum dado de performance disponível",
-      legendLabel: "Pontuação de performance",
-      tooltipLabel: "{{label}}",
-      tooltipValue: "{{value}}%",
-      percentValue: "{{value}}%",
+    interns: {
+      sectionTitle: "Status e Bem-estar dos Estagiários",
+      countLabel: "{{count}} estagiário{{suffix}}",
+      progressLabel: "Progresso do Estágio",
+      progressDataLabel: "Progresso",
+      systemStatus: "Status do Sistema",
+      wellBeing: {
+        tooltip: "Bem-estar: {{status}}",
+        status: {
+          excellent: "Excelente",
+          good: "Bom",
+          neutral: "Neutro",
+          stressed: "Estressado",
+          overwhelmed: "Sobrecarregado",
+        }
+      }
     },
     notifications: {
-      pausedTitle: "Estagiário pausado",
-      resumedTitle: "Estagiário retomado",
-      pausedBody: "Sistema de aprendizagem pausado para {{name}}",
-      resumedBody: "Sistema de aprendizagem retomado para {{name}}",
+      internPaused: "Estagiário pausado",
+      internResumed: "Estagiário retomado",
+      status: {
+        paused: "pausado",
+        resumed: "retomado",
+      },
+      learningSystemStatus: "Sistema de aprendizagem {{status}} para {{name}}",
     }
   },
   internsPage: {

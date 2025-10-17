@@ -211,38 +211,49 @@ const en = {
     },
   },
   dashboard: {
-    welcome: "Welcome back, {{name}}!",
+    greeting: "Welcome back, {{name}}!",
     subtitle: "Here's what's happening with your team today",
     summary: {
-      totalInterns: "Total Interns",
-      courses: "Courses Available",
-      reviews: "Pending Reviews",
-      points: "Team Points",
-      trend: "+2 this month",
-      pointsTrend: "+15%"
+      totalInterns: {
+        title: "Total Interns",
+        trend: "+2 this month",
+      },
+      coursesAvailable: {
+        title: "Courses Available",
+      },
+      pendingReviews: {
+        title: "Pending Reviews",
+      },
+      teamPoints: {
+        title: "Team Points",
+        trend: "+15%",
+      },
     },
-    sectionTitle: "Intern Status & Well-being",
-    status: {
-      heading: "Intern Status & Well-being",
-      count: "{{count}} intern{{suffix}}",
+    interns: {
+      sectionTitle: "Intern Status & Well-being",
+      countLabel: "{{count}} intern{{suffix}}",
       progressLabel: "Internship Progress",
-      daysLeft: "{{count}} days left",
+      progressDataLabel: "Progress",
       systemStatus: "System Status",
-      active: "Active",
-      paused: "Paused",
-    },
-    performanceChart: {
-      noData: "No performance data available",
-      legendLabel: "Performance Score",
-      tooltipLabel: "{{label}}",
-      tooltipValue: "{{value}}%",
-      percentValue: "{{value}}%",
+      wellBeing: {
+        tooltip: "Well-being: {{status}}",
+        status: {
+          excellent: "Excellent",
+          good: "Good",
+          neutral: "Neutral",
+          stressed: "Stressed",
+          overwhelmed: "Overwhelmed",
+        }
+      }
     },
     notifications: {
-      pausedTitle: "Intern Paused",
-      resumedTitle: "Intern Resumed",
-      pausedBody: "Learning system paused for {{name}}",
-      resumedBody: "Learning system resumed for {{name}}",
+      internPaused: "Intern Paused",
+      internResumed: "Intern Resumed",
+      status: {
+        paused: "paused",
+        resumed: "resumed",
+      },
+      learningSystemStatus: "Learning system {{status}} for {{name}}",
     }
   },
   internsPage: {

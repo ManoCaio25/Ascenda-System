@@ -8,36 +8,40 @@ import { motion } from "framer-motion";
 import { RadialBarChart, RadialBar, ResponsiveContainer } from "recharts";
 import Avatar from "../ui/Avatar";
 import { getDaysLeft, getDaysLeftBadgeColor, getInternshipProgress } from "../utils/dates";
+import { useTranslation } from "@padrinho/i18n";
 
 const wellBeingVariants = {
-  "Excellent": { icon: Smile, color: "text-success", bg: "bg-success/10" },
-  "Good": { icon: Smile, color: "text-blue-500", bg: "bg-blue-500/10" },
-  "Neutral": { icon: Meh, color: "text-warning", bg: "bg-warning/10" },
-  "Stressed": { icon: Frown, color: "text-orange-500", bg: "bg-orange-500/10" },
-  "Overwhelmed": { icon: Annoyed, color: "text-error", bg: "bg-error/10" }
+  excellent: { icon: Smile, color: "text-success", bg: "bg-success/10" },
+  good: { icon: Smile, color: "text-blue-500", bg: "bg-blue-500/10" },
+  neutral: { icon: Meh, color: "text-warning", bg: "bg-warning/10" },
+  stressed: { icon: Frown, color: "text-orange-500", bg: "bg-orange-500/10" },
+  overwhelmed: { icon: Annoyed, color: "text-error", bg: "bg-error/10" }
 };
 
 const wellBeingAliases = {
-  "excellent": "Excellent",
-  "good": "Good",
-  "neutral": "Neutral",
-  "stressed": "Stressed",
-  "overwhelmed": "Overwhelmed",
-  "green": "Excellent",
-  "yellow": "Neutral",
-  "red": "Overwhelmed"
+  "excellent": "excellent",
+  "good": "good",
+  "neutral": "neutral",
+  "stressed": "stressed",
+  "overwhelmed": "overwhelmed",
+  "green": "excellent",
+  "yellow": "neutral",
+  "red": "overwhelmed"
 };
 
 export default function InternStatusCard({ intern, onStatusToggle, index }) {
+  const { t } = useTranslation();
   const rawStatus = intern.well_being_status;
   const normalizedStatus = typeof rawStatus === "string"
     ? rawStatus.trim().toLowerCase()
     : undefined;
-  const canonicalStatus = normalizedStatus && wellBeingAliases[normalizedStatus]
+  const canonicalStatusKey = normalizedStatus && wellBeingAliases[normalizedStatus]
     ? wellBeingAliases[normalizedStatus]
-    : rawStatus;
+    : (typeof rawStatus === "string" && wellBeingAliases[rawStatus.trim().toLowerCase()]) || undefined;
 
-  const wellBeing = wellBeingVariants[canonicalStatus] || wellBeingVariants["Neutral"];
+  const wellBeing = canonicalStatusKey
+    ? wellBeingVariants[canonicalStatusKey]
+    : wellBeingVariants.neutral;
   const WellBeingIcon = wellBeing.icon;
   const isActive = intern.status === 'active';
   
@@ -48,10 +52,10 @@ export default function InternStatusCard({ intern, onStatusToggle, index }) {
     : 0;
 
   const radialData = React.useMemo(() => [{
-    name: 'Progress',
+    name: t("dashboard.interns.progressDataLabel"),
     value: progress,
     fill: progress > 66 ? 'var(--error)' : progress > 33 ? 'var(--warning)' : 'var(--success)'
-  }], [progress]);
+  }], [progress, t]);
 
   return (
     <motion.div
@@ -88,7 +92,11 @@ export default function InternStatusCard({ intern, onStatusToggle, index }) {
                   {intern.well_being_status && (
                     <div
                       className={`p-1.5 rounded-lg ${wellBeing.bg}`}
-                      title={`Well-being: ${canonicalStatus || intern.well_being_status || 'Unknown'}`}
+                      title={t("dashboard.interns.wellBeing.tooltip", {
+                        status: canonicalStatusKey
+                          ? t(`dashboard.interns.wellBeing.status.${canonicalStatusKey}`)
+                          : intern.well_being_status || t("common.misc.unknown")
+                      })}
                     >
                       <WellBeingIcon className={`w-4 h-4 ${wellBeing.color}`} />
                     </div>
@@ -96,7 +104,7 @@ export default function InternStatusCard({ intern, onStatusToggle, index }) {
                 </div>
                 <div className="flex items-center gap-2 text-sm flex-wrap">
                   <Badge variant="outline" className="bg-surface2 text-secondary border-border">
-                    {intern.track || 'Learning Track'}
+                    {intern.track || t("common.misc.learningTrack")}
                   </Badge>
                   <span className="text-muted">•</span>
                   <span className="text-muted">{intern.level}</span>
@@ -123,10 +131,10 @@ export default function InternStatusCard({ intern, onStatusToggle, index }) {
                     </ResponsiveContainer>
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs text-muted mb-1">Internship Progress</p>
+                    <p className="text-xs text-muted mb-1">{t("dashboard.interns.progressLabel")}</p>
                     <Badge className={`${daysLeftColors.bg} ${daysLeftColors.text} border ${daysLeftColors.border}`}>
                       <Calendar className="w-3 h-3 mr-1" />
-                      {daysLeft} days left
+                      {t("common.time.daysLeft", { count: daysLeft })}
                     </Badge>
                   </div>
                 </div>
@@ -134,11 +142,11 @@ export default function InternStatusCard({ intern, onStatusToggle, index }) {
 
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <Label htmlFor={`status-${intern.id}`} className="text-sm text-secondary cursor-pointer">
-                  System Status
+                  {t("dashboard.interns.systemStatus")}
                 </Label>
                 <div className="flex items-center gap-2">
                   <span className={`text-sm font-medium ${isActive ? 'text-success' : 'text-warning'}`}>
-                    {isActive ? 'Active' : 'Paused'}
+                    {isActive ? t("common.status.active") : t("common.status.paused")}
                   </span>
                   <Switch
                     id={`status-${intern.id}`}
