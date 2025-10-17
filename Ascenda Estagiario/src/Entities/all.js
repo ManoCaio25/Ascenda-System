@@ -36,6 +36,9 @@ export const User = {
   async list() {
     return userStore.list();
   },
+  async create(record) {
+    return userStore.create(record);
+  },
   async update(id, updates) {
     return userStore.update(id, updates);
   },

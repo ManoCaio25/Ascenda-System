@@ -87,6 +87,15 @@ export default function Layout({ children, currentPageName }) {
   const [isFocusMode, setIsFocusMode] = useState(false); // New state for focus mode
   const { t, language, changeLanguage } = useI18n();
 
+  const defaultUser = useMemo(() => ({
+    full_name: "Caio Menezes",
+    email: "caio.alvarenga@ascenda.com",
+    pontos_gamificacao: 2847,
+    avatar_url: "",
+    area_atuacao: "Frontend Development",
+    equipped_tag: "🚀 Cosmic Explorer",
+  }), []);
+
   const navigationItems = useMemo(
     () =>
       navigationConfig.map((item) => ({
@@ -162,7 +171,8 @@ export default function Layout({ children, currentPageName }) {
 
   const loadUser = async () => {
     try {
-      const currentUser = await User.me();
+      let currentUser = await User.me();
+      currentUser = await ensureDefaultProfile(currentUser);
       setUser(currentUser);
     } catch (error) {
       // User not logged in, create a default user
