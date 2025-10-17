@@ -23,7 +23,6 @@ const ProfileTab = ({ user, onAvatarUpload, isUploading, t }) => {
     if (file) {
       onAvatarUpload(file);
     }
-    event.target.value = '';
   };
 
   return (
@@ -275,8 +274,8 @@ export default function Profile() {
     const fetchData = async () => {
       const currentUser = await User.me().catch(() => ({
         id: 'intern-1',
-        full_name: 'Caio Menezes',
-        email: 'caio.alvarenga@ascenda.com',
+        full_name: 'Alex Cosmos',
+        email: 'alex@ascenda.com',
         pontos_gamificacao: 2847,
         avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face',
         area_atuacao: 'Frontend Development',
@@ -307,28 +306,8 @@ export default function Profile() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const avatarUrl = reader.result;
-        setUser((current) => (current ? { ...current, avatar_url: avatarUrl } : current));
-
-        let updatedUser = null;
-        try {
-          updatedUser = await User.update(user.id, { avatar_url: avatarUrl });
-        } catch (error) {
-          console.error('Avatar update failed', error);
-        }
-
-        const nextUser = updatedUser || { ...user, avatar_url: avatarUrl };
-        setUser(nextUser);
-
-        if (!updatedUser && typeof window !== 'undefined') {
-          const detail = { id: nextUser.id, record: nextUser };
-          window.dispatchEvent(new CustomEvent('ascenda_estagiario_users:update', { detail }));
-          window.dispatchEvent(new CustomEvent('ascenda_estagiario_users:change', { detail: { ...detail, type: 'update' } }));
-        }
-
-        setIsUploading(false);
-      };
-      reader.onerror = (errorEvent) => {
-        console.error('Avatar upload failed', errorEvent);
+        const updated = await User.update(user.id, { avatar_url: avatarUrl }).catch(() => ({ ...user, avatar_url: avatarUrl }));
+        setUser(updated || { ...user, avatar_url: avatarUrl });
         setIsUploading(false);
       };
       reader.readAsDataURL(file);
