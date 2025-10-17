@@ -12,6 +12,7 @@ import { User } from "@padrinho/entities/User";
 import { Loader2, UserPlus, Calendar } from "lucide-react";
 import Avatar from "../ui/Avatar";
 import { eventBus, EventTypes } from "../utils/eventBus";
+import { useTranslation } from "@padrinho/i18n";
 
 export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }) {
   const [interns, setInterns] = useState([]);
@@ -20,6 +21,7 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
   const [notes, setNotes] = useState("");
   const [isAssigning, setIsAssigning] = useState(false);
   const [user, setUser] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadData = async () => {
@@ -61,7 +63,7 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
         const assignment = await CourseAssignment.create({
           course_id: course.id,
           intern_id: internId,
-          assigned_by: user?.email || 'manager',
+          assigned_by: user?.email || t("common.manager").toLowerCase(),
           status: 'assigned',
           progress: 0,
           assigned_date: now,
@@ -73,11 +75,14 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
         const intern = interns.find(i => i.id === internId);
         await Notification.create({
           type: 'course_assigned',
-          title: 'New Course Assigned',
-          body: `"${course.title}" has been assigned to ${intern?.full_name || 'intern'}`,
+          title: t("contentManagement.assignModal.notificationTitle"),
+          body: t("contentManagement.assignModal.notificationBody", undefined, {
+            course: course.title,
+            intern: intern?.full_name || t("common.misc.unknown"),
+          }),
           target_id: course.id,
           target_kind: 'course',
-          actor_name: user?.full_name || 'Manager'
+          actor_name: user?.full_name || t("common.manager"),
         });
       }
 
@@ -107,16 +112,20 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
         <DialogHeader>
           <DialogTitle className="text-primary flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-brand" />
-            Assign "{course.title}" to Interns
+            {t("contentManagement.assignModal.title", undefined, { course: course.title })}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleAssign} className="space-y-6">
           <div>
-            <Label className="text-secondary mb-3 block">Select Interns *</Label>
+            <Label className="text-secondary mb-3 block">
+              {t("contentManagement.assignModal.selectLabel")}
+            </Label>
             <div className="space-y-2 max-h-64 overflow-y-auto border border-border rounded-lg p-3 bg-surface2">
               {interns.length === 0 ? (
-                <p className="text-muted text-sm text-center py-4">No active interns available</p>
+                <p className="text-muted text-sm text-center py-4">
+                  {t("contentManagement.assignModal.emptyState")}
+                </p>
               ) : (
                 interns.map(intern => (
                   <label
@@ -138,14 +147,17 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
               )}
             </div>
             <p className="text-xs text-muted mt-2">
-              {selectedInterns.size} intern{selectedInterns.size !== 1 ? 's' : ''} selected
+              {t("common.counts.selectedInterns", undefined, {
+                count: selectedInterns.size,
+                suffix: selectedInterns.size === 1 ? "" : "s",
+              })}
             </p>
           </div>
 
           <div>
             <Label htmlFor="due-date" className="text-secondary flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              Due Date (Optional)
+              {t("common.labels.dueDateOptional")}
             </Label>
             <Input
               id="due-date"
@@ -158,12 +170,14 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
           </div>
 
           <div>
-            <Label htmlFor="notes" className="text-secondary">Notes (Optional)</Label>
+            <Label htmlFor="notes" className="text-secondary">
+              {t("common.labels.notesOptional")}
+            </Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any special instructions or context..."
+              placeholder={t("common.placeholders.notes")}
               className="bg-surface2 border-border text-primary h-24"
             />
           </div>
@@ -175,7 +189,7 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
               onClick={onClose}
               className="border-border"
             >
-              Cancel
+              {t("common.actions.cancel")}
             </Button>
             <Button
               type="submit"
@@ -185,10 +199,13 @@ export default function AssignCourseModal({ course, isOpen, onClose, onSuccess }
               {isAssigning ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Assigning...
+                  {t("contentManagement.assignModal.assigning")}
                 </>
               ) : (
-                `Assign to ${selectedInterns.size} Intern${selectedInterns.size !== 1 ? 's' : ''}`
+                t("contentManagement.assignModal.assignButton", undefined, {
+                  count: selectedInterns.size,
+                  suffix: selectedInterns.size === 1 ? "" : "s",
+                })
               )}
             </Button>
           </DialogFooter>
