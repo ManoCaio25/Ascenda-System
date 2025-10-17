@@ -100,171 +100,6 @@ const STOP_WORDS = new Set([
   "www",
 ]);
 
-const TEXT_FILE_EXTENSIONS = [
-  ".txt",
-  ".md",
-  ".markdown",
-  ".csv",
-  ".json",
-  ".html",
-  ".htm",
-  ".rtf",
-];
-
-const TEXT_MIME_PREFIXES = [/^text\//i, /^application\/(json|xml|csv)$/i];
-
-const MAX_ANALYSIS_CHARACTERS = 6000;
-
-const decoderUtf8 = new TextDecoder("utf-8", { fatal: false });
-const decoderLatin = new TextDecoder("iso-8859-1", { fatal: false });
-
-function isTextLikeFile(file) {
-  if (!file) return false;
-  if (TEXT_MIME_PREFIXES.some((pattern) => pattern.test(file.type))) {
-    return true;
-  }
-  const loweredName = file.name?.toLowerCase() ?? "";
-  return TEXT_FILE_EXTENSIONS.some((extension) => loweredName.endsWith(extension));
-}
-
-function decodePdfString(raw) {
-  return raw
-    .replace(/\\n/g, "\n")
-    .replace(/\\r/g, "\r")
-    .replace(/\\t/g, "\t")
-    .replace(/\\f/g, "\f")
-    .replace(/\\b/g, "\b")
-    .replace(/\\\(/g, "(")
-    .replace(/\\\)/g, ")")
-    .replace(/\\\\/g, "\\")
-    .replace(/\\(\d{1,3})/g, (_, value) => {
-      const parsed = parseInt(value, 8);
-      if (Number.isNaN(parsed)) {
-        return "";
-      }
-      return String.fromCharCode(parsed);
-    });
-}
-
-function decodeBufferToText(buffer) {
-  if (!buffer) return "";
-  const utf8Text = decoderUtf8.decode(buffer);
-  const utf8ReplacementCount = (utf8Text.match(/\uFFFD/g) || []).length;
-
-  if (utf8ReplacementCount === 0) {
-    return utf8Text;
-  }
-
-  const latinText = decoderLatin.decode(buffer);
-  const latinReplacementCount = (latinText.match(/\uFFFD/g) || []).length;
-
-  if (latinReplacementCount < utf8ReplacementCount) {
-    return latinText;
-  }
-
-  return utf8Text;
-}
-
-function extractTextFromPdfBuffer(buffer) {
-  if (!buffer) return "";
-  try {
-    const raw = decoderLatin.decode(buffer);
-    const sections = raw
-      .split(/BT(?:\s|\r|\n)/)
-      .slice(1)
-      .map((section) => section.split(/\sET/)[0])
-      .join(" ");
-
-    const matches = sections.match(/\(([^)\\]*(?:\\.[^)\\]*)*)\)/g);
-    if (!matches) {
-      return "";
-    }
-
-    const decoded = matches
-      .map((match) => decodePdfString(match.slice(1, -1)))
-      .join(" ");
-
-    return decoded.replace(/\s+/g, " ").trim();
-  } catch (error) {
-    console.warn("Failed to decode PDF", error);
-    return "";
-  }
-}
-
-async function extractTextFromFile(file) {
-  if (!file) return "";
-  try {
-    if (isTextLikeFile(file)) {
-      const buffer = await file.arrayBuffer();
-      return decodeBufferToText(buffer);
-    }
-
-    if (file.type === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf")) {
-      const buffer = await file.arrayBuffer();
-      return extractTextFromPdfBuffer(buffer);
-    }
-  } catch (error) {
-    console.warn("Unable to read file", error);
-  }
-
-  return "";
-}
-
-function normalizeContent(text) {
-  if (!text) return "";
-  return text
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .replace(/[\t\f\v]+/g, " ")
-    .replace(/\u00A0/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function limitTextLength(text, limit = MAX_ANALYSIS_CHARACTERS) {
-  if (!text) return "";
-  if (text.length <= limit) {
-    return text;
-  }
-  return `${text.slice(0, limit)}...`;
-}
-
-function buildContextSnippet(text, limit = 420) {
-  if (!text) return "";
-  const sanitized = text.replace(/\s+/g, " ").trim();
-  if (!sanitized) return "";
-
-  const sentences = sanitized.split(/(?<=[.!?])\s+/).filter(Boolean);
-  const combined = sentences.slice(0, 3).join(" ");
-
-  if (combined.length <= limit) {
-    return combined;
-  }
-
-  return `${combined.slice(0, limit)}...`;
-}
-
-function mergeContentSections(sections) {
-  return sections
-    .filter((section) => typeof section === "string" && section.trim().length > 0)
-    .map((section) => section.trim())
-    .join("\n\n");
-}
-
-function computeWordCount(text) {
-  if (!text) return 0;
-  return text.split(/\s+/).filter(Boolean).length;
-}
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(reader.error || new Error("file_read_error"));
-    reader.readAsDataURL(file);
-  });
-}
-
 function formatDate(language, isoDate) {
   if (!isoDate) return "";
   const formatter = new Intl.DateTimeFormat(language === "pt" ? "pt-BR" : "en-US", {
@@ -281,8 +116,7 @@ function cleanFileName(name) {
 
 function extractKeywords(text, limit = 8) {
   if (!text) return [];
-  const truncated = limitTextLength(text, MAX_ANALYSIS_CHARACTERS);
-  const normalized = truncated
+  const normalized = text
     .toLowerCase()
     .replace(/https?:\/\/\S+/g, " ")
     .replace(/[^\p{L}\p{N}\s]/gu, " ");
@@ -311,8 +145,7 @@ function buildSummarySentences(text, fallback) {
   if (!text) {
     return fallback;
   }
-  const truncated = limitTextLength(text, 800);
-  const sanitized = truncated.replace(/\s+/g, " ").trim();
+  const sanitized = text.replace(/\s+/g, " ").trim();
   if (!sanitized) {
     return fallback;
   }
@@ -329,62 +162,34 @@ function analyzeResource({
   sourceType,
   resourceFile,
   videoUrl,
-  contentText,
-  transcriptText,
 }) {
   const baseTitle =
     resourceTitle.trim() ||
     cleanFileName(resourceFile?.name) ||
     (sourceType === "video"
-      ? videoUrl
-        ? "Video lesson"
-        : "Video resource"
+      ? (videoUrl ? "Video lesson" : "Video resource")
       : "Learning resource");
 
-  const normalizedContent = normalizeContent(contentText);
-  const normalizedTranscript = normalizeContent(transcriptText);
-  const normalizedDescription = normalizeContent(description);
+  const combinedText = [resourceTitle, description, cleanFileName(resourceFile?.name)]
+    .filter(Boolean)
+    .join(" ");
 
-  const combinedContent = mergeContentSections([
-    resourceTitle,
-    normalizedDescription,
-    normalizedContent,
-    normalizedTranscript,
-    cleanFileName(resourceFile?.name),
-  ]);
-
-  const truncatedCombined = limitTextLength(combinedContent, MAX_ANALYSIS_CHARACTERS);
-  const keywords = extractKeywords(truncatedCombined, 12);
-
-  const summarySource = normalizedContent || normalizedTranscript || normalizedDescription;
+  const keywords = extractKeywords(combinedText, 8);
   const fallbackSummary =
     sourceType === "video"
-      ? `This video explores ${baseTitle.toLowerCase()} and highlights ${
-          keywords.slice(0, 3).join(", ") || "core concepts"
-        }.`
+      ? `This video explores ${baseTitle.toLowerCase()} and highlights ${keywords
+          .slice(0, 3)
+          .join(", ") || "core concepts"}.`
       : `This material introduces ${baseTitle.toLowerCase()} with practical scenarios to apply the knowledge.`;
 
-  const summary = buildSummarySentences(summarySource || truncatedCombined, fallbackSummary);
-  const referenceSnippet = buildContextSnippet(summarySource || truncatedCombined);
+  const summary = buildSummarySentences(description, fallbackSummary);
 
   const highlightedKeywords = keywords.length ? keywords : [baseTitle];
-  const textSource = normalizedContent
-    ? "document"
-    : normalizedTranscript
-    ? "transcript"
-    : normalizedDescription
-    ? "description"
-    : "title";
 
   return {
     topic: baseTitle,
     summary,
     keywords: highlightedKeywords.slice(0, 8),
-    referenceSnippet,
-    textSource,
-    totalWords: computeWordCount(summarySource || truncatedCombined),
-    transcriptUsed: Boolean(normalizedTranscript),
-    contentUsed: Boolean(normalizedContent),
   };
 }
 
@@ -483,68 +288,6 @@ function createActivityPlan({ analysis, activityCount, quizCount }) {
   }
 
   return plan;
-}
-
-async function fetchVideoTranscript(videoId) {
-  if (!videoId) {
-    return { transcript: "", source: null, segments: 0 };
-  }
-
-  const endpoints = [
-    `https://r.jina.ai/https://youtubetranscript.com/?server_vid2=${videoId}`,
-    `https://r.jina.ai/http://youtubetranscript.com/?server_vid2=${videoId}`,
-  ];
-
-  for (const endpoint of endpoints) {
-    try {
-      const response = await fetch(endpoint, {
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        continue;
-      }
-
-      const payloadText = await response.text();
-      let payload;
-
-      try {
-        payload = JSON.parse(payloadText);
-      } catch (error) {
-        continue;
-      }
-
-      const transcriptEntries = Array.isArray(payload?.transcripts)
-        ? payload.transcripts
-        : Array.isArray(payload)
-        ? payload
-        : [];
-
-      if (!Array.isArray(transcriptEntries) || transcriptEntries.length === 0) {
-        continue;
-      }
-
-      const combined = normalizeContent(
-        transcriptEntries
-          .map((entry) => (typeof entry.text === "string" ? entry.text : ""))
-          .join(" "),
-      );
-
-      if (combined) {
-        return {
-          transcript: combined,
-          source: typeof payload?.title === "string" ? payload.title : null,
-          segments: transcriptEntries.length,
-        };
-      }
-    } catch (error) {
-      console.warn("Unable to fetch transcript", error);
-    }
-  }
-
-  return { transcript: "", source: null, segments: 0 };
 }
 
 export default function ActivityGenerator() {
@@ -743,38 +486,12 @@ export default function ActivityGenerator() {
     setActivityPreview(null);
 
     try {
-      let transcriptText = "";
-      let transcriptSource = null;
-      let transcriptSegments = 0;
-
-      if (sourceType === "video") {
-        const parsedVideoId = parseYoutubeVideoId(videoUrl.trim());
-        if (parsedVideoId) {
-          const cachedTranscript = transcriptCacheRef.current.get(parsedVideoId);
-          if (cachedTranscript) {
-            ({
-              transcript: transcriptText,
-              source: transcriptSource,
-              segments: transcriptSegments,
-            } = cachedTranscript);
-          } else {
-            const fetchedTranscript = await fetchVideoTranscript(parsedVideoId);
-            transcriptCacheRef.current.set(parsedVideoId, fetchedTranscript);
-            transcriptText = fetchedTranscript.transcript;
-            transcriptSource = fetchedTranscript.source;
-            transcriptSegments = fetchedTranscript.segments;
-          }
-        }
-      }
-
       const analysis = analyzeResource({
         resourceTitle,
         description,
         sourceType,
         resourceFile,
         videoUrl,
-        contentText: resourceContent,
-        transcriptText,
       });
 
       const plan = createActivityPlan({
@@ -804,23 +521,11 @@ export default function ActivityGenerator() {
         resourceTitle: resourceTitle.trim(),
         description: description.trim(),
         generatedAt: new Date().toISOString(),
-        transcriptText,
-        transcriptSource,
-        transcriptSegments,
-        resourceContentWords,
-        resourceContentSource,
       });
-
-      const previewFeedbackKey =
-        sourceType === "video" && !transcriptText
-          ? "activityGenerator.feedback.previewReadyNoTranscript"
-          : resourceContentSource === "document" && resourceContentWords === 0
-          ? "activityGenerator.feedback.previewReadyNoDocument"
-          : "activityGenerator.feedback.previewReady";
 
       setFeedback({
         type: "success",
-        message: t(previewFeedbackKey, undefined, {
+        message: t("activityGenerator.feedback.previewReady", undefined, {
           count: sanitizedActivityCount,
         }),
       });
@@ -853,11 +558,6 @@ export default function ActivityGenerator() {
         videoUrl: previewVideoUrl,
         resourceFile: previewFile,
         generatedAt,
-        transcriptText,
-        transcriptSource,
-        transcriptSegments,
-        resourceContentWords: previewContentWords,
-        resourceContentSource: previewContentSource,
       } = activityPreview;
 
       const createdAt = generatedAt || new Date().toISOString();
@@ -888,16 +588,6 @@ export default function ActivityGenerator() {
             internId,
             blueprint,
             analysis,
-            transcriptSource,
-            transcriptSegments,
-            transcriptPreview: transcriptText ? transcriptText.slice(0, 500) : null,
-            contentWordCount: previewContentWords,
-            contentSource: previewContentSource,
-            textSource: analysis.textSource,
-            summaryWordCount: analysis.totalWords,
-            referenceSnippet: analysis.referenceSnippet,
-            transcriptUsed: analysis.transcriptUsed,
-            contentUsed: analysis.contentUsed,
           },
         };
 
@@ -929,10 +619,6 @@ export default function ActivityGenerator() {
           generatedAt: createdAt,
           blueprint,
           keyTopics: blueprint.keyTopics,
-          analysis,
-          transcriptUsed: analysis.transcriptUsed,
-          textSource: analysis.textSource,
-          contentWordCount: previewContentWords,
         });
       }
 
@@ -1137,11 +823,9 @@ export default function ActivityGenerator() {
                   <Button
                     type="submit"
                     className="bg-brand text-white hover:bg-brand/90"
-                    disabled={isPlanning || isSaving || isExtractingContent}
+                    disabled={isPlanning || isSaving}
                   >
-                    {isExtractingContent
-                      ? t("activityGenerator.actions.processingFile")
-                      : isPlanning
+                    {isPlanning
                       ? t("activityGenerator.actions.preparing")
                       : t("activityGenerator.actions.generatePreview")}
                   </Button>
@@ -1219,7 +903,7 @@ export default function ActivityGenerator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 space-y-4">
+              <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 space-y-3">
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="uppercase tracking-wide text-xs">
                     {t(
@@ -1236,50 +920,10 @@ export default function ActivityGenerator() {
                       name: activityPreview.internName,
                     })}
                   </Badge>
-                  <Badge variant="outline" className="bg-surface text-secondary">
-                    {t("activityGenerator.preview.analysisSource", undefined, {
-                      source: t(
-                        `activityGenerator.preview.sourceLabels.${activityPreview.analysis.textSource}`,
-                      ),
-                    })}
-                  </Badge>
                 </div>
                 <p className="text-sm text-secondary leading-relaxed">
                   {activityPreview.analysis.summary}
                 </p>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
-                  <span>
-                    {t("activityGenerator.preview.wordCount", undefined, {
-                      count: activityPreview.analysis.totalWords,
-                    })}
-                  </span>
-                  {activityPreview.transcriptText && (
-                    <span>
-                      {t("activityGenerator.preview.transcriptSegments", undefined, {
-                        count: activityPreview.transcriptSegments,
-                      })}
-                    </span>
-                  )}
-                </div>
-                {activityPreview.sourceType === "video" && !activityPreview.analysis.transcriptUsed && (
-                  <p className="text-xs text-muted">
-                    {t("activityGenerator.preview.transcriptMissing")}
-                  </p>
-                )}
-                {activityPreview.analysis.referenceSnippet && (
-                  <div className="rounded-lg border border-border bg-surface2/60 p-3 space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-brand">
-                      {t("activityGenerator.preview.referenceTitle", undefined, {
-                        source: t(
-                          `activityGenerator.preview.sourceLabels.${activityPreview.analysis.textSource}`,
-                        ),
-                      })}
-                    </p>
-                    <p className="text-sm text-secondary leading-relaxed">
-                      {activityPreview.analysis.referenceSnippet}
-                    </p>
-                  </div>
-                )}
                 {activityPreview.analysis.keywords.length > 0 && (
                   <div className="space-y-2">
                     <p className="text-xs font-semibold uppercase tracking-wide text-brand">
@@ -1438,22 +1082,6 @@ export default function ActivityGenerator() {
                           date: formatDate(language, item.generatedAt),
                         })}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted">
-                        <BookOpen className="w-4 h-4 text-brand2" />
-                        <span>
-                          {t("activityGenerator.recent.analysisSource", undefined, {
-                            source: t(
-                              `activityGenerator.preview.sourceLabels.${item.textSource || "description"}`,
-                            ),
-                          })}
-                        </span>
-                      </div>
-                      {item.course.youtube_url && item.transcriptUsed === false && (
-                        <div className="flex items-center gap-2 text-xs text-error">
-                          <AlertCircle className="w-4 h-4" />
-                          <span>{t("activityGenerator.recent.transcriptMissing")}</span>
-                        </div>
-                      )}
                       {item.keyTopics?.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {item.keyTopics.map((topic) => (
