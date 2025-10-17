@@ -2,6 +2,7 @@ const PAGE_URLS = {
   Dashboard: '/',
   LearningPath: '/learning-path',
   Tasks: '/tasks',
+  Activities: '/activities',
   Forum: '/forum',
   ForumTopics: '/forum/topics',
   ForumTopicView: '/forum/topic',

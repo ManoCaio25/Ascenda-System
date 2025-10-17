@@ -10,6 +10,7 @@ import Layout from './layout.jsx';
 import Dashboard from './Pages/Dashboard.jsx';
 import LearningPath from './Pages/LearningPath.jsx';
 import Tasks from './Pages/Tasks.jsx';
+import Activities from './Pages/Activities.jsx';
 import Forum from './Pages/Forum.jsx';
 import ForumTopics from './Pages/ForumTopics.jsx';
 import ForumTopicView from './Pages/ForumTopicView.jsx';
@@ -58,6 +59,10 @@ function EstagiarioRouter({ fallbackIntern }) {
       <Route
         path="tasks"
         element={<Page pageName="Tasks" intern={intern}><Tasks /></Page>}
+      />
+      <Route
+        path="activities"
+        element={<Page pageName="Activities" intern={intern}><Activities /></Page>}
       />
       <Route
         path="forum"

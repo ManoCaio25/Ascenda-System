@@ -8,6 +8,7 @@ import {
   forumTopics,
   forumReplies,
   calendarEvents,
+  activities,
   achievements,
   shopItems,
 } from './data.js';
@@ -20,6 +21,7 @@ const forumCategoryStore = createEntityStore('ascenda_estagiario_forum_categorie
 const forumTopicStore = createEntityStore('ascenda_estagiario_forum_topics', forumTopics);
 const forumReplyStore = createEntityStore('ascenda_estagiario_forum_replies', forumReplies);
 const calendarStore = createEntityStore('ascenda_estagiario_calendar_events', calendarEvents);
+const activityStore = createEntityStore('ascenda_estagiario_activities', activities);
 const achievementStore = createEntityStore('ascenda_estagiario_achievements', achievements);
 const shopItemStore = createEntityStore('ascenda_estagiario_shop_items', shopItems);
 
@@ -102,6 +104,29 @@ export const ForumReply = {
 export const CalendarEvent = {
   async list(sort, limit) {
     return calendarStore.list(sort, limit);
+  },
+  async create(payload) {
+    return calendarStore.create(payload);
+  },
+};
+
+export const Activity = {
+  async list(sort, limit) {
+    return activityStore.list(sort, limit);
+  },
+  async update(id, updates) {
+    return activityStore.update(id, updates);
+  },
+  async addResponse(id, response) {
+    const current = await activityStore.findById(id);
+    if (!current) return null;
+    const newResponse = {
+      id: response?.id ?? `resp-${Date.now()}`,
+      created_date: new Date().toISOString(),
+      ...response,
+    };
+    const respostas = [...(current.respostas || []), newResponse];
+    return activityStore.update(id, { respostas });
   },
 };
 
