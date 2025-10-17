@@ -2,8 +2,10 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Rocket, Sparkles } from "lucide-react";
 import { Skeleton } from "@estagiario/Components/ui/skeleton";
+import { useI18n } from "@estagiario/Components/utils/i18n";
 
 export default function WelcomeWidget({ user, isLoading }) {
+  const { t } = useI18n();
   if (isLoading) {
     return (
       <div className="relative overflow-hidden cosmic-card rounded-2xl p-8 mb-8 cosmic-glow">
@@ -27,22 +29,22 @@ export default function WelcomeWidget({ user, isLoading }) {
       
       <div className="relative z-10 flex items-center justify-between">
         <div>
-          <motion.h1 
+          <motion.h1
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl font-bold text-white mb-2"
+            className="text-3xl font-bold text-text-primary mb-2"
           >
-            Ready to Ascend, {user?.full_name?.split(' ')[0] || 'Intern'}? 
+            {t('welcomeMessage', { name: user?.full_name?.split(' ')[0] || t('activitiesInternFallback') })}
             <Rocket className="inline ml-2 w-8 h-8 text-orange-400" />
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-slate-300"
+            className="text-text-secondary"
           >
-            Continue your cosmic journey of learning and growth
+            {t('welcomeSubtitle')}
           </motion.p>
         </div>
         
