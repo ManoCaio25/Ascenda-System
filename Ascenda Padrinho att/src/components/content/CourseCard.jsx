@@ -1,13 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@padrinho/components/ui/card";
 import { Badge } from "@padrinho/components/ui/badge";
 import { Button } from "@padrinho/components/ui/button";
-import { BookOpen, Clock, Users, TrendingUp, Pencil, Eye, Youtube, FileText, UserPlus } from "lucide-react";
+import {
+  BookOpen,
+  Clock,
+  Users,
+  TrendingUp,
+  Pencil,
+  Eye,
+  Youtube,
+  FileText,
+  UserPlus,
+  Trash2,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { CourseAssignment } from "@padrinho/entities/CourseAssignment";
 import { useTranslation } from "@padrinho/i18n";
 
-export default function CourseCard({ course, index, onEdit, onPreview, onAssign }) {
+export default function CourseCard({ course, index, onEdit, onPreview, onAssign, onDelete }) {
   const [assignmentCount, setAssignmentCount] = useState(0);
   const { t } = useTranslation();
 
@@ -23,19 +34,40 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
   }, [course.id]);
 
   const difficultyColors = {
-    "Beginner": "bg-green-500/20 text-success border-green-500/30",
-    "Intermediate": "bg-yellow-500/20 text-warning border-yellow-500/30",
-    "Advanced": "bg-red-500/20 text-error border-red-500/30"
+    Beginner: "bg-green-500/20 text-success border-green-500/30",
+    Intermediate: "bg-yellow-500/20 text-warning border-yellow-500/30",
+    Advanced: "bg-red-500/20 text-error border-red-500/30",
   };
 
   const categoryColors = {
-    "Technical": "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30",
-    "Leadership": "bg-purple-500/20 text-brand border-border",
-    "Communication": "bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/30",
-    "Design": "bg-orange-500/20 text-brand2 border-orange-500/30",
-    "Business": "bg-green-500/20 text-success border-green-500/30",
+    Technical: "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30",
+    Leadership: "bg-purple-500/20 text-brand border-border",
+    Communication: "bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/30",
+    Design: "bg-orange-500/20 text-brand2 border-orange-500/30",
+    Business: "bg-green-500/20 text-success border-green-500/30",
     "AI Generated": "bg-brand/10 text-brand border-brand/30",
   };
+
+  const categoryLabels = useMemo(
+    () => ({
+      Technical: t("contentManagement.categories.technical"),
+      Leadership: t("contentManagement.categories.leadership"),
+      Communication: t("contentManagement.categories.communication"),
+      Design: t("contentManagement.categories.design"),
+      Business: t("contentManagement.categories.business"),
+      "AI Generated": t("contentManagement.categories.generated"),
+    }),
+    [t],
+  );
+
+  const difficultyLabels = useMemo(
+    () => ({
+      Beginner: t("contentManagement.difficulties.beginner"),
+      Intermediate: t("contentManagement.difficulties.intermediate"),
+      Advanced: t("contentManagement.difficulties.advanced"),
+    }),
+    [t],
+  );
 
   const hasMedia = course.youtube_video_id || course.file_url;
 
@@ -61,11 +93,11 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Badge className={categoryColors[course.category] + " border"}>
-                {course.category}
+              <Badge className={(categoryColors[course.category] ?? "bg-surface2 text-primary border-border") + " border"}>
+                {categoryLabels[course.category] ?? course.category}
               </Badge>
-              <Badge className={difficultyColors[course.difficulty] + " border"}>
-                {course.difficulty}
+              <Badge className={(difficultyColors[course.difficulty] ?? "bg-surface2 text-primary border-border") + " border"}>
+                {difficultyLabels[course.difficulty] ?? course.difficulty}
               </Badge>
               {course.youtube_video_id && (
                 <Badge variant="outline" className="border-error/30 text-error bg-error/10">
@@ -76,7 +108,7 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
               {course.file_url && (
                 <Badge variant="outline" className="border-brand/30 text-brand bg-brand/10">
                   <FileText className="w-3 h-3 mr-1" />
-                  {course.file_name || 'File'}
+                  {course.file_name || t("common.misc.file")}
                 </Badge>
               )}
               {assignmentCount > 0 && (
@@ -113,7 +145,7 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -132,12 +164,21 @@ export default function CourseCard({ course, index, onEdit, onPreview, onAssign 
                 <UserPlus className="w-4 h-4 mr-2" />
                 {t("common.actions.assign")}
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete?.(course)}
+                className="border-error/30 text-error hover:bg-error/10"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t("common.actions.delete")}
+              </Button>
               {hasMedia && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onPreview(course)}
-                  className="col-span-2 border-brand/30 hover:bg-brand/10 text-brand"
+                  className="col-span-2 md:col-span-3 border-brand/30 hover:bg-brand/10 text-brand"
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   {t("common.actions.preview")}

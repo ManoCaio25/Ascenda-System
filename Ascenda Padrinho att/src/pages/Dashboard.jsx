@@ -8,6 +8,7 @@ import { Users, BookOpen, ClipboardCheck, Trophy } from "lucide-react";
 import SummaryCard from "../components/dashboard/SummaryCard";
 import InternStatusCard from "../components/dashboard/InternStatusCard";
 import { motion } from "framer-motion";
+import { useTranslation } from "@padrinho/i18n";
 import { eventBus, EventTypes } from "../components/utils/eventBus";
 
 export default function Dashboard() {
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [courses, setCourses] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadData();
@@ -55,11 +57,18 @@ export default function Dashboard() {
 
     await Notification.create({
       type: newStatus === 'paused' ? 'intern_paused' : 'intern_resumed',
-      title: `Intern ${newStatus === 'paused' ? 'Paused' : 'Resumed'}`,
-      body: `Learning system ${newStatus === 'paused' ? 'paused' : 'resumed'} for ${intern.full_name}`,
+      title: newStatus === 'paused'
+        ? t("dashboard.notifications.internPaused")
+        : t("dashboard.notifications.internResumed"),
+      body: t("dashboard.notifications.learningSystemStatus", {
+        status: newStatus === 'paused'
+          ? t("dashboard.notifications.status.paused")
+          : t("dashboard.notifications.status.resumed"),
+        name: intern.full_name
+      }),
       target_id: intern.id,
       target_kind: 'intern',
-      actor_name: user?.full_name || 'Manager'
+      actor_name: user?.full_name || t("common.manager")
     });
 
     eventBus.emit(newStatus === 'paused' ? EventTypes.INTERN_PAUSED : EventTypes.INTERN_RESUMED, {
@@ -80,48 +89,53 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">
-            Welcome back, {user?.full_name || 'Manager'}!
+            {t("dashboard.greeting", { name: user?.full_name || t("common.manager") })}
           </h1>
-          <p className="text-muted">Here's what's happening with your team today</p>
+          <p className="text-muted">{t("dashboard.subtitle")}</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <SummaryCard
-            title="Total Interns"
+            title={t("dashboard.summary.totalInterns.title")}
             value={interns.length}
             icon={Users}
             gradient="bg-gradient-to-br from-brand to-blue-600"
-            trend="+2 this month"
+            trend={t("dashboard.summary.totalInterns.trend")}
             delay={0.1}
           />
           <SummaryCard
-            title="Courses Available"
+            title={t("dashboard.summary.coursesAvailable.title")}
             value={courses.length}
             icon={BookOpen}
             gradient="bg-gradient-to-br from-brand2 to-pink-600"
             delay={0.2}
           />
           <SummaryCard
-            title="Pending Reviews"
+            title={t("dashboard.summary.pendingReviews.title")}
             value={pendingTasks}
             icon={ClipboardCheck}
             gradient="bg-gradient-to-br from-brand2 to-yellow-600"
             delay={0.3}
           />
           <SummaryCard
-            title="Team Points"
+            title={t("dashboard.summary.teamPoints.title")}
             value={totalPoints}
             icon={Trophy}
             gradient="bg-gradient-to-br from-yellow-600 to-pink-600"
-            trend="+15%"
+            trend={t("dashboard.summary.teamPoints.trend")}
             delay={0.4}
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-primary">Intern Status & Well-being</h2>
-            <span className="text-sm text-muted">{interns.length} interns</span>
+            <h2 className="text-2xl font-bold text-primary">{t("dashboard.interns.sectionTitle")}</h2>
+            <span className="text-sm text-muted">
+              {t("dashboard.interns.countLabel", {
+                count: interns.length,
+                suffix: interns.length === 1 ? "" : "s"
+              })}
+            </span>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
