@@ -10,7 +10,6 @@ import {
   Sparkles,
   Flame,
   Search,
-  Plus,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@estagiario/utils';

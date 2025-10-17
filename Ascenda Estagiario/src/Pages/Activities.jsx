@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Activity, User } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -10,18 +10,24 @@ import {
   MessageCircle,
   Link as LinkIcon,
   Reply,
-  ListFilter,
-  Loader2,
 } from 'lucide-react';
 import { Button } from '@estagiario/Components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@estagiario/Components/ui/dialog';
 import Textarea from '@estagiario/Components/ui/textarea';
-import { useI18n } from '@estagiario/Components/utils/i18n';
 
-const STATUS_STYLES = {
-  open: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40',
-  in_progress: 'bg-blue-500/20 text-blue-200 border border-blue-500/40',
-  completed: 'bg-purple-500/20 text-purple-200 border border-purple-500/40',
+const statusConfig = {
+  open: {
+    label: 'Aberta',
+    badge: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40',
+  },
+  in_progress: {
+    label: 'Em andamento',
+    badge: 'bg-blue-500/20 text-blue-200 border border-blue-500/40',
+  },
+  completed: {
+    label: 'Concluída',
+    badge: 'bg-purple-500/20 text-purple-200 border border-purple-500/40',
+  },
 };
 
 const rarityColor = {
@@ -30,138 +36,76 @@ const rarityColor = {
   reflection: 'from-blue-500/80 to-blue-300/30',
 };
 
-const statusFilters = [
-  { id: 'all', labelKey: 'activitiesFilterAll', icon: Sparkles },
-  { id: 'open', labelKey: 'activitiesFilterOpen', icon: ClipboardList },
-  { id: 'in_progress', labelKey: 'activitiesFilterInProgress', icon: Clock },
-  { id: 'completed', labelKey: 'activitiesFilterCompleted', icon: CheckCircle2 },
-];
-
-const fallbackUser = {
-  full_name: 'Alex Cosmos',
-  email: 'alex@ascenda.com',
-};
-
 function formatDeadline(dateString) {
   try {
     return format(new Date(dateString), "dd MMM, HH:mm");
   } catch (error) {
-    return '—';
+    return dateString;
   }
 }
 
 export default function ActivitiesPage() {
-  const { t } = useI18n();
   const [activities, setActivities] = useState([]);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [responseText, setResponseText] = useState('');
   const [responseLinks, setResponseLinks] = useState('');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-
-  const loadActivities = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const [activityData, userData] = await Promise.all([
-        Activity.list('-created_date'),
-        User.me().catch(() => fallbackUser),
-      ]);
-
-      setActivities(Array.isArray(activityData) ? activityData : []);
-      setUser(userData || fallbackUser);
-    } catch (loadError) {
-      setActivities([]);
-      setError(t('activitiesLoadError'));
-      setUser((current) => current || fallbackUser);
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
 
   useEffect(() => {
-    loadActivities();
-  }, [loadActivities]);
+    Activity.list('-created_date').then(setActivities);
+    User.me()
+      .then(setUser)
+      .catch(() =>
+        setUser({
+          full_name: 'Alex Cosmos',
+          email: 'alex@ascenda.com',
+        }),
+      )
+      .finally(() => setLoading(false));
+  }, []);
 
   const summary = useMemo(() => {
     const open = activities.filter((activity) => activity.status !== 'completed');
     const completed = activities.filter((activity) => activity.status === 'completed');
     const next = open
       .map((activity) => new Date(activity.prazo_resposta))
-      .filter((date) => !Number.isNaN(date.getTime()))
       .sort((a, b) => a.getTime() - b.getTime())[0];
 
     return {
       open: open.length,
       completed: completed.length,
-      nextDeadline: next ? formatDeadline(next) : t('activitiesNoUpcomingDeadline'),
+      nextDeadline: next ? formatDeadline(next) : '—',
     };
-  }, [activities, t]);
-
-  const filteredActivities = useMemo(() => {
-    if (statusFilter === 'all') {
-      return activities
-        .slice()
-        .sort((a, b) => new Date(a.prazo_resposta) - new Date(b.prazo_resposta));
-    }
-
-    return activities
-      .filter((activity) => activity.status === statusFilter)
-      .sort((a, b) => new Date(a.prazo_resposta) - new Date(b.prazo_resposta));
-  }, [activities, statusFilter]);
-
-  const statusLabels = useMemo(
-    () => ({
-      open: t('activitiesStatusOpen'),
-      in_progress: t('activitiesStatusInProgress'),
-      completed: t('activitiesStatusCompleted'),
-    }),
-    [t],
-  );
+  }, [activities]);
 
   const handleRespond = async () => {
     if (!selectedActivity || !responseText.trim()) return;
 
-    setIsSubmitting(true);
+    const payload = {
+      autor: user?.full_name || 'Você',
+      conteudo: responseText.trim(),
+      links: responseLinks
+        .split('\n')
+        .map((link) => link.trim())
+        .filter(Boolean),
+      tipo: 'intern',
+    };
 
-    try {
-      const payload = {
-        autor: user?.full_name || t('activitiesInternFallback'),
-        conteudo: responseText.trim(),
-        links: responseLinks
-          .split('\n')
-          .map((link) => link.trim())
-          .filter(Boolean),
-        tipo: 'intern',
-      };
-
-      const updated = await Activity.addResponse(selectedActivity.id, payload);
-      if (updated) {
-        setActivities((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-        setSelectedActivity(updated);
-        setResponseText('');
-        setResponseLinks('');
-      }
-    } catch (submitError) {
-      setError(t('activitiesSubmitError'));
-    } finally {
-      setIsSubmitting(false);
+    const updated = await Activity.addResponse(selectedActivity.id, payload);
+    if (updated) {
+      setActivities((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      setSelectedActivity(updated);
+      setResponseText('');
+      setResponseLinks('');
     }
   };
 
   const handleMarkComplete = async (activityId) => {
-    try {
-      const updated = await Activity.update(activityId, { status: 'completed' });
-      if (updated) {
-        setActivities((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-        setSelectedActivity((current) => (current?.id === updated.id ? updated : current));
-      }
-    } catch (updateError) {
-      setError(t('activitiesSubmitError'));
+    const updated = await Activity.update(activityId, { status: 'completed' });
+    if (updated) {
+      setActivities((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      setSelectedActivity((current) => (current?.id === updated.id ? updated : current));
     }
   };
 
@@ -169,10 +113,9 @@ export default function ActivitiesPage() {
     setSelectedActivity(null);
     setResponseText('');
     setResponseLinks('');
-    setIsSubmitting(false);
   };
 
-  const isEmpty = !loading && filteredActivities.length === 0;
+  const isEmpty = !loading && activities.length === 0;
 
   return (
     <div className="p-8 max-w-6xl mx-auto text-white space-y-8">
@@ -184,87 +127,44 @@ export default function ActivitiesPage() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2">
             <span className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-purple-300">
-              <ClipboardList className="w-4 h-4" /> {t('mentorActivitiesTag')}
+              <ClipboardList className="w-4 h-4" /> Mentor Activities
             </span>
-            <h1 className="text-3xl font-bold">{t('mentorJourneyTitle')}</h1>
-            <p className="text-slate-300 max-w-2xl">{t('mentorJourneySubtitle')}</p>
+            <h1 className="text-3xl font-bold">Sua jornada guiada pelo padrinho</h1>
+            <p className="text-slate-300 max-w-2xl">
+              Acompanhe missões, rituais e reflexões enviados pelo seu padrinho. Responda rapidamente
+              para manter a constelação alinhada!
+            </p>
           </div>
           <div className="grid grid-cols-3 gap-4 min-w-[260px]">
             <div className="rounded-xl border border-purple-500/40 bg-purple-500/10 p-4 text-center">
-              <p className="text-sm text-purple-200">{t('activitiesSummaryOpen')}</p>
+              <p className="text-sm text-purple-200">Abertas</p>
               <p className="text-2xl font-bold">{summary.open}</p>
             </div>
             <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
-              <p className="text-sm text-emerald-200">{t('activitiesSummaryCompleted')}</p>
+              <p className="text-sm text-emerald-200">Concluídas</p>
               <p className="text-2xl font-bold">{summary.completed}</p>
             </div>
             <div className="rounded-xl border border-orange-500/40 bg-orange-500/10 p-4 text-center">
-              <p className="text-sm text-orange-200">{t('activitiesSummaryNextDeadline')}</p>
+              <p className="text-sm text-orange-200">Próximo prazo</p>
               <p className="text-lg font-semibold">{summary.nextDeadline}</p>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {error ? (
-        <div className="cosmic-card rounded-xl border border-red-500/40 bg-red-500/10 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <p className="text-sm text-red-100">{error}</p>
-          <Button variant="outline" size="sm" onClick={loadActivities}>
-            {t('activitiesRetry')}
-          </Button>
-        </div>
-      ) : null}
-
-      <div className="cosmic-card rounded-2xl p-5 border border-purple-500/20">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="inline-flex items-center gap-2 text-sm text-slate-300">
-            <ListFilter className="w-4 h-4" />
-            {t('activitiesFilterLabel')}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {statusFilters.map((filter) => {
-              const Icon = filter.icon;
-              const isActive = statusFilter === filter.id;
-              return (
-                <Button
-                  key={filter.id}
-                  variant={isActive ? 'gradient' : 'outline'}
-                  size="sm"
-                  onClick={() => setStatusFilter(filter.id)}
-                >
-                  <Icon className="w-4 h-4 mr-2" /> {t(filter.labelKey)}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="grid gap-6">
-          {[...Array(3)].map((_, index) => (
-            <div
-              key={index}
-              className="cosmic-card rounded-2xl p-6 border border-purple-500/20 animate-pulse bg-slate-900/40"
-            >
-              <div className="h-6 bg-slate-700/50 rounded w-1/3 mb-4" />
-              <div className="h-4 bg-slate-700/40 rounded w-2/3 mb-2" />
-              <div className="h-4 bg-slate-700/30 rounded w-full" />
-            </div>
-          ))}
-        </div>
-      ) : isEmpty ? (
+      {isEmpty ? (
         <div className="cosmic-card rounded-2xl p-12 text-center border border-dashed border-purple-500/40">
           <Sparkles className="w-10 h-10 text-purple-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">{t('activitiesEmptyTitle')}</h2>
-          <p className="text-slate-400">{t('activitiesEmptyDescription')}</p>
+          <h2 className="text-2xl font-semibold mb-2">Tudo pronto por aqui!</h2>
+          <p className="text-slate-400">
+            Seu padrinho ainda não enviou novas atividades. Aproveite para revisar suas conquistas.
+          </p>
         </div>
       ) : (
         <div className="grid gap-6">
-          {filteredActivities.map((activity, index) => {
+          {activities.map((activity, index) => {
+            const status = statusConfig[activity.status] || statusConfig.open;
             const gradient = rarityColor[activity.categoria] || 'from-purple-500/80 to-slate-700/30';
-            const statusClass = STATUS_STYLES[activity.status] || STATUS_STYLES.open;
-            const responseCount = activity.respostas?.length || 0;
             return (
               <motion.div
                 key={activity.id}
@@ -279,11 +179,11 @@ export default function ActivitiesPage() {
                       <span className={`rounded-full px-3 py-1 text-xs font-semibold bg-gradient-to-r ${gradient}`}>
                         {activity.categoria}
                       </span>
-                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusClass}`}>
-                        {statusLabels[activity.status] || statusLabels.open}
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${status.badge}`}>
+                        {status.label}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-slate-400">
-                        <Clock className="w-4 h-4" /> {t('activitiesDueLabel')}: {formatDeadline(activity.prazo_resposta)}
+                        <Clock className="w-4 h-4" /> {formatDeadline(activity.prazo_resposta)}
                       </span>
                     </div>
                     <div>
@@ -292,17 +192,15 @@ export default function ActivitiesPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700">
-                        <Sparkles className="w-4 h-4 text-purple-300" />
-                        {t('activitiesMentorLabel', { name: activity.mentor })}
+                        <Sparkles className="w-4 h-4 text-purple-300" /> Mentor: {activity.mentor}
                       </span>
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700">
-                        <MessageCircle className="w-4 h-4 text-orange-300" />
-                        {t('activitiesInteractions', { count: responseCount })}
+                        <MessageCircle className="w-4 h-4 text-orange-300" /> {activity.respostas?.length || 0} interações
                       </span>
                     </div>
                     {activity.recursos_sugeridos?.length ? (
                       <div className="text-sm">
-                        <p className="text-slate-400 mb-1">{t('activitiesResources')}</p>
+                        <p className="text-slate-400 mb-1">Recursos sugeridos</p>
                         <div className="flex flex-wrap gap-2">
                           {activity.recursos_sugeridos.map((link) => (
                             <a
@@ -326,7 +224,7 @@ export default function ActivitiesPage() {
                       onClick={() => setSelectedActivity(activity)}
                       className="w-full"
                     >
-                      {t('activitiesRespondCta')}
+                      Responder atividade
                     </Button>
                     {activity.status !== 'completed' ? (
                       <Button
@@ -334,11 +232,11 @@ export default function ActivitiesPage() {
                         className="w-full border-emerald-400 text-emerald-200 hover:bg-emerald-500/10"
                         onClick={() => handleMarkComplete(activity.id)}
                       >
-                        <CheckCircle2 className="w-4 h-4 mr-2" /> {t('activitiesMarkComplete')}
+                        <CheckCircle2 className="w-4 h-4 mr-2" /> Marcar como concluída
                       </Button>
                     ) : (
                       <span className="inline-flex items-center justify-center gap-2 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/40 rounded-lg py-2">
-                        <CheckCircle2 className="w-4 h-4" /> {t('activitiesMarkedComplete')}
+                        <CheckCircle2 className="w-4 h-4" /> Entrega registrada
                       </span>
                     )}
                   </div>
@@ -357,22 +255,19 @@ export default function ActivitiesPage() {
                 <Reply className="w-6 h-6 text-purple-300" /> {selectedActivity.titulo}
               </DialogTitle>
               <DialogDescription>
-                {t('activitiesDialogDetails', {
-                  deadline: formatDeadline(selectedActivity.prazo_resposta),
-                  mentor: selectedActivity.mentor,
-                })}
+                Prazo: {formatDeadline(selectedActivity.prazo_resposta)} · Mentor {selectedActivity.mentor}
               </DialogDescription>
             </DialogHeader>
 
             <div className="p-6 space-y-6">
               <div className="space-y-3">
                 <label className="text-sm font-medium text-slate-300" htmlFor="activity-response">
-                  {t('activitiesDialogResponseLabel')}
+                  Sua resposta
                 </label>
                 <Textarea
                   id="activity-response"
                   rows={5}
-                  placeholder={t('activitiesDialogResponsePlaceholder')}
+                  placeholder="Compartilhe seus insights, anexos ou dúvidas..."
                   value={responseText}
                   onChange={(event) => setResponseText(event.target.value)}
                 />
@@ -380,19 +275,19 @@ export default function ActivitiesPage() {
 
               <div className="space-y-3">
                 <label className="text-sm font-medium text-slate-300" htmlFor="activity-links">
-                  {t('activitiesDialogLinksLabel')}
+                  Links úteis (opcional)
                 </label>
                 <Textarea
                   id="activity-links"
                   rows={3}
-                  placeholder={t('activitiesDialogLinksPlaceholder')}
+                  placeholder="Cole cada link em uma nova linha"
                   value={responseLinks}
                   onChange={(event) => setResponseLinks(event.target.value)}
                 />
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-slate-200">{t('activitiesDialogHistory')}</p>
+                <p className="text-sm font-semibold text-slate-200">Histórico de interações</p>
                 <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
                   {selectedActivity.respostas?.length ? (
                     selectedActivity.respostas
@@ -428,28 +323,17 @@ export default function ActivitiesPage() {
                         </div>
                       ))
                   ) : (
-                    <p className="text-sm text-slate-400">{t('activitiesDialogEmptyHistory')}</p>
+                    <p className="text-sm text-slate-400">Seja o primeiro a responder esta atividade.</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <Button variant="ghost" onClick={closeDialog}>
-                  {t('cancel')}
+                  Cancelar
                 </Button>
-                <Button
-                  variant="gradient"
-                  onClick={handleRespond}
-                  disabled={!responseText.trim() || isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {t('activitiesDialogSubmitting')}
-                    </span>
-                  ) : (
-                    t('activitiesDialogSubmit')
-                  )}
+                <Button variant="gradient" onClick={handleRespond} disabled={!responseText.trim()}>
+                  Enviar resposta
                 </Button>
               </div>
             </div>
