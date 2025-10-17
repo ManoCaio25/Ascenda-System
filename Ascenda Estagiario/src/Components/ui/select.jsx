@@ -22,7 +22,7 @@ export function Select({ value, onValueChange, children }) {
     <select
       value={value}
       onChange={(event) => onValueChange?.(event.target.value)}
-      className={`rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500 ${triggerClassName}`}
+      className={`rounded-md border border-default bg-[var(--sidebar-bg)] px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-purple-500 ${triggerClassName}`}
     >
       {options.length === 0 && <option value="">Select...</option>}
       {options.map((option) => (

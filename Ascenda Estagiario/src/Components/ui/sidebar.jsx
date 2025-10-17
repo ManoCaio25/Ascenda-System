@@ -45,10 +45,26 @@ export function SidebarMenuItem({ className = "", children }) {
   return <div className={className}>{children}</div>;
 }
 
-export function SidebarMenuButton({ className = "", active = false, children, ...props }) {
+export function SidebarMenuButton({
+  className = "",
+  active = false,
+  children,
+  asChild = false,
+  ...props
+}) {
   const stateClass = active ? 'bg-purple-600/20 text-white' : 'hover:bg-purple-600/10 text-slate-300';
+  const combinedClassName = `w-full rounded-lg px-3 py-2 text-left transition-colors ${stateClass} ${className}`.trim();
+
+  if (asChild && React.isValidElement(children)) {
+    const childClassName = children.props.className ?? "";
+    return React.cloneElement(children, {
+      ...props,
+      className: `${childClassName} ${combinedClassName}`.trim(),
+    });
+  }
+
   return (
-    <button className={`w-full rounded-lg px-3 py-2 text-left transition-colors ${stateClass} ${className}`} {...props}>
+    <button className={combinedClassName} {...props}>
       {children}
     </button>
   );

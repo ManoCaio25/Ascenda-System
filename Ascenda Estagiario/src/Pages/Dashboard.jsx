@@ -42,6 +42,25 @@ export default function Dashboard() {
     loadDashboardData();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = User.subscribe((change) => {
+      if (!change || !change.record) return;
+
+      setUser((previous) => {
+        if (!previous || String(previous.id) === String(change.record.id)) {
+          return change.record;
+        }
+        return previous;
+      });
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, []);
+
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
