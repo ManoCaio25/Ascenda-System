@@ -10,7 +10,8 @@ import {
   FileText,
   Youtube,
   CheckCircle,
-  Trash2
+  Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@padrinho/components/ui/button";
 import { Input } from "@padrinho/components/ui/input";
@@ -296,6 +297,10 @@ export default function ActivityGenerator() {
   const [description, setDescription] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [resourceFile, setResourceFile] = useState(null);
+  const [resourceContent, setResourceContent] = useState("");
+  const [resourceContentWords, setResourceContentWords] = useState(0);
+  const [resourceContentSource, setResourceContentSource] = useState(null);
+  const [isExtractingContent, setIsExtractingContent] = useState(false);
   const [activityCount, setActivityCount] = useState(3);
   const [quizCount, setQuizCount] = useState(5);
   const [selectedIntern, setSelectedIntern] = useState(null);
@@ -306,6 +311,7 @@ export default function ActivityGenerator() {
   const [activityPreview, setActivityPreview] = useState(null);
   const [generatedActivities, setGeneratedActivities] = useState([]);
   const fileInputRef = useRef(null);
+  const transcriptCacheRef = useRef(new Map());
 
   useEffect(() => {
     const loadInterns = async () => {
@@ -315,27 +321,64 @@ export default function ActivityGenerator() {
     loadInterns();
   }, []);
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
+    setFeedback(null);
+
     if (!file) {
       setResourceFile(null);
+      setResourceContent("");
+      setResourceContentWords(0);
+      setResourceContentSource(null);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
+    setIsExtractingContent(true);
+
+    try {
+      const [dataUrl, extractedText] = await Promise.all([
+        readFileAsDataUrl(file),
+        extractTextFromFile(file),
+      ]);
+
+      const normalizedExtracted = normalizeContent(extractedText);
+      const derivedSource = file.type?.startsWith("video/") ? "video" : "document";
       setResourceFile({
         name: file.name,
         size: file.size,
         type: file.type,
-        dataUrl: reader.result,
+        dataUrl,
       });
-    };
-    reader.readAsDataURL(file);
+      setResourceContent(extractedText || "");
+      setResourceContentWords(computeWordCount(normalizedExtracted));
+      setResourceContentSource(derivedSource === "document" ? "document" : null);
+
+      if (derivedSource === "document" && !normalizedExtracted && isTextLikeFile(file)) {
+        setFeedback({
+          type: "error",
+          message: t("activityGenerator.feedback.emptyDocument"),
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      setFeedback({
+        type: "error",
+        message: t("activityGenerator.feedback.unableToReadFile"),
+      });
+      setResourceFile(null);
+      setResourceContent("");
+      setResourceContentWords(0);
+      setResourceContentSource(null);
+    } finally {
+      setIsExtractingContent(false);
+    }
   };
 
   const handleRemoveFile = () => {
     setResourceFile(null);
+    setResourceContent("");
+    setResourceContentWords(0);
+    setResourceContentSource(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -346,6 +389,9 @@ export default function ActivityGenerator() {
     setDescription("");
     setVideoUrl("");
     setResourceFile(null);
+    setResourceContent("");
+    setResourceContentWords(0);
+    setResourceContentSource(null);
     setActivityCount(3);
     setQuizCount(5);
     setSelectedIntern(null);
@@ -356,14 +402,29 @@ export default function ActivityGenerator() {
   };
 
   const resourceSummary = useMemo(() => {
+    if (isExtractingContent) {
+      return t("activityGenerator.upload.extracting");
+    }
     if (resourceFile) {
-      return `${resourceFile.name} · ${(resourceFile.size / 1024).toFixed(1)} KB`;
+      const sizeLabel = `${resourceFile.name} · ${(resourceFile.size / 1024).toFixed(1)} KB`;
+      if (resourceContentWords > 0) {
+        return `${sizeLabel} · ${t("activityGenerator.upload.wordCount", undefined, {
+          count: resourceContentWords,
+        })}`;
+      }
+      return sizeLabel;
     }
     if (videoUrl.trim()) {
       return videoUrl.trim();
     }
     return t("activityGenerator.upload.noResource");
-  }, [resourceFile, videoUrl, t]);
+  }, [
+    isExtractingContent,
+    resourceFile,
+    resourceContentWords,
+    videoUrl,
+    t,
+  ]);
 
   const sourceType = useMemo(() => {
     if (videoUrl.trim()) return "video";
@@ -378,6 +439,14 @@ export default function ActivityGenerator() {
 
     const sanitizedActivityCount = Number(activityCount) || 0;
     const sanitizedQuizCount = Number(quizCount) || 0;
+
+    if (isExtractingContent) {
+      setFeedback({
+        type: "error",
+        message: t("activityGenerator.feedback.processingFile"),
+      });
+      return;
+    }
 
     if (!resourceTitle.trim()) {
       setFeedback({
