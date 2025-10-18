@@ -127,16 +127,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
         const target = params.get('target');
         if (!target) {
-            return null;
+            return new URL('../Login Ascenda/index.html', window.location.href).toString();
         }
 
         const destinoNormalizado = target.toLowerCase();
         const rotas = {
             estagiario: '../Ascenda Estagiario/index.html',
             padrinho: '../Ascenda Padrinho att/index.html',
+            login: '../Login Ascenda/index.html',
         };
 
-        return rotas[destinoNormalizado] ?? null;
+        const caminho = rotas[destinoNormalizado] ?? rotas.login;
+        return new URL(caminho, window.location.href).toString();
     }
 
     const destinoFinal = obterDestinoFinal();

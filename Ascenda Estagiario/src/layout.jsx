@@ -185,11 +185,20 @@ export default function Layout({ children, currentPageName }) {
     refreshUser: loadUser,
   }), [user, loadUser]);
 
+  const redirectWithLoading = useCallback((target) => {
+    if (typeof window === 'undefined') return;
+    const loadingUrl = new URL('../loading-page/index.html', window.location.href);
+    loadingUrl.searchParams.set('target', target);
+    window.location.href = loadingUrl.toString();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await User.logout();
     } catch (error) {
       console.log("Logout error:", error);
+    } finally {
+      redirectWithLoading('login');
     }
   };
 

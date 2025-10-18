@@ -1,0 +1,10 @@
+{
+  "name": "login-ascenda",
+  "version": "1.0.0",
+  "description": "Interface de login da Ascenda com validação de credenciais e redirecionamentos.",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "type": "module"
+}
