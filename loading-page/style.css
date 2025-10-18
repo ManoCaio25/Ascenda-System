@@ -185,10 +185,12 @@ body {
 }
 
 .rocket {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 0 15px rgba(123, 45, 142, 0.6));
+  width:100%;
+  height:100%;
+  filter:drop-shadow(0 0 15px rgba(123,45,142,.6));
+  animation: rocketFloat 3s ease-in-out infinite; /* apenas sobe/desce */
 }
+
 
 @keyframes rocketFloat {
     0%, 100% {
@@ -254,6 +256,7 @@ body {
     }
 }
 
+
 /* Responsividade */
 @media (max-width: 768px) {
     .rocket-wrapper {
@@ -268,6 +271,22 @@ body {
     .line {
         height: 2px;
     }
+    /* animação horizontal movida para o wrapper (sem rotação) */
+@keyframes fly-right {
+  0%   { transform: translateX(-35vw); opacity:.15 }
+  20%  { opacity:1 }
+  100% { transform: translateX(35vw);  opacity:1 }
+}
+@keyframes fly-left {
+  0%   { transform: translateX(35vw);  opacity:.15 }
+  20%  { opacity:1 }
+  100% { transform: translateX(-35vw); opacity:1 }
+}
+
+/* aplica ao wrapper conforme o modo */
+#rocketWrap.anim-enter { animation: fly-right 6.8s ease-in-out forwards; }
+#rocketWrap.anim-exit  { animation: fly-left  6.8s ease-in-out forwards; }
+
 
     .beta-badge {
         font-size: 12px;
