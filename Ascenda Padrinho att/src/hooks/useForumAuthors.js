@@ -9,39 +9,7 @@ const USER_TO_INTERN_MAP = {
   user_5: 'iasmin',
 };
 
-const isEmoji = (value) => {
-  if (!value || typeof value !== 'string') {
-    return false;
-  }
-
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return false;
-  }
-
-  const emojiRegex = /(\p{Emoji}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}|\p{Emoji_Component})/u;
-  return emojiRegex.test(trimmed);
-};
-
-const normalizeAvatar = (intern) => {
-  if (!intern) return '';
-
-  const { avatar_url: avatarUrl, avatar } = intern;
-
-  if (isEmoji(avatarUrl)) {
-    return avatarUrl.trim();
-  }
-
-  if (typeof avatarUrl === 'string' && avatarUrl.trim()) {
-    return avatarUrl.trim();
-  }
-
-  if (typeof avatar === 'string' && avatar.trim()) {
-    return avatar.trim();
-  }
-
-  return '';
-};
+const normalizeAvatar = (intern) => intern?.avatar || intern?.avatar_url || '';
 
 export function useForumAuthors() {
   const [interns, setInterns] = useState([]);

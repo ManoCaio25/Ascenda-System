@@ -30,7 +30,6 @@ import {
 } from '@padrinho/components/ui/dialog';
 import { useTranslation } from '@padrinho/i18n';
 import { useForumAuthors } from '@padrinho/hooks/useForumAuthors';
-import Avatar from '@padrinho/components/ui/Avatar';
 
 const categoryIcons = {
   'Technical Questions': Hash,
@@ -406,16 +405,11 @@ export default function ForumPage() {
                     className="block rounded-lg border border-border bg-surface2 p-3 transition hover:border-brand"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex items-center justify-center">
+                      <div className="h-10 w-10 overflow-hidden rounded-full border border-border bg-surface">
                         {author?.avatar ? (
-                          <Avatar
-                            src={author.avatar}
-                            alt={author.displayName}
-                            size={40}
-                            className="border border-border bg-surface"
-                          />
+                          <img src={author.avatar} alt={author.displayName} className="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-sm text-muted">
+                          <div className="flex h-full w-full items-center justify-center text-sm text-muted">
                             <MessageSquare className="h-4 w-4" />
                           </div>
                         )}
