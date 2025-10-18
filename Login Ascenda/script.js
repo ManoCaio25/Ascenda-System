@@ -31,7 +31,7 @@ const ESTAGIARIO = {
 };
 
 function construirUrlLoading(alvo) {
-  const url = new URL("../loading-page/index.html", window.location.href);
+  const url = new URL("./loading-page/index.html", window.location.href);
   url.searchParams.set("target", alvo);
   return url.toString();
 }

@@ -43,14 +43,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji',
-    'Twemoji Mozilla', 'Montserrat', sans-serif;
-}
-
-.lang-button span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .lang-button:hover,
