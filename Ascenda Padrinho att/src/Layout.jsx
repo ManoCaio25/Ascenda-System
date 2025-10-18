@@ -8,6 +8,7 @@ import {
   BarChart3,
   Calendar,
   Sparkles,
+  MessageSquare,
   LogOut
 } from "lucide-react";
 import { Button } from "@padrinho/components/ui/button";
@@ -44,6 +45,12 @@ const NAVIGATION_ITEMS = [
     url: createPageUrl("Interns"),
     icon: Users,
     translationKey: "layout.nav.interns",
+  },
+  {
+    key: "forum",
+    url: createPageUrl("Forum"),
+    icon: MessageSquare,
+    translationKey: "layout.nav.forum",
   },
   {
     key: "activityGenerator",

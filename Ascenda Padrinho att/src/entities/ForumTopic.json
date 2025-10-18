@@ -1,0 +1,33 @@
+{
+  "name": "ForumTopic",
+  "type": "object",
+  "properties": {
+    "id_categoria_forum": {
+      "type": "string",
+      "description": "Forum category ID"
+    },
+    "titulo": {
+      "type": "string",
+      "description": "Topic title"
+    },
+    "conteudo_topico": {
+      "type": "string",
+      "description": "Topic content"
+    },
+    "id_usuario_criador": {
+      "type": "string",
+      "description": "Creator user ID"
+    },
+    "visualizacoes": {
+      "type": "number",
+      "default": 0,
+      "description": "View count"
+    },
+    "reply_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of replies"
+    }
+  },
+  "required": ["id_categoria_forum", "titulo", "conteudo_topico"]
+}
