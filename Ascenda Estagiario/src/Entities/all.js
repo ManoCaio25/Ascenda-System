@@ -46,6 +46,16 @@ export const User = {
     const unsubscribe = userStore.subscribe('change', handler);
     return typeof unsubscribe === 'function' ? unsubscribe : () => {};
   },
+  async logout() {
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem('ascenda_estagiario_users');
+      } catch (error) {
+        console.warn('Failed to clear estagiario user storage on logout', error);
+      }
+    }
+    return true;
+  },
 };
 
 export const Task = {
