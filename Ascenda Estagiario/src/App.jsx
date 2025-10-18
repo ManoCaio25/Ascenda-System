@@ -17,7 +17,7 @@ import ForumTopicView from './Pages/ForumTopicView.jsx';
 import Calendar from './Pages/Calendar.jsx';
 import Profile from './Pages/Profile.jsx';
 import Settings from './Pages/Settings.jsx';
-import { I18nProvider } from './Components/utils/i18n.jsx';
+import { I18nProvider, useI18n } from './Components/utils/i18n.jsx';
 import { AccessibilityProvider } from './Components/utils/accessibility.jsx';
 import interns from '@/data/interns.json';
 
@@ -38,11 +38,12 @@ function Page({ pageName, intern, children }) {
 function EstagiarioRouter({ fallbackIntern }) {
   const { state } = useLocation();
   const { internId } = useParams();
+  const { t } = useI18n();
 
   const intern = fallbackIntern || state || interns.find((item) => item.id === internId);
 
   if (!intern) {
-    return <div>Estagiário não encontrado.</div>;
+    return <div>{t('internNotFound')}</div>;
   }
 
   return (

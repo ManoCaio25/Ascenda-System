@@ -387,18 +387,30 @@ export default function Layout({ children, currentPageName }) {
                       size="sm"
                       onClick={() => changeLanguage('pt')}
                       className="flex items-center gap-2"
+                      aria-label={t('languagePortuguese')}
                     >
-                      <span role="img" aria-label="Português">🇧🇷</span>
-                      <span>PT</span>
+                      <img
+                        src="https://flagcdn.com/w20/br.png"
+                        alt={t('languagePortuguese')}
+                        className="w-5 h-4 rounded-sm object-cover"
+                        loading="lazy"
+                      />
+                      <span>{t('languagePortugueseShort')}</span>
                     </Button>
                     <Button
                       variant={language === 'en' ? 'gradient' : 'ghost'}
                       size="sm"
                       onClick={() => changeLanguage('en')}
                       className="flex items-center gap-2"
+                      aria-label={t('languageEnglish')}
                     >
-                      <span role="img" aria-label="English">🇺🇸</span>
-                      <span>EN</span>
+                      <img
+                        src="https://flagcdn.com/w20/us.png"
+                        alt={t('languageEnglish')}
+                        className="w-5 h-4 rounded-sm object-cover"
+                        loading="lazy"
+                      />
+                      <span>{t('languageEnglishShort')}</span>
                     </Button>
                   </div>
                 </div>

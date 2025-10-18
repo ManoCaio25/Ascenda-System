@@ -1,20 +1,21 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, X, Bot, User, Sparkles } from "lucide-react";
 import { Button } from "@estagiario/Components/ui/button";
 import { Input } from "@estagiario/Components/ui/input";
 import { InvokeLLM } from "@estagiario/integrations/Core";
+import { useI18n } from "@estagiario/Components/utils/i18n";
 
 const AIChatWidget = () => {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'bot',
-      content: 'Hi! I\'m your AI assistant. I can help you with questions about the Ascenda platform, your tasks, learning paths, and more. How can I help you today?',
-      timestamp: new Date()
-    }
-  ]);
+  const initialBotMessage = useMemo(() => ({
+    id: 'welcome',
+    type: 'bot',
+    content: t('aiAssistantWelcome'),
+    timestamp: new Date()
+  }), [t]);
+  const [messages, setMessages] = useState([initialBotMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -26,6 +27,15 @@ const AIChatWidget = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    setMessages((previous) => {
+      if (previous.length === 1 && previous[0].id === 'welcome') {
+        return [{ ...initialBotMessage, timestamp: previous[0].timestamp }];
+      }
+      return previous;
+    });
+  }, [initialBotMessage]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -43,7 +53,7 @@ const AIChatWidget = () => {
 
     try {
       const response = await InvokeLLM({
-        prompt: `You are an AI assistant for the Ascenda Cosmic Intern Portal platform. 
+        prompt: `You are an AI assistant for the Ascenda Cosmic Intern Portal platform.
         
         Context about the platform:
         - Ascenda is an internship management platform with a cosmic theme
@@ -70,7 +80,7 @@ const AIChatWidget = () => {
       const errorMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: 'I\'m having trouble processing your request right now. Please try again in a moment.',
+        content: t('aiAssistantError'),
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -124,8 +134,8 @@ const AIChatWidget = () => {
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">AI Assistant</h3>
-                  <p className="text-xs text-slate-400">Always ready to help</p>
+                  <h3 className="font-semibold text-white">{t('aiAssistantTitle')}</h3>
+                  <p className="text-xs text-slate-400">{t('aiAssistantSubtitle')}</p>
                 </div>
               </div>
               <Button
@@ -199,7 +209,7 @@ const AIChatWidget = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask me anything about Ascenda..."
+                  placeholder={t('aiAssistantPlaceholder')}
                   className="flex-1 bg-slate-800 border-slate-600 text-white placeholder-slate-400"
                   disabled={isLoading}
                 />

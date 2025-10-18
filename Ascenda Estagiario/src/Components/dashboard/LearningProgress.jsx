@@ -1,31 +1,34 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@estagiario/utils"; 
+import { createPageUrl } from "@estagiario/utils";
 import { BookOpen, ChevronRight, Play, FileText, ExternalLink, CheckCircle } from "lucide-react";
 import { Button } from "@estagiario/Components/ui/button";
 import { Progress } from "@estagiario/Components/ui/progress";
 import { Skeleton } from "@estagiario/Components/ui/skeleton";
+import { useI18n } from "@estagiario/Components/utils/i18n";
 
 export default function LearningProgress({ learningPaths, content, isLoading }) {
-  const mockPath = {
-    nome_trilha: "Frontend Development Mastery",
-    descricao: "Complete path from basics to advanced frontend development",
-    progress_percent: 73
-  };
+  const { t } = useI18n();
 
-  const mockContent = [
+  const mockPath = useMemo(() => ({
+    nome_trilha: t('learningFallbackPathTitle'),
+    descricao: t('learningFallbackPathDescription'),
+    progress_percent: 73
+  }), [t]);
+
+  const mockContent = useMemo(() => ([
     {
       id: "1",
-      titulo: "React Hooks Deep Dive",
-      tipo_conteudo: "Video", 
+      titulo: t('learningFallbackContentReactHooks'),
+      tipo_conteudo: "Video",
       status_conclusao: "Em Progresso",
       duracao_estimada_minutos: 45,
       ordem_na_trilha: 4
     },
     {
-      id: "2", 
-      titulo: "State Management with Redux",
+      id: "2",
+      titulo: t('learningFallbackContentRedux'),
       tipo_conteudo: "Video",
       status_conclusao: "Nao Iniciado",
       duracao_estimada_minutos: 60,
@@ -33,13 +36,13 @@ export default function LearningProgress({ learningPaths, content, isLoading }) 
     },
     {
       id: "3",
-      titulo: "Performance Optimization Guide", 
+      titulo: t('learningFallbackContentPerformance'),
       tipo_conteudo: "PDF",
-      status_conclusao: "Concluido", 
+      status_conclusao: "Concluido",
       duracao_estimada_minutos: 30,
       ordem_na_trilha: 3
     }
-  ];
+  ]), [t]);
 
   const currentPath = learningPaths[0] || mockPath;
   const pathContent = content.length > 0 ? content.slice(0, 3) : mockContent;
@@ -60,6 +63,15 @@ export default function LearningProgress({ learningPaths, content, isLoading }) 
       case 'Nao Iniciado': return 'text-slate-400';
       default: return 'text-slate-400';
     }
+  };
+
+  const translateStatus = (status) => {
+    if (!status) return '';
+    const normalized = status.toLowerCase();
+    if (normalized.includes('concluido')) return t('contentStatusCompleted');
+    if (normalized.includes('progresso') || normalized.includes('progress')) return t('contentStatusInProgress');
+    if (normalized.includes('nao iniciado') || normalized.includes('not started')) return t('contentStatusNotStarted');
+    return status;
   };
 
   if (isLoading) {
@@ -97,11 +109,11 @@ export default function LearningProgress({ learningPaths, content, isLoading }) 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-blue-400" />
-          <h2 className="text-xl font-semibold text-white">Learning Progress</h2>
+          <h2 className="text-xl font-semibold text-white">{t('learningProgress')}</h2>
         </div>
         <Link to={createPageUrl("LearningPath")}>
           <Button variant="outline" size="sm" className="border-blue-600 text-blue-300 hover:bg-blue-600/20">
-            View Path
+            {t('viewPath')}
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </Link>
@@ -118,7 +130,7 @@ export default function LearningProgress({ learningPaths, content, isLoading }) 
         </div>
 
         <div className="mt-6">
-          <h4 className="text-sm font-medium text-slate-300 mb-3">Next Lessons</h4>
+          <h4 className="text-sm font-medium text-slate-300 mb-3">{t('nextLessons')}</h4>
           <div className="space-y-3">
             {pathContent.map((item, index) => (
               <motion.div
@@ -139,10 +151,10 @@ export default function LearningProgress({ learningPaths, content, isLoading }) 
                   <h5 className="text-sm font-medium text-white">{item.titulo}</h5>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-xs ${getStatusColor(item.status_conclusao)}`}>
-                      {item.status_conclusao?.replace('_', ' ')}
+                      {translateStatus(item.status_conclusao)}
                     </span>
                     <span className="text-xs text-slate-500">
-                      {item.duracao_estimada_minutos} min
+                      {item.duracao_estimada_minutos} {t('minutes')}
                     </span>
                   </div>
                 </div>

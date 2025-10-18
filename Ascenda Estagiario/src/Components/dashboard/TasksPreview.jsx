@@ -1,13 +1,16 @@
-import React from "react";
-import { motion } from "framer-motion"; 
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@estagiario/utils";
 import { CheckCircle, Clock, AlertCircle, ChevronRight, Target } from "lucide-react";
 import { Button } from "@estagiario/Components/ui/button";
 import { Skeleton } from "@estagiario/Components/ui/skeleton";
 import { format } from "date-fns";
+import { useI18n } from "@estagiario/Components/utils/i18n";
 
 export default function TasksPreview({ tasks, isLoading }) {
+  const { t } = useI18n();
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'Concluida': return <CheckCircle className="w-4 h-4 text-green-400" />;
@@ -26,18 +29,18 @@ export default function TasksPreview({ tasks, isLoading }) {
     }
   };
 
-  const mockTasks = [
+  const mockTasks = useMemo(() => ([
     {
       id: "1",
-      titulo_demanda: "Complete React Components Tutorial",
-      status_demanda: "Em Andamento", 
+      titulo_demanda: t('tasksFallbackReactComponents'),
+      status_demanda: "Em Andamento",
       data_limite: "2024-01-15",
       pontos_gamificacao_associados: 150,
       priority: "high"
     },
     {
-      id: "2", 
-      titulo_demanda: "Submit Weekly Report",
+      id: "2",
+      titulo_demanda: t('tasksFallbackWeeklyReport'),
       status_demanda: "Pendente",
       data_limite: "2024-01-12",
       pontos_gamificacao_associados: 50,
@@ -45,15 +48,30 @@ export default function TasksPreview({ tasks, isLoading }) {
     },
     {
       id: "3",
-      titulo_demanda: "Review Code Documentation", 
+      titulo_demanda: t('tasksFallbackDocumentation'),
       status_demanda: "Pendente",
       data_limite: "2024-01-18",
       pontos_gamificacao_associados: 75,
       priority: "low"
     }
-  ];
+  ]), [t]);
 
   const displayTasks = tasks.length > 0 ? tasks.slice(0, 4) : mockTasks;
+
+  const translateStatus = (status) => {
+    switch (status) {
+      case 'Concluida':
+        return t('done');
+      case 'Em Andamento':
+        return t('inProgress');
+      case 'Pendente':
+        return t('todo');
+      case 'Aguardando Revisao':
+        return t('inReview');
+      default:
+        return status;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -86,11 +104,11 @@ export default function TasksPreview({ tasks, isLoading }) {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-purple-400" />
-          <h2 className="text-xl font-semibold text-white">Active Tasks</h2>
+          <h2 className="text-xl font-semibold text-white">{t('activeTasks')}</h2>
         </div>
         <Link to={createPageUrl("Tasks")}>
           <Button variant="outline" size="sm" className="border-purple-600 text-purple-300 hover:bg-purple-600/20">
-            View All
+            {t('viewAll')}
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </Link>
@@ -113,11 +131,11 @@ export default function TasksPreview({ tasks, isLoading }) {
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`px-2 py-1 rounded text-xs ${getStatusColor(task.status_demanda)}`}>
-                    {task.status_demanda}
+                    {translateStatus(task.status_demanda)}
                   </span>
                   {task.data_limite && (
                     <span className="text-xs text-slate-400">
-                      Due {format(new Date(task.data_limite), "MMM d")}
+                      {t('due', { date: format(new Date(task.data_limite), "MMM d") })}
                     </span>
                   )}
                 </div>
@@ -125,7 +143,7 @@ export default function TasksPreview({ tasks, isLoading }) {
             </div>
             <div className="text-right">
               <div className="text-sm font-medium text-orange-400">
-                +{task.pontos_gamificacao_associados} pts
+                +{task.pontos_gamificacao_associados} {t('pointsSuffix')}
               </div>
             </div>
           </motion.div>

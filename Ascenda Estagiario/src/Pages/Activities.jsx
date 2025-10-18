@@ -14,21 +14,7 @@ import {
 import { Button } from '@estagiario/Components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@estagiario/Components/ui/dialog';
 import Textarea from '@estagiario/Components/ui/textarea';
-
-const statusConfig = {
-  open: {
-    label: 'Aberta',
-    badge: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40',
-  },
-  in_progress: {
-    label: 'Em andamento',
-    badge: 'bg-blue-500/20 text-blue-200 border border-blue-500/40',
-  },
-  completed: {
-    label: 'Concluída',
-    badge: 'bg-purple-500/20 text-purple-200 border border-purple-500/40',
-  },
-};
+import { useI18n } from '@estagiario/Components/utils/i18n';
 
 const rarityColor = {
   ritual: 'from-purple-500/80 to-purple-300/30',
@@ -51,6 +37,22 @@ export default function ActivitiesPage() {
   const [responseLinks, setResponseLinks] = useState('');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const { t } = useI18n();
+
+  const statusConfig = useMemo(() => ({
+    open: {
+      label: t('activitiesStatusOpen'),
+      badge: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40',
+    },
+    in_progress: {
+      label: t('activitiesStatusInProgress'),
+      badge: 'bg-blue-500/20 text-blue-200 border border-blue-500/40',
+    },
+    completed: {
+      label: t('activitiesStatusCompleted'),
+      badge: 'bg-purple-500/20 text-purple-200 border border-purple-500/40',
+    },
+  }), [t]);
 
   useEffect(() => {
     Activity.list('-created_date').then(setActivities);
@@ -75,15 +77,15 @@ export default function ActivitiesPage() {
     return {
       open: open.length,
       completed: completed.length,
-      nextDeadline: next ? formatDeadline(next) : '—',
+      nextDeadline: next ? formatDeadline(next) : t('activitiesNoUpcomingDeadline'),
     };
-  }, [activities]);
+  }, [activities, t]);
 
   const handleRespond = async () => {
     if (!selectedActivity || !responseText.trim()) return;
 
     const payload = {
-      autor: user?.full_name || 'Você',
+      autor: user?.full_name || t('activitiesInternFallback'),
       conteudo: responseText.trim(),
       links: responseLinks
         .split('\n')
@@ -127,25 +129,22 @@ export default function ActivitiesPage() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2">
             <span className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-purple-300">
-              <ClipboardList className="w-4 h-4" /> Mentor Activities
+              <ClipboardList className="w-4 h-4" /> {t('mentorActivitiesTag')}
             </span>
-            <h1 className="text-3xl font-bold">Sua jornada guiada pelo padrinho</h1>
-            <p className="text-slate-300 max-w-2xl">
-              Acompanhe missões, rituais e reflexões enviados pelo seu padrinho. Responda rapidamente
-              para manter a constelação alinhada!
-            </p>
+            <h1 className="text-3xl font-bold">{t('mentorJourneyTitle')}</h1>
+            <p className="text-slate-300 max-w-2xl">{t('mentorJourneySubtitle')}</p>
           </div>
           <div className="grid grid-cols-3 gap-4 min-w-[260px]">
             <div className="rounded-xl border border-purple-500/40 bg-purple-500/10 p-4 text-center">
-              <p className="text-sm text-purple-200">Abertas</p>
+              <p className="text-sm text-purple-200">{t('activitiesSummaryOpen')}</p>
               <p className="text-2xl font-bold">{summary.open}</p>
             </div>
             <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
-              <p className="text-sm text-emerald-200">Concluídas</p>
+              <p className="text-sm text-emerald-200">{t('activitiesSummaryCompleted')}</p>
               <p className="text-2xl font-bold">{summary.completed}</p>
             </div>
             <div className="rounded-xl border border-orange-500/40 bg-orange-500/10 p-4 text-center">
-              <p className="text-sm text-orange-200">Próximo prazo</p>
+              <p className="text-sm text-orange-200">{t('activitiesSummaryNextDeadline')}</p>
               <p className="text-lg font-semibold">{summary.nextDeadline}</p>
             </div>
           </div>
@@ -155,10 +154,8 @@ export default function ActivitiesPage() {
       {isEmpty ? (
         <div className="cosmic-card rounded-2xl p-12 text-center border border-dashed border-purple-500/40">
           <Sparkles className="w-10 h-10 text-purple-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Tudo pronto por aqui!</h2>
-          <p className="text-slate-400">
-            Seu padrinho ainda não enviou novas atividades. Aproveite para revisar suas conquistas.
-          </p>
+          <h2 className="text-2xl font-semibold mb-2">{t('activitiesEmptyTitle')}</h2>
+          <p className="text-slate-400">{t('activitiesEmptyDescription')}</p>
         </div>
       ) : (
         <div className="grid gap-6">
@@ -192,15 +189,15 @@ export default function ActivitiesPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700">
-                        <Sparkles className="w-4 h-4 text-purple-300" /> Mentor: {activity.mentor}
+                        <Sparkles className="w-4 h-4 text-purple-300" /> {t('activitiesMentorLabel', { name: activity.mentor || t('activitiesInternFallback') })}
                       </span>
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700">
-                        <MessageCircle className="w-4 h-4 text-orange-300" /> {activity.respostas?.length || 0} interações
+                        <MessageCircle className="w-4 h-4 text-orange-300" /> {t('activitiesInteractions', { count: activity.respostas?.length || 0 })}
                       </span>
                     </div>
                     {activity.recursos_sugeridos?.length ? (
                       <div className="text-sm">
-                        <p className="text-slate-400 mb-1">Recursos sugeridos</p>
+                        <p className="text-slate-400 mb-1">{t('activitiesResources')}</p>
                         <div className="flex flex-wrap gap-2">
                           {activity.recursos_sugeridos.map((link) => (
                             <a
@@ -224,7 +221,7 @@ export default function ActivitiesPage() {
                       onClick={() => setSelectedActivity(activity)}
                       className="w-full"
                     >
-                      Responder atividade
+                      {t('activitiesRespondCta')}
                     </Button>
                     {activity.status !== 'completed' ? (
                       <Button
@@ -232,11 +229,11 @@ export default function ActivitiesPage() {
                         className="w-full border-emerald-400 text-emerald-200 hover:bg-emerald-500/10"
                         onClick={() => handleMarkComplete(activity.id)}
                       >
-                        <CheckCircle2 className="w-4 h-4 mr-2" /> Marcar como concluída
+                        <CheckCircle2 className="w-4 h-4 mr-2" /> {t('activitiesMarkComplete')}
                       </Button>
                     ) : (
                       <span className="inline-flex items-center justify-center gap-2 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/40 rounded-lg py-2">
-                        <CheckCircle2 className="w-4 h-4" /> Entrega registrada
+                        <CheckCircle2 className="w-4 h-4" /> {t('activitiesMarkedComplete')}
                       </span>
                     )}
                   </div>
@@ -255,19 +252,22 @@ export default function ActivitiesPage() {
                 <Reply className="w-6 h-6 text-purple-300" /> {selectedActivity.titulo}
               </DialogTitle>
               <DialogDescription>
-                Prazo: {formatDeadline(selectedActivity.prazo_resposta)} · Mentor {selectedActivity.mentor}
+                {t('activitiesDialogDetails', {
+                  deadline: formatDeadline(selectedActivity.prazo_resposta),
+                  mentor: selectedActivity.mentor,
+                })}
               </DialogDescription>
             </DialogHeader>
 
             <div className="p-6 space-y-6">
               <div className="space-y-3">
                 <label className="text-sm font-medium text-slate-300" htmlFor="activity-response">
-                  Sua resposta
+                  {t('activitiesDialogResponseLabel')}
                 </label>
                 <Textarea
                   id="activity-response"
                   rows={5}
-                  placeholder="Compartilhe seus insights, anexos ou dúvidas..."
+                  placeholder={t('activitiesDialogResponsePlaceholder')}
                   value={responseText}
                   onChange={(event) => setResponseText(event.target.value)}
                 />
@@ -275,19 +275,19 @@ export default function ActivitiesPage() {
 
               <div className="space-y-3">
                 <label className="text-sm font-medium text-slate-300" htmlFor="activity-links">
-                  Links úteis (opcional)
+                  {t('activitiesDialogLinksLabel')}
                 </label>
                 <Textarea
                   id="activity-links"
                   rows={3}
-                  placeholder="Cole cada link em uma nova linha"
+                  placeholder={t('activitiesDialogLinksPlaceholder')}
                   value={responseLinks}
                   onChange={(event) => setResponseLinks(event.target.value)}
                 />
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-slate-200">Histórico de interações</p>
+                <p className="text-sm font-semibold text-slate-200">{t('activitiesDialogHistory')}</p>
                 <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
                   {selectedActivity.respostas?.length ? (
                     selectedActivity.respostas
@@ -323,17 +323,17 @@ export default function ActivitiesPage() {
                         </div>
                       ))
                   ) : (
-                    <p className="text-sm text-slate-400">Seja o primeiro a responder esta atividade.</p>
+                    <p className="text-sm text-slate-400">{t('activitiesDialogEmptyHistory')}</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <Button variant="ghost" onClick={closeDialog}>
-                  Cancelar
+                  {t('cancel')}
                 </Button>
                 <Button variant="gradient" onClick={handleRespond} disabled={!responseText.trim()}>
-                  Enviar resposta
+                  {t('activitiesDialogSubmit')}
                 </Button>
               </div>
             </div>
