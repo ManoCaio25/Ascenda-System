@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@estagiario/Components/ui/button';
 import { Progress } from '@estagiario/Components/ui/progress';
 import { useI18n } from '@estagiario/Components/utils/i18n';
+import { useUser } from '@estagiario/contexts/UserContext';
 
 const buildRarityMap = (t) => ({
   legendary: { label: t('rarityLegendary'), badge: 'bg-gradient-to-r from-purple-500 to-orange-400 text-white', accent: 'text-orange-300' },
@@ -259,8 +260,8 @@ export default function Profile() {
   const searchParams = new URLSearchParams(location.search);
   const tab = searchParams.get('tab');
   const { t } = useI18n();
+  const { user, setUser } = useUser();
 
-  const [user, setUser] = useState(null);
   const [achievements, setAchievements] = useState([]);
   const [shopItems, setShopItems] = useState([]);
   const [activeTab, setActiveTab] = useState(tab || 'profile');
@@ -291,7 +292,7 @@ export default function Profile() {
       setShopItems(shopData);
     };
     fetchData();
-  }, []);
+  }, [setUser]);
 
   const handleEquipTag = async (tag) => {
     if (!user) return;

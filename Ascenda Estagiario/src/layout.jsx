@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@estagiario/utils";
 import {
@@ -36,6 +36,7 @@ import {
 } from "@estagiario/Components/ui/sidebar";
 import { useI18n } from "@estagiario/Components/utils/i18n";
 import AIChatWidget from "@estagiario/Components/ai/AIChat";
+import { UserContext } from "@estagiario/contexts/UserContext";
 
 const navigationConfig = [
   { key: "dashboard", page: "Dashboard", icon: Home },
@@ -87,14 +88,23 @@ export default function Layout({ children, currentPageName }) {
   const [isFocusMode, setIsFocusMode] = useState(false); // New state for focus mode
   const { t, language, changeLanguage } = useI18n();
 
-  const defaultUser = useMemo(() => ({
-    full_name: "Caio Menezes",
-    email: "caio.alvarenga@ascenda.com",
-    pontos_gamificacao: 2847,
-    avatar_url: "",
-    area_atuacao: "Frontend Development",
-    equipped_tag: "🚀 Cosmic Explorer",
-  }), []);
+  const loadUser = useCallback(async () => {
+    try {
+      let currentUser = await User.me();
+      currentUser = await ensureDefaultProfile(currentUser);
+      setUser(currentUser);
+    } catch (error) {
+      // User not logged in, create a default user
+      setUser({
+        full_name: "Caio Menezes",
+        email: "caio.alvarenga@ascenda.com",
+        pontos_gamificacao: 2847,
+        avatar_url: "", // Changed to empty string for fallback test
+        area_atuacao: "Frontend Development",
+        equipped_tag: "🚀 Cosmic Explorer"
+      });
+    }
+  }, []);
 
   const navigationItems = useMemo(
     () =>
@@ -135,7 +145,7 @@ export default function Layout({ children, currentPageName }) {
 
   useEffect(() => {
     loadUser();
-  }, []);
+  }, [loadUser]);
 
   useEffect(() => {
     const unsubscribe = User.subscribe((change) => {
@@ -169,23 +179,11 @@ export default function Layout({ children, currentPageName }) {
     };
   }, []);
 
-  const loadUser = async () => {
-    try {
-      let currentUser = await User.me();
-      currentUser = await ensureDefaultProfile(currentUser);
-      setUser(currentUser);
-    } catch (error) {
-      // User not logged in, create a default user
-      setUser({
-        full_name: "Caio Menezes",
-        email: "caio.alvarenga@ascenda.com",
-        pontos_gamificacao: 2847,
-        avatar_url: "", // Changed to empty string for fallback test
-        area_atuacao: "Frontend Development",
-        equipped_tag: "🚀 Cosmic Explorer"
-      });
-    }
-  };
+  const userContextValue = useMemo(() => ({
+    user,
+    setUser,
+    refreshUser: loadUser,
+  }), [user, loadUser]);
 
   const handleLogout = async () => {
     try {
@@ -196,7 +194,8 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-primary transition-colors duration-300">
+    <UserContext.Provider value={userContextValue}>
+      <div className="min-h-screen bg-background text-text-primary transition-colors duration-300">
       <style>{`
             :root.light {
               --background: #f1f5f9; /* slate-100 */
@@ -456,6 +455,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </SidebarProvider>
       <AIChatWidget />
-    </div>
+      </div>
+    </UserContext.Provider>
   );
 }
