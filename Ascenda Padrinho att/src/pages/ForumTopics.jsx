@@ -103,10 +103,7 @@ export default function ForumTopicsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-6 md:p-8">
       <div className="flex flex-col gap-3">
-        <Link
-          to={createPageUrl('Forum')}
-          className="flex items-center gap-2 text-sm text-muted hover:text-primary"
-        >
+        <Link to={createPageUrl('Forum')} className="flex items-center gap-2 text-sm text-muted hover:text-primary">
           <ChevronLeft className="h-4 w-4" /> {t('forum.back')}
         </Link>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -129,7 +126,7 @@ export default function ForumTopicsPage() {
             transition={{ delay: index * 0.08 }}
           >
             <Link
-              to={`${createPageUrl('ForumTopicView')}?id=${topic.id}`}
+              to={createPageUrl(`ForumTopicView?id=${topic.id}`)}
               className="block rounded-lg border border-border bg-surface p-5 shadow-e1 transition hover:border-brand"
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">

@@ -225,7 +225,7 @@ export default function ForumPage() {
                 transition={{ delay: index * 0.05 }}
               >
                 <Link
-                  to={`${createPageUrl('ForumTopics')}?category=${category.id}`}
+                  to={createPageUrl(`ForumTopics?category=${category.id}`)}
                   className="block rounded-xl border border-border bg-surface p-6 shadow-e1 transition-all hover:border-brand"
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -275,7 +275,7 @@ export default function ForumPage() {
               {trendingTopics.map((topic) => (
                 <Link
                   key={topic.id}
-                  to={`${createPageUrl('ForumTopicView')}?id=${topic.id}`}
+                  to={createPageUrl(`ForumTopicView?id=${topic.id}`)}
                   className="block rounded-lg border border-border bg-surface2 p-3 transition hover:border-brand"
                 >
                   <p className="text-sm font-semibold text-primary line-clamp-2">{topic.titulo}</p>
