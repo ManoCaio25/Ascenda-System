@@ -47,22 +47,43 @@ export default function YouTubePlayer({
   onProgress,
   onDuration,
   onPlaybackStateChange,
+  onPlayerReady,
 }) {
   const containerRef = useRef(null);
   const playerRef = useRef(null);
   const progressTimer = useRef(null);
   const durationRef = useRef(0);
+  const progressCallbackRef = useRef(onProgress);
+  const durationCallbackRef = useRef(onDuration);
+  const playbackCallbackRef = useRef(onPlaybackStateChange);
+  const readyCallbackRef = useRef(onPlayerReady);
+
+  useEffect(() => {
+    progressCallbackRef.current = onProgress;
+  }, [onProgress]);
+
+  useEffect(() => {
+    durationCallbackRef.current = onDuration;
+  }, [onDuration]);
+
+  useEffect(() => {
+    playbackCallbackRef.current = onPlaybackStateChange;
+  }, [onPlaybackStateChange]);
+
+  useEffect(() => {
+    readyCallbackRef.current = onPlayerReady;
+  }, [onPlayerReady]);
 
   const emitProgress = () => {
-    if (!playerRef.current || typeof onProgress !== 'function') return;
+    if (!playerRef.current || typeof progressCallbackRef.current !== 'function') return;
 
     const currentTime = Math.floor(playerRef.current.getCurrentTime() || 0);
     const duration = Math.floor(playerRef.current.getDuration() || 0);
 
     if (duration > 0) {
       durationRef.current = duration;
-      if (typeof onDuration === 'function') {
-        onDuration(durationRef.current);
+      if (typeof durationCallbackRef.current === 'function') {
+        durationCallbackRef.current(durationRef.current);
       }
     }
 
@@ -70,7 +91,7 @@ export default function YouTubePlayer({
       ? Math.min(100, Math.round((currentTime / durationRef.current) * 100))
       : 0;
 
-    onProgress({ currentTime, duration: durationRef.current, percent });
+    progressCallbackRef.current({ currentTime, duration: durationRef.current, percent });
   };
 
   const handleStateChange = (event) => {
@@ -88,8 +109,8 @@ export default function YouTubePlayer({
 
     const mappedState = stateMap[event.data] || 'unknown';
 
-    if (typeof onPlaybackStateChange === 'function') {
-      onPlaybackStateChange(mappedState);
+    if (typeof playbackCallbackRef.current === 'function') {
+      playbackCallbackRef.current(mappedState);
     }
 
     if (mappedState === 'playing') {
@@ -130,16 +151,20 @@ export default function YouTubePlayer({
             const duration = Math.floor(event.target.getDuration() || 0);
             if (duration > 0) {
               durationRef.current = duration;
-              if (typeof onDuration === 'function') {
-                onDuration(durationRef.current);
+              if (typeof durationCallbackRef.current === 'function') {
+                durationCallbackRef.current(durationRef.current);
               }
             }
 
-            if (typeof onPlaybackStateChange === 'function') {
-              onPlaybackStateChange('ready');
+            if (typeof playbackCallbackRef.current === 'function') {
+              playbackCallbackRef.current('ready');
             }
 
             emitProgress();
+
+            if (typeof readyCallbackRef.current === 'function') {
+              readyCallbackRef.current(event.target);
+            }
           },
           onStateChange: handleStateChange,
         },
@@ -156,8 +181,24 @@ export default function YouTubePlayer({
         playerRef.current.destroy();
         playerRef.current = null;
       }
+      if (typeof readyCallbackRef.current === 'function') {
+        readyCallbackRef.current(null);
+      }
     };
-  }, [videoId, startTime, onProgress, onDuration, onPlaybackStateChange]);
+  }, [videoId]);
+
+  useEffect(() => {
+    if (!playerRef.current) return;
+    const player = playerRef.current;
+    try {
+      const currentVideoId = player.getVideoData?.()?.video_id;
+      if (currentVideoId === videoId && startTime >= 0) {
+        player.seekTo(Math.floor(startTime || 0), true);
+      }
+    } catch (error) {
+      // noop if player API is unavailable
+    }
+  }, [startTime, videoId]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 }

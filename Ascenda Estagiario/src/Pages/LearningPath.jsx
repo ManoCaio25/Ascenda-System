@@ -13,6 +13,7 @@ import {
   Link as LinkIcon,
   ArrowLeft,
   X,
+  RotateCcw,
 } from 'lucide-react';
 import { Progress } from '@estagiario/Components/ui/progress';
 import {
@@ -155,6 +156,7 @@ export default function LearningPathPage() {
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentProgress, setContentProgress] = useState({});
   const [videoPlayback, setVideoPlayback] = useState(() => createInitialPlaybackState());
+  const [playerInstance, setPlayerInstance] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -206,6 +208,7 @@ export default function LearningPathPage() {
     setSelectedContent(content);
     const savedSeconds = contentProgress[content.id] || 0;
     setVideoPlayback(createInitialPlaybackState(savedSeconds));
+    setPlayerInstance(null);
   };
 
   const handleProgressUpdate = (contentId, seconds) => {
@@ -244,6 +247,7 @@ export default function LearningPathPage() {
     }
     setSelectedContent(null);
     setVideoPlayback(createInitialPlaybackState());
+    setPlayerInstance(null);
   };
 
   if (isLoading || !learningPath) {
@@ -265,6 +269,44 @@ export default function LearningPathPage() {
   const hasContent = contents.length > 0;
   const selectedVideoId = getYoutubeVideoId(selectedContent?.url_acesso);
   const selectedProgress = selectedContent ? contentProgress[selectedContent.id] || 0 : 0;
+  const youtubeShareUrl = selectedVideoId ? `https://www.youtube.com/watch?v=${selectedVideoId}` : null;
+  const estimatedMinutes = selectedContent?.duracao_estimada_minutos;
+  const hasEstimatedMinutes = typeof estimatedMinutes === 'number' && !Number.isNaN(estimatedMinutes);
+  const playbackStatusKeyMap = {
+    idle: 'videoStatusIdle',
+    ready: 'videoStatusReady',
+    playing: 'videoStatusPlaying',
+    paused: 'videoStatusPaused',
+    buffering: 'videoStatusBuffering',
+    ended: 'videoStatusEnded',
+    cued: 'videoStatusCued',
+    unstarted: 'videoStatusUnstarted',
+    unknown: 'videoStatusUnknown',
+  };
+  const lastCheckpointSeconds = videoPlayback.currentTime || selectedProgress || 0;
+  const playbackStatusText = t(playbackStatusKeyMap[videoPlayback.state] || 'videoStatusUnknown');
+  const displayCurrentTime = formatTime(videoPlayback.currentTime);
+  const displayDuration = videoPlayback.duration ? formatTime(videoPlayback.duration) : '00:00';
+  const displayCheckpoint = formatTime(lastCheckpointSeconds);
+  const showOverlay =
+    ['paused', 'ended', 'cued'].includes(videoPlayback.state) ||
+    (videoPlayback.state === 'ready' && lastCheckpointSeconds === 0);
+  const canRestart = lastCheckpointSeconds > 5;
+
+  const handleResumePlayback = () => {
+    if (playerInstance && typeof playerInstance.playVideo === 'function') {
+      playerInstance.playVideo();
+    }
+  };
+
+  const handleRestartPlayback = () => {
+    if (playerInstance && typeof playerInstance.seekTo === 'function') {
+      playerInstance.seekTo(0, true);
+      if (typeof playerInstance.playVideo === 'function') {
+        playerInstance.playVideo();
+      }
+    }
+  };
 
   return (
     <div className="p-8 max-w-6xl mx-auto text-text-primary space-y-10">
@@ -317,8 +359,8 @@ export default function LearningPathPage() {
       })}
 
       <Dialog open={Boolean(selectedContent)} onOpenChange={(open) => !open && closeDialog()}>
-        <DialogContent className="cosmic-card text-text-primary border-purple-700/60 max-w-5xl w-full p-0 overflow-hidden">
-          <div className="flex flex-col gap-6 p-6">
+        <DialogContent className="cosmic-card text-text-primary border-purple-700/60 max-w-6xl w-full overflow-hidden bg-slate-950/95 p-0">
+          <div className="space-y-6 p-6">
             <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
@@ -345,48 +387,144 @@ export default function LearningPathPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-5">
+            <div className="space-y-6">
               {selectedVideoId ? (
-                <div className="space-y-5">
-                  <div className="relative overflow-hidden rounded-xl border border-white/5 bg-slate-950/60 shadow-lg">
-                    <div className="aspect-video w-full">
-                      <YouTubePlayer
-                        videoId={selectedVideoId}
-                        startTime={selectedProgress}
-                        onProgress={handleVideoProgress}
-                        onDuration={handleVideoDuration}
-                        onPlaybackStateChange={handlePlaybackStateChange}
-                      />
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                  <section className="space-y-5">
+                    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/80 shadow-2xl">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.25),_transparent_60%)]" />
+                      <div className="aspect-video w-full">
+                        <YouTubePlayer
+                          videoId={selectedVideoId}
+                          startTime={selectedProgress}
+                          onProgress={handleVideoProgress}
+                          onDuration={handleVideoDuration}
+                          onPlaybackStateChange={handlePlaybackStateChange}
+                          onPlayerReady={setPlayerInstance}
+                        />
+                      </div>
+                      {showOverlay && (
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-slate-950/70 backdrop-blur-sm">
+                          <span className="text-sm font-medium text-purple-100">{playbackStatusText}</span>
+                          <div className="flex flex-wrap items-center justify-center gap-3">
+                            <button
+                              type="button"
+                              onClick={handleResumePlayback}
+                              disabled={!playerInstance}
+                              className="inline-flex items-center gap-2 rounded-full border border-purple-400/60 bg-purple-500/20 px-4 py-2 text-sm font-semibold text-purple-50 transition hover:border-purple-300 hover:bg-purple-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300 disabled:cursor-not-allowed disabled:border-purple-400/20 disabled:bg-purple-500/10 disabled:text-purple-200/60"
+                            >
+                              <Play className="h-4 w-4" />
+                              {t('videoResumePlaybackButton')}
+                            </button>
+                            {canRestart && (
+                              <button
+                                type="button"
+                                onClick={handleRestartPlayback}
+                                disabled={!playerInstance}
+                                className="inline-flex items-center gap-2 rounded-full border border-purple-400/60 bg-transparent px-4 py-2 text-sm font-semibold text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300 disabled:cursor-not-allowed disabled:border-purple-400/20 disabled:text-purple-200/60"
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                                {t('videoRestartButton')}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      <div className="pointer-events-none absolute left-6 top-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-purple-100 shadow-lg">
+                        <Play className="h-3 w-3" />
+                        {t('continueVideo')}
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-slate-950/80 px-6 py-4 text-sm text-text-secondary">
+                        <div className="flex items-center gap-2 text-text-primary">
+                          <Clock className="h-4 w-4 text-purple-200" />
+                          <span>
+                            {displayCurrentTime} / {displayDuration}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-purple-200/80">
+                            <span>{t('videoStatusLabel')}</span>
+                            <span className="text-sm font-semibold text-purple-100 normal-case tracking-normal">
+                              {playbackStatusText}
+                            </span>
+                          </div>
+                          {youtubeShareUrl && (
+                            <a
+                              href={youtubeShareUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 rounded-full border border-purple-400/60 px-3 py-1 text-xs font-semibold text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              {t('videoOpenInYoutube')}
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    {videoPlayback.state === 'paused' && (
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-slate-950/60">
-                        <span className="rounded-full bg-purple-500/20 px-4 py-2 text-sm font-medium text-purple-100 shadow-lg backdrop-blur">
-                          {t('videoPlaybackPaused')}
-                        </span>
+                  </section>
+                  <aside className="space-y-5">
+                    <div className="space-y-3 rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">
+                      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-purple-200/80">
+                        <span>{t('videoProgressLabel')}</span>
+                        <span>{Math.min(100, Math.max(0, Math.round(videoPlayback.percent || 0)))}%</span>
+                      </div>
+                      <Progress value={videoPlayback.percent} className="h-2" />
+                      <div className="grid grid-cols-2 gap-3 text-xs text-text-secondary/80">
+                        <div className="space-y-1">
+                          <span className="block text-[0.65rem] uppercase tracking-[0.3em] text-purple-200/70">
+                            {t('videoCurrentPositionLabel')}
+                          </span>
+                          <span className="text-sm font-semibold text-text-primary">{displayCurrentTime}</span>
+                        </div>
+                        <div className="space-y-1 text-right">
+                          <span className="block text-[0.65rem] uppercase tracking-[0.3em] text-purple-200/70">
+                            {t('videoDurationLabel')}
+                          </span>
+                          <span className="text-sm font-semibold text-text-primary">{displayDuration}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-text-secondary">
+                        {t(getProgressDescriptorKey(videoPlayback.percent || 0))}
+                      </p>
+                    </div>
+
+                    {(selectedProgress > 0 || videoPlayback.currentTime > 0) && (
+                      <div className="space-y-2 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-4 text-sm text-text-secondary">
+                        <div className="flex items-center justify-between text-[0.65rem] uppercase tracking-[0.3em] text-purple-200/80">
+                          <span>{t('videoLastCheckpoint')}</span>
+                          <span className="text-text-primary">{displayCheckpoint}</span>
+                        </div>
+                        <p className="text-text-primary">
+                          {t('resumeFrom', { minutes: Math.floor(lastCheckpointSeconds / 60) })}
+                        </p>
                       </div>
                     )}
-                  </div>
 
-                  <div className="space-y-2 rounded-lg border border-purple-500/30 bg-purple-500/5 p-4">
-                    <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-purple-200/80">
-                      <span>{t('videoProgressLabel')}</span>
-                      <span>{Math.min(100, Math.max(0, Math.round(videoPlayback.percent || 0)))}%</span>
+                    <div className="space-y-4 rounded-2xl border border-white/10 bg-slate-900/70 p-5 text-sm text-text-secondary">
+                      <h4 className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-200/80">
+                        {t('videoLessonInsights')}
+                      </h4>
+                      <dl className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="font-medium text-text-primary">{t('videoEstimatedDuration')}</dt>
+                          <dd>{hasEstimatedMinutes ? `${estimatedMinutes} ${t('minutes')}` : '-'}</dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="font-medium text-text-primary">{t('videoContentType')}</dt>
+                          <dd>{selectedContent?.tipo_conteudo || '-'}</dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="font-medium text-text-primary">{t('videoLevelLabel')}</dt>
+                          <dd>{badgeLabels[selectedContent?.level] || selectedContent?.level || '-'}</dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="font-medium text-text-primary">{t('videoStatusLabel')}</dt>
+                          <dd className="text-purple-200">{playbackStatusText}</dd>
+                        </div>
+                      </dl>
                     </div>
-                    <Progress value={videoPlayback.percent} className="h-2" />
-                    <div className="flex items-center justify-between text-xs text-text-secondary/80">
-                      <span>{formatTime(videoPlayback.currentTime)}</span>
-                      <span>{videoPlayback.duration ? formatTime(videoPlayback.duration) : '00:00'}</span>
-                    </div>
-                    <p className="text-xs text-text-secondary">
-                      {t(getProgressDescriptorKey(videoPlayback.percent || 0))}
-                    </p>
-                  </div>
-
-                  {(selectedProgress > 0 || videoPlayback.currentTime > 0) && (
-                    <p className="text-sm text-text-secondary">
-                      {t('resumeFrom', { minutes: Math.floor((videoPlayback.currentTime || selectedProgress) / 60) })}
-                    </p>
-                  )}
+                  </aside>
                 </div>
               ) : selectedContent?.url_acesso ? (
                 <a
