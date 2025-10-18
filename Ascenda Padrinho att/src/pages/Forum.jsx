@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import {
   Hash,
   MessageSquare,
@@ -14,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ForumCategory } from '@padrinho/entities/ForumCategory';
 import { ForumTopic } from '@padrinho/entities/ForumTopic';
+import { ForumReply } from '@padrinho/entities/ForumReply';
 import { createPageUrl } from '@padrinho/utils';
 import { Input } from '@padrinho/components/ui/input';
 import { Button } from '@padrinho/components/ui/button';
@@ -26,6 +29,7 @@ import {
   DialogTitle,
 } from '@padrinho/components/ui/dialog';
 import { useTranslation } from '@padrinho/i18n';
+import { useForumAuthors } from '@padrinho/hooks/useForumAuthors';
 
 const categoryIcons = {
   'Technical Questions': Hash,
@@ -53,9 +57,11 @@ const focusFilters = [
 const initialTopicForm = { title: '', content: '', categoryId: '' };
 
 export default function ForumPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const { getAuthorProfile } = useForumAuthors();
   const [categories, setCategories] = useState([]);
   const [topics, setTopics] = useState([]);
+  const [replies, setReplies] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [focus, setFocus] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -65,16 +71,27 @@ export default function ForumPage() {
 
   useEffect(() => {
     const loadForum = async () => {
-      const [categoryData, topicData] = await Promise.all([
+      const [categoryData, topicData, repliesData] = await Promise.all([
         ForumCategory.list(),
         ForumTopic.list(),
+        ForumReply.list('-created_date'),
       ]);
       setCategories(categoryData);
       setTopics(topicData);
+      setReplies(repliesData);
       setIsLoading(false);
     };
     loadForum();
   }, []);
+
+  const locale = language === 'pt' ? ptBR : undefined;
+
+  const topicsById = useMemo(() => {
+    return topics.reduce((acc, topic) => {
+      acc[topic.id] = topic;
+      return acc;
+    }, {});
+  }, [topics]);
 
   const categoryTopicCounts = useMemo(() => {
     return topics.reduce((acc, topic) => {
@@ -105,14 +122,59 @@ export default function ForumPage() {
     });
   }, [categories, searchTerm, focus]);
 
-  const trendingTopics = useMemo(
-    () =>
-      topics
-        .slice()
-        .sort((a, b) => (b.reply_count || 0) - (a.reply_count || 0))
-        .slice(0, 3),
-    [topics],
-  );
+  const trendingTopics = useMemo(() => {
+    return topics
+      .slice()
+      .sort((a, b) => (b.reply_count || 0) - (a.reply_count || 0))
+      .slice(0, 3)
+      .map((topic) => {
+        const author = getAuthorProfile(topic.id_usuario_criador);
+        const relativeTime = topic.created_date
+          ? formatDistanceToNow(new Date(topic.created_date), { addSuffix: true, locale })
+          : null;
+        return {
+          ...topic,
+          author,
+          relativeTime,
+        };
+      });
+  }, [topics, getAuthorProfile, locale]);
+
+  const latestReplies = useMemo(() => {
+    return replies
+      .slice()
+      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
+      .slice(0, 4)
+      .map((reply) => {
+        const author = getAuthorProfile(reply.id_usuario_criador);
+        const topic = topicsById[reply.id_topico];
+        const relativeTime = reply.created_date
+          ? formatDistanceToNow(new Date(reply.created_date), { addSuffix: true, locale })
+          : null;
+        return {
+          reply,
+          author,
+          topic,
+          relativeTime,
+        };
+      });
+  }, [replies, getAuthorProfile, topicsById, locale]);
+
+  const forumStats = useMemo(() => {
+    const totalTopics = topics.length;
+    const totalReplies = replies.length;
+    const activeInterns = new Set(
+      replies
+        .map((reply) => getAuthorProfile(reply.id_usuario_criador)?.displayName)
+        .filter(Boolean),
+    ).size;
+
+    return {
+      totalTopics,
+      totalReplies,
+      activeInterns,
+    };
+  }, [topics, replies, getAuthorProfile]);
 
   const handleCreateTopic = async () => {
     if (!topicForm.title.trim() || !topicForm.content.trim() || !topicForm.categoryId) {
@@ -180,6 +242,23 @@ export default function ForumPage() {
               <Plus className="mr-2 h-4 w-4" />
               {t('forum.newTopicCta')}
             </Button>
+          </div>
+        </div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-border bg-surface2 p-4 shadow-e1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t('forum.stats.topics')}</p>
+            <p className="mt-1 text-2xl font-bold text-primary">{forumStats.totalTopics}</p>
+            <p className="text-xs text-muted">{t('forum.stats.topicsDescription')}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-surface2 p-4 shadow-e1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t('forum.stats.replies')}</p>
+            <p className="mt-1 text-2xl font-bold text-primary">{forumStats.totalReplies}</p>
+            <p className="text-xs text-muted">{t('forum.stats.repliesDescription')}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-surface2 p-4 shadow-e1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t('forum.stats.activeInterns')}</p>
+            <p className="mt-1 text-2xl font-bold text-primary">{forumStats.activeInterns}</p>
+            <p className="text-xs text-muted">{t('forum.stats.activeInternsDescription')}</p>
           </div>
         </div>
       </div>
@@ -287,6 +366,12 @@ export default function ForumPage() {
                       {topic.visualizacoes || 0} {t('forum.viewsLabel')}
                     </span>
                   </div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-muted">
+                    <span className="font-medium text-primary">
+                      {topic.author?.displayName || t('forum.anonymous')}
+                    </span>
+                    {topic.relativeTime ? <span>{topic.relativeTime}</span> : null}
+                  </div>
                 </Link>
               ))}
             </div>
@@ -299,6 +384,60 @@ export default function ForumPage() {
             <p className="text-sm text-muted">• {t('forum.tipOne')}</p>
             <p className="text-sm text-muted">• {t('forum.tipTwo')}</p>
             <p className="text-sm text-muted">• {t('forum.tipThree')}</p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface p-5 shadow-e1">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  {t('forum.latestRepliesTitle')}
+                </h3>
+                <p className="mt-1 text-sm text-muted">{t('forum.latestRepliesSubtitle')}</p>
+              </div>
+              <MessageSquare className="h-5 w-5 text-brand" />
+            </div>
+            <div className="mt-4 space-y-3">
+              {latestReplies.length ? (
+                latestReplies.map(({ reply, author, topic, relativeTime }) => (
+                  <Link
+                    key={reply.id}
+                    to={createPageUrl(`ForumTopicView?id=${reply.id_topico}`)}
+                    className="block rounded-lg border border-border bg-surface2 p-3 transition hover:border-brand"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 overflow-hidden rounded-full border border-border bg-surface">
+                        {author?.avatar ? (
+                          <img src={author.avatar} alt={author.displayName} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-sm text-muted">
+                            <MessageSquare className="h-4 w-4" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between text-xs text-muted">
+                          <span className="font-semibold text-primary">
+                            {author?.displayName || t('forum.anonymous')}
+                          </span>
+                          {relativeTime ? <span>{relativeTime}</span> : null}
+                        </div>
+                        <p className="text-sm text-primary line-clamp-2">{reply.conteudo_resposta}</p>
+                        {topic ? (
+                          <p className="text-xs text-muted">
+                            {t('forum.replyInTopic')}{' '}
+                            <span className="font-medium text-primary">{topic.titulo}</span>
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <p className="rounded-lg border border-dashed border-border bg-surface2 p-4 text-center text-xs text-muted">
+                  {t('forum.latestRepliesEmpty')}
+                </p>
+              )}
+            </div>
           </div>
         </aside>
       </div>

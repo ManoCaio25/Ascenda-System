@@ -18,12 +18,7 @@ import {
   DialogTitle,
 } from '@padrinho/components/ui/dialog';
 import { useTranslation } from '@padrinho/i18n';
-
-const mockUsers = {
-  user_1: { full_name: 'Silva', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face' },
-  user_2: { full_name: 'Jose', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face' },
-  user_3: { full_name: 'Laila', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face' },
-};
+import { useForumAuthors } from '@padrinho/hooks/useForumAuthors';
 
 const initialTopicState = { title: '', content: '' };
 
@@ -32,6 +27,7 @@ export default function ForumTopicsPage() {
   const searchParams = new URLSearchParams(location.search);
   const categoryId = searchParams.get('category');
   const { t, language } = useTranslation();
+  const { getAuthorProfile } = useForumAuthors();
 
   const [category, setCategory] = useState(null);
   const [topics, setTopics] = useState([]);
@@ -59,14 +55,21 @@ export default function ForumTopicsPage() {
 
   const formattedTopics = useMemo(() => {
     return topics.map((topic) => {
-      const creator = mockUsers[topic.id_usuario_criador] || { full_name: t('forum.anonymous'), avatar_url: '' };
+      const authorProfile = getAuthorProfile(topic.id_usuario_criador);
+      const creator = authorProfile
+        ? {
+            full_name: authorProfile.displayName,
+            avatar_url: authorProfile.avatar,
+            track: authorProfile.track,
+          }
+        : { full_name: t('forum.anonymous'), avatar_url: '' };
       return {
         ...topic,
         creator,
         formattedDate: format(new Date(topic.created_date), language === 'pt' ? 'dd/MM/yyyy' : 'MMM d, yyyy', { locale }),
       };
     });
-  }, [topics, language, locale, t]);
+    }, [topics, language, locale, t, getAuthorProfile]);
 
   const handleCreateTopic = async () => {
     if (!newTopic.title.trim() || !newTopic.content.trim() || !category) {
@@ -130,11 +133,19 @@ export default function ForumTopicsPage() {
               className="block rounded-lg border border-border bg-surface p-5 shadow-e1 transition hover:border-brand"
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                <img
-                  src={topic.creator.avatar_url}
-                  alt={topic.creator.full_name}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
+                <div className="h-12 w-12 overflow-hidden rounded-full border border-border bg-surface2">
+                  {topic.creator.avatar_url ? (
+                    <img
+                      src={topic.creator.avatar_url}
+                      alt={topic.creator.full_name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm text-muted">
+                      <User className="h-4 w-4" />
+                    </div>
+                  )}
+                </div>
                 <div className="flex-grow space-y-2">
                   <h2 className="text-lg font-semibold text-primary">{topic.titulo}</h2>
                   <div className="flex flex-wrap items-center gap-4 text-xs text-muted">
@@ -142,6 +153,11 @@ export default function ForumTopicsPage() {
                       <User className="h-3 w-3" />
                       {topic.creator.full_name}
                     </span>
+                    {topic.creator.track ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface2 px-2 py-1 font-medium text-[11px] text-brand">
+                        {topic.creator.track}
+                      </span>
+                    ) : null}
                     <span className="inline-flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
                       {topic.formattedDate}
