@@ -168,6 +168,18 @@ const en = {
     noTopics: "No topics published in this category yet.",
     bestAnswer: "Best answer",
     postReply: "Post reply",
+    latestRepliesTitle: "Intern replies",
+    latestRepliesSubtitle: "Monitor what interns are sharing across the forum.",
+    latestRepliesEmpty: "No intern replies yet. Invite them to start a conversation!",
+    replyInTopic: "Replying to",
+    stats: {
+      topics: "Open topics",
+      topicsDescription: "Discussions created by the cohort.",
+      replies: "Replies",
+      repliesDescription: "Contributions from interns and mentors.",
+      activeInterns: "Active interns",
+      activeInternsDescription: "Participating in discussions this week.",
+    },
   },
   contentManagement: {
     title: "Content Management",
