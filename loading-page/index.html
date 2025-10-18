@@ -18,10 +18,89 @@
         </div>
 
         <!-- Foguete -->
-        <div class="rocket-wrapper" aria-hidden="true">
-            <div id="rocket" class="rocket"></div>
+        <div class="rocket-wrapper">
+            <svg class="rocket" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                <!-- Chamas traseiras -->
+                <g class="flames">
+                    <!-- Chama principal -->
+                    <path class="flame flame-main" d="M 20 40 Q 10 35, 5 40 Q 10 45, 20 40 Z" fill="#FF6B35" opacity="0.9">
+                        <animate attributeName="d" 
+                            values="M 20 40 Q 10 35, 5 40 Q 10 45, 20 40 Z;
+                                    M 20 40 Q 8 35, 2 40 Q 8 45, 20 40 Z;
+                                    M 20 40 Q 12 35, 8 40 Q 12 45, 20 40 Z;
+                                    M 20 40 Q 10 35, 5 40 Q 10 45, 20 40 Z"
+                            dur="0.3s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <!-- Chama secundária -->
+                    <path class="flame flame-secondary" d="M 20 40 Q 12 37, 8 40 Q 12 43, 20 40 Z" fill="#FFD93D" opacity="0.8">
+                        <animate attributeName="d" 
+                            values="M 20 40 Q 12 37, 8 40 Q 12 43, 20 40 Z;
+                                    M 20 40 Q 10 37, 4 40 Q 10 43, 20 40 Z;
+                                    M 20 40 Q 14 37, 10 40 Q 14 43, 20 40 Z;
+                                    M 20 40 Q 12 37, 8 40 Q 12 43, 20 40 Z"
+                            dur="0.25s" repeatCount="indefinite"/>
+                    </path>
+
+                    <!-- Chama interna -->
+                    <path class="flame flame-inner" d="M 20 40 Q 15 38, 12 40 Q 15 42, 20 40 Z" fill="#FFF" opacity="0.6">
+                        <animate attributeName="d" 
+                            values="M 20 40 Q 15 38, 12 40 Q 15 42, 20 40 Z;
+                                    M 20 40 Q 14 38, 10 40 Q 14 42, 20 40 Z;
+                                    M 20 40 Q 16 38, 14 40 Q 16 42, 20 40 Z;
+                                    M 20 40 Q 15 38, 12 40 Q 15 42, 20 40 Z"
+                            dur="0.2s" repeatCount="indefinite"/>
+                    </path>
+                </g>
+
+                <!-- Corpo do foguete -->
+                <g class="rocket-body">
+                    <!-- Corpo principal -->
+                    <path d="M 40 25 L 140 25 L 140 55 L 40 55 Z" fill="#4A1A5C" stroke="#7B2D8E" stroke-width="2"/>
+                    
+                    <!-- Nariz do foguete -->
+                    <path d="M 140 25 L 180 40 L 140 55 Z" fill="#5C1F6E" stroke="#7B2D8E" stroke-width="2"/>
+                    
+                    <!-- Asa superior -->
+                    <path d="M 50 25 L 60 10 L 70 25 Z" fill="#6B2D7E" stroke="#7B2D8E" stroke-width="2"/>
+                    
+                    <!-- Asa inferior -->
+                    <path d="M 50 55 L 60 70 L 70 55 Z" fill="#6B2D7E" stroke="#7B2D8E" stroke-width="2"/>
+                    
+                    <!-- Janela -->
+                    <circle cx="100" cy="40" r="8" fill="#1A1A2E" stroke="#7B2D8E" stroke-width="1.5"/>
+                    <circle cx="100" cy="40" r="5" fill="#4A5568" opacity="0.5"/>
+                    
+                    <!-- Detalhes decorativos -->
+                    <line x1="75" y1="30" x2="75" y2="50" stroke="#7B2D8E" stroke-width="1.5"/>
+                    <line x1="85" y1="30" x2="85" y2="50" stroke="#7B2D8E" stroke-width="1.5"/>
+                    <line x1="115" y1="30" x2="115" y2="50" stroke="#7B2D8E" stroke-width="1.5"/>
+                    <line x1="125" y1="30" x2="125" y2="50" stroke="#7B2D8E" stroke-width="1.5"/>
+                    
+                    <!-- Propulsor traseiro -->
+                    <rect x="25" y="32" width="20" height="16" fill="#3D1149" stroke="#7B2D8E" stroke-width="2" rx="2"/>
+                    <circle cx="30" cy="40" r="3" fill="#FF6B35" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;0.4;0.8" dur="0.3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="38" cy="40" r="3" fill="#FFD93D" opacity="0.7">
+                        <animate attributeName="opacity" values="0.7;0.3;0.7" dur="0.25s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+
+                <!-- Rastro de movimento -->
+                <g class="motion-trail">
+                    <line x1="40" y1="35" x2="10" y2="35" stroke="#7B2D8E" stroke-width="2" opacity="0.6">
+                        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="0.8s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="40" y1="40" x2="5" y2="40" stroke="#9B4DB8" stroke-width="2" opacity="0.5">
+                        <animate attributeName="opacity" values="0.5;0.1;0.5" dur="0.7s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="40" y1="45" x2="10" y2="45" stroke="#7B2D8E" stroke-width="2" opacity="0.6">
+                        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="0.8s" repeatCount="indefinite"/>
+                    </line>
+                </g>
+            </svg>
         </div>
-        <p id="tagline" class="tagline" aria-live="polite"></p>
 
         <!-- Linhas de carregamento inferiores -->
         <div class="loading-lines bottom">
@@ -33,9 +112,10 @@
         </div>
 
         <!-- Badge BETA -->
-        <!-- <div class="beta-badge">BETA</div> -->
+        <div class="beta-badge">BETA</div>
     </div>
+
     <script src="script.js"></script>
-  </body>
+</body>
 </html>
 
