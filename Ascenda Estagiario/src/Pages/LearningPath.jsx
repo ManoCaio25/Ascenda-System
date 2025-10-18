@@ -519,21 +519,31 @@ export default function LearningPathPage() {
                     {t('videoBackToLearningPath')}
                   </button>
                 </div>
-                <a
-                  href={selectedContent.url_acesso}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition hover:border-purple-400/60 hover:bg-purple-500/20"
-                >
-                  <LinkIcon className="h-4 w-4" />
-                  {t('openContentLink')}
-                </a>
-              </div>
-            ) : selectedContent ? (
-              <div className="space-y-6 p-12 text-center text-text-secondary">
-                <BookOpen className="mx-auto h-16 w-16 text-purple-300" />
-                <h3 className="text-xl font-semibold text-white">{t('contentPlaceholderTitle')}</h3>
-                <p>{t('contentPlaceholderDescription')}</p>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      <Dialog open={Boolean(selectedContent)} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="cosmic-card text-text-primary border-purple-700/60 max-w-6xl w-full overflow-hidden bg-slate-950/95 p-0">
+          {selectedContent?.tipo_conteudo === 'Video' && selectedVideoId ? (
+            <VideoPlayer
+              contentId={selectedContent.id}
+              videoId={selectedVideoId}
+              title={selectedContent.titulo}
+              description={selectedContent.descricao}
+              onClose={handlePlayerClose}
+              onProgressChange={handleVideoProgressChange}
+              onCompletion={handleVideoCompletion}
+              levelLabel={badgeLabels[selectedContent.level]}
+              estimatedMinutes={hasEstimatedMinutes ? estimatedMinutes : null}
+              contentType={selectedContent.tipo_conteudo}
+            />
+          ) : selectedContent?.url_acesso ? (
+            <div className="space-y-6 p-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold text-text-primary">{selectedContent.titulo}</h2>
                 <button
                   type="button"
                   onClick={closeDialog}
@@ -545,6 +555,30 @@ export default function LearningPathPage() {
             ) : null}
           </DialogContent>
         </Dialog>
+      {videoNotification && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-purple-500/40 bg-slate-900/95 p-5 shadow-lg shadow-purple-500/30">
+          <div className="flex items-start gap-3">
+            <div className="mt-1 h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
+            <div className="flex-1 text-text-primary">
+              <p className="text-sm font-semibold text-purple-200">{videoNotification.title}</p>
+              <p className="mt-1 text-xs text-text-secondary/80">{videoNotification.message}</p>
+            </div>
+          ) : selectedContent ? (
+            <div className="space-y-6 p-10 text-center text-text-secondary">
+              <BookOpen className="w-16 h-16 mx-auto mb-4 text-purple-300" />
+              <h3 className="text-xl font-semibold text-text-primary">{t('contentPlaceholderTitle')}</h3>
+              <p>{t('contentPlaceholderDescription')}</p>
+              <button
+                type="button"
+                onClick={closeDialog}
+                className="mx-auto inline-flex items-center gap-2 rounded-full border border-purple-500/40 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20"
+              >
+                {t('videoBackToLearningPath')}
+              </button>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
       {videoNotification && (
         <div className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-purple-500/40 bg-slate-900/95 p-5 shadow-lg shadow-purple-500/30">
           <div className="flex items-start gap-3">
