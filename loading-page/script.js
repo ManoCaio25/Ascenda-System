@@ -122,7 +122,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     createRocketParticles();
-    
+
+    function obterDestinoFinal() {
+        const params = new URLSearchParams(window.location.search);
+        const target = params.get('target');
+        if (!target) {
+            return null;
+        }
+
+        const destinoNormalizado = target.toLowerCase();
+        const rotas = {
+            estagiario: '../Ascenda Estagiario/dist/index.html',
+            padrinho: '../Ascenda Padrinho att/dist/index.html',
+        };
+
+        return rotas[destinoNormalizado] ?? null;
+    }
+
+    const destinoFinal = obterDestinoFinal();
+    if (destinoFinal) {
+        setTimeout(() => {
+            window.location.href = destinoFinal;
+        }, 7000);
+    }
+
     // Log de inicialização
     console.log('🚀 Rocket Loading Animation initialized!');
     console.log('✨ Features: Purple rocket, fire effects, animated loading lines');
