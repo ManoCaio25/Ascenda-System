@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <defs>
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8e2de2" />
+      <stop offset="100%" stop-color="#4a00e0" />
+    </linearGradient>
+    <linearGradient id="finGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff8a65" />
+      <stop offset="100%" stop-color="#ff7043" />
+    </linearGradient>
+    <radialGradient id="windowGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#7ecfff" stop-opacity="0.8" />
+    </radialGradient>
+  </defs>
+  <g transform="translate(20 10)">
+    <path d="M60 0 C100 30 120 70 120 120 L0 120 C0 70 20 30 60 0 Z" fill="url(#bodyGradient)" stroke="#2d0a51" stroke-width="4" />
+    <path d="M0 120 L-20 150 L40 120 Z" fill="url(#finGradient)" />
+    <path d="M120 120 L180 150 L120 90 Z" fill="url(#finGradient)" transform="translate(-40 0)" />
+    <circle cx="60" cy="60" r="20" fill="url(#windowGradient)" stroke="#2d0a51" stroke-width="4" />
+  </g>
+  <g>
+    <path d="M40 130 C30 150 45 160 60 160 C75 160 90 150 80 130" fill="#ffd54f" opacity="0.85" />
+    <path d="M60 130 C50 150 63 158 74 158 C85 158 98 150 88 130" fill="#ffab40" opacity="0.75" />
+  </g>
+</svg>
