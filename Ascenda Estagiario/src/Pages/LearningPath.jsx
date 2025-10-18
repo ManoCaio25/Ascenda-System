@@ -10,7 +10,9 @@ import {
   Clock,
   Lock,
   Star,
-  Link as LinkIcon
+  Link as LinkIcon,
+  ArrowLeft,
+  X,
 } from 'lucide-react';
 import { Progress } from '@estagiario/Components/ui/progress';
 import {
@@ -25,6 +27,30 @@ import { useI18n } from '@estagiario/Components/utils/i18n';
 
 const LEVEL_ORDER = ['Basic', 'Medium', 'Advanced'];
 const PROGRESS_KEY_PREFIX = 'ascenda-learning-progress';
+
+const createInitialPlaybackState = (currentTime = 0) => ({
+  currentTime,
+  duration: 0,
+  percent: 0,
+  state: 'idle',
+});
+
+const formatTime = (totalSeconds) => {
+  if (typeof totalSeconds !== 'number' || Number.isNaN(totalSeconds) || totalSeconds <= 0) {
+    return '00:00';
+  }
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+const getProgressDescriptorKey = (percent) => {
+  if (percent >= 85) return 'videoProgressStatusEnd';
+  if (percent >= 40) return 'videoProgressStatusMiddle';
+  return 'videoProgressStatusBeginning';
+};
 
 const getYoutubeVideoId = (url) => {
   if (!url) return null;
@@ -128,6 +154,7 @@ export default function LearningPathPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentProgress, setContentProgress] = useState({});
+  const [videoPlayback, setVideoPlayback] = useState(() => createInitialPlaybackState());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -177,12 +204,46 @@ export default function LearningPathPage() {
 
   const handleContentClick = (content) => {
     setSelectedContent(content);
+    const savedSeconds = contentProgress[content.id] || 0;
+    setVideoPlayback(createInitialPlaybackState(savedSeconds));
   };
 
   const handleProgressUpdate = (contentId, seconds) => {
-    if (!contentId) return;
-    setContentProgress((prev) => ({ ...prev, [contentId]: seconds }));
-    localStorage.setItem(buildProgressKey(contentId), String(seconds));
+    if (!contentId || typeof seconds !== 'number') return;
+    const normalizedSeconds = Math.max(0, Math.floor(seconds));
+    setContentProgress((prev) => ({ ...prev, [contentId]: normalizedSeconds }));
+    localStorage.setItem(buildProgressKey(contentId), String(normalizedSeconds));
+  };
+
+  const handleVideoProgress = (progressData) => {
+    if (!selectedContent || !progressData) return;
+    setVideoPlayback((prev) => ({ ...prev, ...progressData }));
+    handleProgressUpdate(selectedContent.id, progressData.currentTime);
+  };
+
+  const handleVideoDuration = (duration) => {
+    if (!selectedContent || typeof duration !== 'number') return;
+    setVideoPlayback((prev) => {
+      const normalizedDuration = Math.max(0, Math.floor(duration));
+      const currentTime = prev.currentTime || contentProgress[selectedContent.id] || 0;
+      const percent = normalizedDuration
+        ? Math.min(100, Math.round((currentTime / normalizedDuration) * 100))
+        : prev.percent;
+      return { ...prev, duration: normalizedDuration, percent };
+    });
+  };
+
+  const handlePlaybackStateChange = (state) => {
+    setVideoPlayback((prev) => ({ ...prev, state }));
+  };
+
+  const closeDialog = () => {
+    if (selectedContent?.tipo_conteudo === 'Video') {
+      const lastKnownTime = videoPlayback.currentTime || selectedProgress || 0;
+      handleProgressUpdate(selectedContent.id, lastKnownTime);
+    }
+    setSelectedContent(null);
+    setVideoPlayback(createInitialPlaybackState());
   };
 
   if (isLoading || !learningPath) {
@@ -255,50 +316,98 @@ export default function LearningPathPage() {
         );
       })}
 
-      <Dialog open={Boolean(selectedContent)} onOpenChange={(open) => !open && setSelectedContent(null)}>
-        <DialogContent className="cosmic-card text-text-primary border-purple-700/60 max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-text-primary">{selectedContent?.titulo}</DialogTitle>
-            <DialogDescription className="text-text-secondary">
-              {selectedContent?.descricao}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            {selectedVideoId ? (
-              <div className="space-y-3">
-                <div className="aspect-video rounded-xl overflow-hidden">
-                  <YouTubePlayer
-                    videoId={selectedVideoId}
-                    startTime={selectedProgress}
-                    onProgress={(seconds) => handleProgressUpdate(selectedContent.id, seconds)}
-                  />
-                </div>
-                {selectedProgress > 0 && (
-                  <p className="text-sm text-text-secondary">
-                    {t('resumeFrom', { minutes: Math.floor(selectedProgress / 60) })}
-                  </p>
-                )}
-              </div>
-            ) : selectedContent?.url_acesso ? (
-              <a
-                href={selectedContent.url_acesso}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 cosmic-gradient text-white font-semibold py-3 px-5 rounded-lg"
+      <Dialog open={Boolean(selectedContent)} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="cosmic-card text-text-primary border-purple-700/60 max-w-5xl w-full p-0 overflow-hidden">
+          <div className="flex flex-col gap-6 p-6">
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={closeDialog}
+                className="inline-flex items-center gap-2 rounded-lg border border-purple-500/40 bg-purple-500/10 px-3 py-1.5 text-sm font-medium text-purple-100 transition hover:border-purple-400/60 hover:bg-purple-500/20"
               >
-                <LinkIcon className="w-4 h-4" />
-                {t('openContentLink')}
-              </a>
-            ) : (
-              <div className="py-10 text-center text-text-secondary">
-                <BookOpen className="w-16 h-16 mx-auto mb-4 text-purple-300" />
-                <h3 className="font-semibold mb-2 text-text-primary">{t('contentPlaceholderTitle')}</h3>
-                <p>{t('contentPlaceholderDescription')}</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+                <ArrowLeft className="h-4 w-4" />
+                {t('videoBackToLearningPath')}
+              </button>
+              <button
+                type="button"
+                onClick={closeDialog}
+                className="rounded-full border border-transparent p-2 text-text-secondary transition hover:border-purple-400/40 hover:bg-purple-500/10 hover:text-text-primary"
+                aria-label={t('videoClosePlayer')}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <DialogHeader className="border-none p-0 space-y-2">
+              <DialogTitle className="text-2xl text-text-primary">{selectedContent?.titulo}</DialogTitle>
+              <DialogDescription className="text-sm text-text-secondary">
+                {selectedContent?.descricao}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-5">
+              {selectedVideoId ? (
+                <div className="space-y-5">
+                  <div className="relative overflow-hidden rounded-xl border border-white/5 bg-slate-950/60 shadow-lg">
+                    <div className="aspect-video w-full">
+                      <YouTubePlayer
+                        videoId={selectedVideoId}
+                        startTime={selectedProgress}
+                        onProgress={handleVideoProgress}
+                        onDuration={handleVideoDuration}
+                        onPlaybackStateChange={handlePlaybackStateChange}
+                      />
+                    </div>
+                    {videoPlayback.state === 'paused' && (
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-slate-950/60">
+                        <span className="rounded-full bg-purple-500/20 px-4 py-2 text-sm font-medium text-purple-100 shadow-lg backdrop-blur">
+                          {t('videoPlaybackPaused')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2 rounded-lg border border-purple-500/30 bg-purple-500/5 p-4">
+                    <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-purple-200/80">
+                      <span>{t('videoProgressLabel')}</span>
+                      <span>{Math.min(100, Math.max(0, Math.round(videoPlayback.percent || 0)))}%</span>
+                    </div>
+                    <Progress value={videoPlayback.percent} className="h-2" />
+                    <div className="flex items-center justify-between text-xs text-text-secondary/80">
+                      <span>{formatTime(videoPlayback.currentTime)}</span>
+                      <span>{videoPlayback.duration ? formatTime(videoPlayback.duration) : '00:00'}</span>
+                    </div>
+                    <p className="text-xs text-text-secondary">
+                      {t(getProgressDescriptorKey(videoPlayback.percent || 0))}
+                    </p>
+                  </div>
+
+                  {(selectedProgress > 0 || videoPlayback.currentTime > 0) && (
+                    <p className="text-sm text-text-secondary">
+                      {t('resumeFrom', { minutes: Math.floor((videoPlayback.currentTime || selectedProgress) / 60) })}
+                    </p>
+                  )}
+                </div>
+              ) : selectedContent?.url_acesso ? (
+                <a
+                  href={selectedContent.url_acesso}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 cosmic-gradient text-white font-semibold py-3 px-5 rounded-lg"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                  {t('openContentLink')}
+                </a>
+              ) : (
+                <div className="py-10 text-center text-text-secondary">
+                  <BookOpen className="w-16 h-16 mx-auto mb-4 text-purple-300" />
+                  <h3 className="font-semibold mb-2 text-text-primary">{t('contentPlaceholderTitle')}</h3>
+                  <p>{t('contentPlaceholderDescription')}</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 }
