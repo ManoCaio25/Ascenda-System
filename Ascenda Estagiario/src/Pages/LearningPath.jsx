@@ -260,6 +260,27 @@ export default function LearningPathPage() {
   const selectedVideoId = getYoutubeVideoId(selectedContent?.url_acesso);
   const estimatedMinutes = selectedContent?.duracao_estimada_minutos;
   const hasEstimatedMinutes = typeof estimatedMinutes === 'number' && !Number.isNaN(estimatedMinutes);
+  const computedLearningProgress = useMemo(() => {
+    if (!contents.length) {
+      return learningPath.progress_percent || 0;
+    }
+
+    const total = contents.length;
+    if (total === 0) {
+      return learningPath.progress_percent || 0;
+    }
+
+    const completedCount = contents.reduce((count, item) => {
+      const progressState = contentProgress[item.id];
+      if (progressState?.completed || item.status_conclusao === 'Concluido') {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+
+    const localPercent = Math.round((completedCount / total) * 100);
+    return Math.max(localPercent, learningPath.progress_percent || 0);
+  }, [contentProgress, contents, learningPath.progress_percent]);
 
   return (
     <div className="p-8 max-w-6xl mx-auto text-text-primary space-y-10">
