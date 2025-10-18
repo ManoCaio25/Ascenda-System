@@ -51,6 +51,19 @@ body {
   color: #B55FFF;
 }
 
+.feedback-message {
+  min-height: 20px;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #f87171;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.feedback-message[data-status='success'] {
+  color: #34d399;
+}
+
 .container button {
   background: linear-gradient(90deg, #B55FFF, #5C7CFA);
   color: #ffffff;
