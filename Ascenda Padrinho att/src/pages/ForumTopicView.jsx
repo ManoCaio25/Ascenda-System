@@ -3,21 +3,16 @@ import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, User } from 'lucide-react';
 import { ForumTopic } from '@padrinho/entities/ForumTopic';
 import { ForumReply } from '@padrinho/entities/ForumReply';
 import { Textarea } from '@padrinho/components/ui/textarea';
 import { Button } from '@padrinho/components/ui/button';
 import { useTranslation } from '@padrinho/i18n';
+import { useForumAuthors } from '@padrinho/hooks/useForumAuthors';
 
-const mockUsers = {
-  user_1: { full_name: 'Galileo', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face' },
-  user_2: { full_name: 'Newton', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face' },
-  user_3: { full_name: 'Curie', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face' },
-};
-
-const ReplyCard = ({ reply, formattedDate, t }) => {
-  const author = mockUsers[reply.id_usuario_criador] || { full_name: t('forum.anonymous'), avatar_url: '' };
+const ReplyCard = ({ reply, formattedDate, author, t }) => {
+  const authorProfile = author || { full_name: t('forum.anonymous'), avatar: '' };
   const highlightClasses = reply.melhor_resposta
     ? 'border-green-500/60 bg-green-500/5'
     : 'border-border';
@@ -28,13 +23,33 @@ const ReplyCard = ({ reply, formattedDate, t }) => {
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-start gap-4 rounded-lg border bg-surface p-5 shadow-e1 ${highlightClasses}`}
     >
-      <img src={author.avatar_url} alt={author.full_name} className="h-10 w-10 rounded-full object-cover" />
+      <div className="h-10 w-10 overflow-hidden rounded-full border border-border bg-surface2">
+        {authorProfile.avatar ? (
+          <img
+            src={authorProfile.avatar}
+            alt={authorProfile.displayName || authorProfile.full_name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-xs text-muted">
+            <User className="h-4 w-4" />
+          </div>
+        )}
+      </div>
       <div className="flex-grow space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm text-muted">
-            <span className="font-semibold text-primary">{author.full_name}</span>
+            <span className="font-semibold text-primary">{authorProfile.displayName || authorProfile.full_name}</span>
             <span>·</span>
             <span>{formattedDate}</span>
+            {authorProfile.track ? (
+              <>
+                <span>·</span>
+                <span className="rounded-full bg-surface2 px-2 py-1 text-[11px] font-medium text-brand">
+                  {authorProfile.track}
+                </span>
+              </>
+            ) : null}
           </div>
           {reply.melhor_resposta && (
             <div className="flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-1 text-xs font-semibold text-green-500">
@@ -54,6 +69,7 @@ export default function ForumTopicViewPage() {
   const searchParams = new URLSearchParams(location.search);
   const topicId = searchParams.get('id');
   const { t, language } = useTranslation();
+  const { getAuthorProfile } = useForumAuthors();
 
   const [topic, setTopic] = useState(null);
   const [replies, setReplies] = useState([]);
@@ -90,9 +106,10 @@ export default function ForumTopicViewPage() {
   const formattedReplies = useMemo(() => {
     return replies.map((reply) => ({
       reply,
+      author: getAuthorProfile(reply.id_usuario_criador),
       formattedDate: format(new Date(reply.created_date), language === 'pt' ? 'dd/MM/yyyy' : 'MMM d, yyyy', { locale }),
     }));
-  }, [replies, language, locale]);
+  }, [replies, language, locale, getAuthorProfile]);
 
   const handlePostReply = async () => {
     if (!newReply.trim() || !topic) return;
@@ -120,7 +137,10 @@ export default function ForumTopicViewPage() {
   if (isLoading) return <div className="p-10 text-center text-muted">{t('forum.loading')}</div>;
   if (!topic) return <div className="p-10 text-center text-muted">{t('forum.noCategories')}</div>;
 
-  const creator = mockUsers[topic.id_usuario_criador] || { full_name: t('forum.anonymous') };
+  const creatorProfile = getAuthorProfile(topic.id_usuario_criador);
+  const creator = creatorProfile
+    ? { full_name: creatorProfile.displayName, track: creatorProfile.track }
+    : { full_name: t('forum.anonymous') };
   const formattedDate = format(new Date(topic.created_date), language === 'pt' ? 'dd/MM/yyyy' : 'MMMM d, yyyy', { locale });
   const bestAnswer = formattedReplies.find((item) => item.reply.melhor_resposta);
   const otherReplies = formattedReplies.filter((item) => !item.reply.melhor_resposta);
@@ -137,6 +157,14 @@ export default function ForumTopicViewPage() {
           <span>
             {(topic.visualizacoes || 0)} {t('forum.viewsLabel').toLowerCase()}
           </span>
+          {creator.track ? (
+            <>
+              <span>·</span>
+              <span className="rounded-full bg-surface2 px-2 py-1 text-[11px] font-medium text-brand">
+                {creator.track}
+              </span>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -146,10 +174,21 @@ export default function ForumTopicViewPage() {
 
       <div className="space-y-5">
         {bestAnswer && (
-          <ReplyCard reply={bestAnswer.reply} formattedDate={bestAnswer.formattedDate} t={t} />
+          <ReplyCard
+            reply={bestAnswer.reply}
+            formattedDate={bestAnswer.formattedDate}
+            author={bestAnswer.author}
+            t={t}
+          />
         )}
         {otherReplies.map((item) => (
-          <ReplyCard key={item.reply.id} reply={item.reply} formattedDate={item.formattedDate} t={t} />
+          <ReplyCard
+            key={item.reply.id}
+            reply={item.reply}
+            formattedDate={item.formattedDate}
+            author={item.author}
+            t={t}
+          />
         ))}
       </div>
 

@@ -168,6 +168,18 @@ const pt = {
     noTopics: "Ainda não há tópicos publicados nesta categoria.",
     bestAnswer: "Melhor resposta",
     postReply: "Enviar resposta",
+    latestRepliesTitle: "Respostas dos estagiários",
+    latestRepliesSubtitle: "Acompanhe o que a turma está compartilhando agora.",
+    latestRepliesEmpty: "Ainda não há respostas dos estagiários. Incentive a primeira participação!",
+    replyInTopic: "No tópico",
+    stats: {
+      topics: "Tópicos abertos",
+      topicsDescription: "Discussões criadas pela turma.",
+      replies: "Respostas",
+      repliesDescription: "Contribuições de estagiários e mentores.",
+      activeInterns: "Estagiários ativos",
+      activeInternsDescription: "Participando das conversas nesta semana.",
+    },
   },
   contentManagement: {
     title: "Gestão de conteúdo",
