@@ -96,22 +96,21 @@ function LayoutContent() {
     loadUser();
   }, []);
 
-  const redirectWithLoading = React.useCallback((target) => {
-    if (typeof window === 'undefined') return;
-    const loadingUrl = new URL('../loading-page/index.html', window.location.href);
-    loadingUrl.searchParams.set('target', target);
-    window.location.href = loadingUrl.toString();
-  }, []);
-
   const handleLogout = React.useCallback(async () => {
     try {
       await User.logout();
     } catch (error) {
       console.log("Logout error:", error);
     } finally {
-      redirectWithLoading('login');
+      try {
+        sessionStorage.setItem('nextUrl', '/Login Ascenda/index.html');
+        sessionStorage.removeItem('role');
+      } catch (storageError) {
+        console.warn('sessionStorage unavailable', storageError);
+      }
+      window.location.href = '/loading-page/index.html';
     }
-  }, [redirectWithLoading]);
+  }, []);
 
   const navigationItems = React.useMemo(
     () =>

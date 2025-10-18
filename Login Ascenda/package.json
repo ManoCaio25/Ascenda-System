@@ -1,10 +1,12 @@
 {
-  "name": "login-ascenda",
-  "version": "1.0.0",
-  "description": "Interface de login da Ascenda com validação de credenciais e redirecionamentos.",
+  "name": "ascenda-login-dev",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
-  "type": "module"
+  "dependencies": {
+    "express": "^4.19.2",
+    "open": "^9.1.0"
+  }
 }

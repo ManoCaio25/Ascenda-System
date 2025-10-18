@@ -114,8 +114,14 @@
         <!-- Badge BETA -->
         <div class="beta-badge">BETA</div>
     </div>
-
     <script src="script.js"></script>
-</body>
+    <script>
+const nextUrl = sessionStorage.getItem("nextUrl");
+const fallbackLogin = "/Login Ascenda/index.html";
+setTimeout(() => {
+  window.location.href = nextUrl || fallbackLogin;
+}, 7000);
+    </script>
+  </body>
 </html>
 
