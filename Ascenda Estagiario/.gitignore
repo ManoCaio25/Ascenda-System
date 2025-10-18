@@ -1,5 +1,1 @@
-# dependencies
-node_modules/
-
-# build cache
-.vite/
+node_modules
