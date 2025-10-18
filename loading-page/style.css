@@ -1,0 +1,299 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #0f0f1e 100%);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.loading-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 80px;
+}
+
+/* Linhas de carregamento */
+.loading-lines {
+    width: 100%;
+    max-width: 800px;
+    height: 60px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+.loading-lines.top {
+    align-items: flex-start;
+}
+
+.loading-lines.bottom {
+    align-items: flex-end;
+}
+
+.line {
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #7B2D8E 50%, transparent 100%);
+    border-radius: 2px;
+    opacity: 0;
+    box-shadow: 0 0 10px #7B2D8E, 0 0 20px #7B2D8E;
+}
+
+/* Animações das linhas superiores */
+.loading-lines.top .line-1 {
+    width: 200px;
+    animation: slideLineTop1 2s ease-in-out infinite;
+}
+
+.loading-lines.top .line-2 {
+    width: 150px;
+    animation: slideLineTop2 2s ease-in-out infinite 0.2s;
+}
+
+.loading-lines.top .line-3 {
+    width: 180px;
+    animation: slideLineTop3 2s ease-in-out infinite 0.4s;
+}
+
+.loading-lines.top .line-4 {
+    width: 120px;
+    animation: slideLineTop4 2s ease-in-out infinite 0.6s;
+}
+
+.loading-lines.top .line-5 {
+    width: 160px;
+    animation: slideLineTop5 2s ease-in-out infinite 0.8s;
+}
+
+/* Animações das linhas inferiores */
+.loading-lines.bottom .line-1 {
+    width: 180px;
+    animation: slideLineBottom1 2s ease-in-out infinite 0.1s;
+}
+
+.loading-lines.bottom .line-2 {
+    width: 140px;
+    animation: slideLineBottom2 2s ease-in-out infinite 0.3s;
+}
+
+.loading-lines.bottom .line-3 {
+    width: 200px;
+    animation: slideLineBottom3 2s ease-in-out infinite 0.5s;
+}
+
+.loading-lines.bottom .line-4 {
+    width: 130px;
+    animation: slideLineBottom4 2s ease-in-out infinite 0.7s;
+}
+
+.loading-lines.bottom .line-5 {
+    width: 170px;
+    animation: slideLineBottom5 2s ease-in-out infinite 0.9s;
+}
+
+@keyframes slideLineTop1 {
+    0%, 100% { opacity: 0; transform: translateX(-100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(400%); }
+    60%, 100% { opacity: 0; transform: translateX(400%); }
+}
+
+@keyframes slideLineTop2 {
+    0%, 100% { opacity: 0; transform: translateX(-100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(500%); }
+    60%, 100% { opacity: 0; transform: translateX(500%); }
+}
+
+@keyframes slideLineTop3 {
+    0%, 100% { opacity: 0; transform: translateX(-100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(450%); }
+    60%, 100% { opacity: 0; transform: translateX(450%); }
+}
+
+@keyframes slideLineTop4 {
+    0%, 100% { opacity: 0; transform: translateX(-100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(600%); }
+    60%, 100% { opacity: 0; transform: translateX(600%); }
+}
+
+@keyframes slideLineTop5 {
+    0%, 100% { opacity: 0; transform: translateX(-100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(480%); }
+    60%, 100% { opacity: 0; transform: translateX(480%); }
+}
+
+@keyframes slideLineBottom1 {
+    0%, 100% { opacity: 0; transform: translateX(100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(-450%); }
+    60%, 100% { opacity: 0; transform: translateX(-450%); }
+}
+
+@keyframes slideLineBottom2 {
+    0%, 100% { opacity: 0; transform: translateX(100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(-550%); }
+    60%, 100% { opacity: 0; transform: translateX(-550%); }
+}
+
+@keyframes slideLineBottom3 {
+    0%, 100% { opacity: 0; transform: translateX(100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(-400%); }
+    60%, 100% { opacity: 0; transform: translateX(-400%); }
+}
+
+@keyframes slideLineBottom4 {
+    0%, 100% { opacity: 0; transform: translateX(100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(-580%); }
+    60%, 100% { opacity: 0; transform: translateX(-580%); }
+}
+
+@keyframes slideLineBottom5 {
+    0%, 100% { opacity: 0; transform: translateX(100%); }
+    10% { opacity: 1; }
+    50% { opacity: 1; transform: translateX(-470%); }
+    60%, 100% { opacity: 0; transform: translateX(-470%); }
+}
+
+/* Foguete */
+.rocket-wrapper {
+    position: relative;
+    width: 300px;
+    height: 120px;
+    animation: rocketFloat 3s ease-in-out infinite;
+}
+
+.rocket {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 15px rgba(123, 45, 142, 0.6));
+}
+
+@keyframes rocketFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Animação de pulsação para o brilho do foguete */
+.rocket-body {
+    animation: rocketGlow 2s ease-in-out infinite;
+}
+
+@keyframes rocketGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 5px rgba(123, 45, 142, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 0 15px rgba(155, 77, 184, 0.8));
+    }
+}
+
+/* Chamas */
+.flames {
+    animation: flameIntensity 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes flameIntensity {
+    0% {
+        transform: scaleX(1);
+    }
+    100% {
+        transform: scaleX(1.2);
+    }
+}
+
+/* Badge BETA */
+.beta-badge {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(123, 45, 142, 0.3);
+    border: 2px solid #7B2D8E;
+    color: #9B4DB8;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    box-shadow: 0 0 20px rgba(123, 45, 142, 0.5);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(123, 45, 142, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(155, 77, 184, 0.8);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .rocket-wrapper {
+        width: 200px;
+        height: 80px;
+    }
+
+    .loading-lines {
+        max-width: 90%;
+    }
+
+    .line {
+        height: 2px;
+    }
+
+    .beta-badge {
+        font-size: 12px;
+        padding: 6px 16px;
+        bottom: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rocket-wrapper {
+        width: 150px;
+        height: 60px;
+    }
+
+    .loading-container {
+        gap: 50px;
+    }
+
+    .loading-lines {
+        height: 40px;
+    }
+
+    .beta-badge {
+        font-size: 10px;
+        padding: 5px 12px;
+        bottom: 20px;
+    }
+}
+
