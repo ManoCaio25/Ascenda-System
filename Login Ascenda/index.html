@@ -14,7 +14,7 @@
   <body>
     <div class="container" id="container">
       <div class="form-container sign-up">
-        <form>
+        <form id="mentorForm" autocomplete="on">
           <h1>Bem Vindo Padrinho!</h1>
           <div class="social-icons">
             <a href="#" class="icon"
@@ -27,9 +27,24 @@
             ></a> -->
           </div>
           <span>Entre com seu nome, e-mail e senha</span>
-          <input type="text" name="name" placeholder="Nome" autocomplete="name" required />
-          <input type="email" name="email" placeholder="Email" autocomplete="email" required />
           <input
+            id="mentorName"
+            type="text"
+            name="name"
+            placeholder="Nome"
+            autocomplete="name"
+            required
+          />
+          <input
+            id="mentorEmail"
+            type="email"
+            name="email"
+            placeholder="Email"
+            autocomplete="email"
+            required
+          />
+          <input
+            id="mentorPassword"
             type="password"
             name="password"
             placeholder="Password"
@@ -37,11 +52,12 @@
             required
           />
           <a href="#">Esqueceu sua senha?</a>
-          <button>Sign Up</button>
+          <button type="submit">Sign Up</button>
+          <p id="mentorFeedback" class="feedback" aria-live="polite"></p>
         </form>
       </div>
       <div class="form-container sign-in">
-        <form>
+        <form id="internForm" autocomplete="on">
           <h1>Bem Vindo Estagiário!</h1>
           <div class="social-icons">
             <a href="#" class="icon"
@@ -54,9 +70,24 @@
             ></a> -->
           </div>
           <span>Entre com seu nome, e-mail e senha</span>
-          <input type="text" name="name" placeholder="Nome" autocomplete="name" required />
-          <input type="email" name="email" placeholder="Email" autocomplete="email" required />
           <input
+            id="internName"
+            type="text"
+            name="name"
+            placeholder="Nome"
+            autocomplete="name"
+            required
+          />
+          <input
+            id="internEmail"
+            type="email"
+            name="email"
+            placeholder="Email"
+            autocomplete="email"
+            required
+          />
+          <input
+            id="internPassword"
             type="password"
             name="password"
             placeholder="Password"
@@ -64,7 +95,8 @@
             required
           />
           <a href="#">Esqueceu sua senha?</a>
-          <button>Sign In</button>
+          <button type="submit">Sign In</button>
+          <p id="internFeedback" class="feedback" aria-live="polite"></p>
         </form>
       </div>
       <div class="toggle-container">
@@ -85,6 +117,114 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+      // ===== Alternância visual (manter) =====
+      const container = document.getElementById("container");
+      document.getElementById("register").addEventListener("click", () =>
+        container.classList.add("active")
+      );
+      document.getElementById("login").addEventListener("click", () =>
+        container.classList.remove("active")
+      );
+
+      // ===== Rotas absolutas =====
+      const LOADING_URL = "/loading-page/index.html";
+
+      const MENTOR = {
+        name: "Paulo Henrique Vieira",
+        email: "paulo.henrique@ascenda.com",
+        password: "123456",
+        target: "/Ascenda Padrinho att/index.html",
+      };
+
+      const INTERN_ALLOWED_EMAILS = new Set([
+        "caio.alvarenga@ascenda.com",
+        "caio.alvarenga@aperam.com",
+      ]);
+      const INTERN = {
+        name: "Caio Menezes",
+        password: "123456",
+        target: "/Ascenda Estagiario/index.html",
+      };
+
+      function goThroughLoading(toUrl) {
+        try {
+          sessionStorage.setItem("nextUrl", toUrl);
+        } catch (error) {
+          console.warn("sessionStorage unavailable", error);
+        }
+        window.location.href = LOADING_URL;
+      }
+
+      function showFeedback(el, msg, ok = false) {
+        el.textContent = msg;
+        el.classList.toggle("ok", ok);
+        el.classList.toggle("err", !ok);
+      }
+
+      // ===== Estagiário (Sign In) =====
+      document.getElementById("internForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fb = document.getElementById("internFeedback");
+        const name = document.getElementById("internName").value.trim();
+        const email = document
+          .getElementById("internEmail")
+          .value.trim()
+          .toLowerCase();
+        const pass = document.getElementById("internPassword").value.trim();
+
+        const valid =
+          name === INTERN.name &&
+          INTERN_ALLOWED_EMAILS.has(email) &&
+          pass === INTERN.password;
+        if (valid) {
+          try {
+            sessionStorage.setItem("role", "intern");
+          } catch (error) {
+            console.warn("sessionStorage unavailable", error);
+          }
+          showFeedback(fb, "Login realizado com sucesso! Redirecionando...", true);
+          goThroughLoading(INTERN.target);
+        } else {
+          showFeedback(
+            fb,
+            "Credenciais incorretas. Verifique nome, e-mail e senha.",
+            false,
+          );
+        }
+      });
+
+      // ===== Padrinho (Sign Up) =====
+      document.getElementById("mentorForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fb = document.getElementById("mentorFeedback");
+        const name = document.getElementById("mentorName").value.trim();
+        const email = document
+          .getElementById("mentorEmail")
+          .value.trim()
+          .toLowerCase();
+        const pass = document.getElementById("mentorPassword").value.trim();
+
+        const valid =
+          name === MENTOR.name &&
+          email === MENTOR.email &&
+          pass === MENTOR.password;
+        if (valid) {
+          try {
+            sessionStorage.setItem("role", "mentor");
+          } catch (error) {
+            console.warn("sessionStorage unavailable", error);
+          }
+          showFeedback(fb, "Login realizado com sucesso! Redirecionando...", true);
+          goThroughLoading(MENTOR.target);
+        } else {
+          showFeedback(
+            fb,
+            "Credenciais incorretas. Verifique nome, e-mail e senha.",
+            false,
+          );
+        }
+      });
+    </script>
   </body>
 </html>

@@ -123,31 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     createRocketParticles();
 
-    function obterDestinoFinal() {
-        const params = new URLSearchParams(window.location.search);
-        const target = params.get('target');
-        if (!target) {
-            return new URL('../Login Ascenda/index.html', window.location.href).toString();
-        }
-
-        const destinoNormalizado = target.toLowerCase();
-        const rotas = {
-            estagiario: '../Ascenda Estagiario/index.html',
-            padrinho: '../Ascenda Padrinho att/index.html',
-            login: '../Login Ascenda/index.html',
-        };
-
-        const caminho = rotas[destinoNormalizado] ?? rotas.login;
-        return new URL(caminho, window.location.href).toString();
-    }
-
-    const destinoFinal = obterDestinoFinal();
-    if (destinoFinal) {
-        setTimeout(() => {
-            window.location.href = destinoFinal;
-        }, 7000);
-    }
-
     // Log de inicialização
     console.log('🚀 Rocket Loading Animation initialized!');
     console.log('✨ Features: Purple rocket, fire effects, animated loading lines');
