@@ -7,6 +7,33 @@ export const users = [
     area_atuacao: 'Frontend Development',
     pontos_gamificacao: 2847,
     equipped_tag: '🚀 Cosmic Explorer'
+  },
+  {
+    id: 'intern-2',
+    full_name: 'Leticia Alvez',
+    email: 'leticia.alvez@ascenda.com',
+    avatar_url: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=120&h=120&fit=crop&crop=center&auto=format',
+    area_atuacao: 'Power BI Analytics',
+    pontos_gamificacao: 2384,
+    equipped_tag: '🦈 Shark Visionary'
+  },
+  {
+    id: 'intern-3',
+    full_name: 'Iasmin Duarte',
+    email: 'iasmin.duarte@ascenda.com',
+    avatar_url: 'https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-1p3tzg5_3c9f2b2f.jpeg?region=0%2C0%2C450%2C450&width=200',
+    area_atuacao: 'Customer Success & CX',
+    pontos_gamificacao: 2216,
+    equipped_tag: '🌺 Ohana Guide'
+  },
+  {
+    id: 'manager-1',
+    full_name: 'Paulo Henrique',
+    email: 'paulo.henrique@ascenda.com',
+    avatar_url: 'https://cdn.cloudflare.steamstatic.com/steam/apps/2536830/header.jpg',
+    area_atuacao: 'Program Management',
+    pontos_gamificacao: 3620,
+    equipped_tag: '🎭 Clair Obscur Maestro'
   }
 ];
 

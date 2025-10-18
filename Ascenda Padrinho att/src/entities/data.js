@@ -3,6 +3,7 @@ export const users = [
     id: 1,
     full_name: 'Paulo Henrique',
     email: 'paulo.henrique@ascenda.com',
+    avatar_url: 'https://cdn.cloudflare.steamstatic.com/steam/apps/2536830/header.jpg',
     role: 'Manager'
   }
 ];
@@ -90,7 +91,7 @@ export const interns = [
     id: 'leticia',
     full_name: 'Leticia Alvez',
     avatar: '/avatars/leticia.jpg',
-    avatar_url: '📊',
+    avatar_url: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=120&h=120&fit=crop&crop=center&auto=format',
     email: 'leticia.alvez@ascenda.com',
     level: 'Novice',
     status: 'active',
@@ -110,6 +111,32 @@ export const interns = [
       { date: '2024-08-01', score: 72 },
       { date: '2024-09-01', score: 73 },
       { date: '2024-10-01', score: 75 }
+    ]
+  },
+  {
+    id: 'iasmin',
+    full_name: 'Iasmin Duarte',
+    avatar: '/avatars/iasmin.jpg',
+    avatar_url: 'https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-1p3tzg5_3c9f2b2f.jpeg?region=0%2C0%2C450%2C450&width=200',
+    email: 'iasmin.duarte@ascenda.com',
+    level: 'Apprentice',
+    status: 'active',
+    track: 'Customer Success + CX',
+    cohort: '2024.3',
+    mentor_name: 'Paulo Henrique',
+    points: 480,
+    avg_score_pct: 73,
+    well_being_status: 'Good',
+    start_date: '2024-06-10T00:00:00.000Z',
+    end_date: '2025-04-25T00:00:00.000Z',
+    skills: ['Customer Success', 'Empathy', 'Communication'],
+    performance_history: [
+      { date: '2024-06-01', score: 65 },
+      { date: '2024-07-01', score: 70 },
+      { date: '2024-08-01', score: 72 },
+      { date: '2024-09-01', score: 74 },
+      { date: '2024-10-01', score: 76 },
+      { date: '2024-11-01', score: 78 }
     ]
   },
   {
