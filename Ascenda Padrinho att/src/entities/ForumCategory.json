@@ -1,0 +1,20 @@
+{
+  "name": "ForumCategory",
+  "type": "object",
+  "properties": {
+    "nome_categoria": {
+      "type": "string",
+      "description": "Category name"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Category description"
+    },
+    "topic_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of topics"
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,24 @@
+{
+  "name": "ForumReply",
+  "type": "object",
+  "properties": {
+    "id_topico": {
+      "type": "string",
+      "description": "Topic ID"
+    },
+    "conteudo_resposta": {
+      "type": "string",
+      "description": "Reply content"
+    },
+    "id_usuario_criador": {
+      "type": "string",
+      "description": "Author user ID"
+    },
+    "melhor_resposta": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the reply is marked as best answer"
+    }
+  },
+  "required": ["id_topico", "conteudo_resposta"]
+}
