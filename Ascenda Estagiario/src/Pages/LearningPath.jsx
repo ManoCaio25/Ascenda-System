@@ -15,7 +15,7 @@ import {
 import { Progress } from '@estagiario/Components/ui/progress';
 import { Dialog, DialogContent } from '@estagiario/Components/ui/dialog';
 import VideoPlayer from '@estagiario/Components/learning/VideoPlayer.jsx';
-import { readStoredVideoProgress } from '@estagiario/hooks/useVideoProgress';
+import { formatVideoTime, readStoredVideoProgress } from '@estagiario/hooks/useVideoProgress';
 import { useI18n } from '@estagiario/Components/utils/i18n';
 
 const LEVEL_ORDER = ['Basic', 'Medium', 'Advanced'];
@@ -137,6 +137,7 @@ export default function LearningPathPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentProgress, setContentProgress] = useState({});
+  const [videoNotification, setVideoNotification] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -217,9 +218,46 @@ export default function LearningPathPage() {
     [handleVideoProgressChange],
   );
 
-  const closeDialog = () => {
+  const closeDialog = useCallback(() => {
     setSelectedContent(null);
-  };
+  }, []);
+
+  const handlePlayerClose = useCallback(
+    (payload = {}) => {
+      if (selectedContent) {
+        const progressState = payload.contentId
+          ? {
+              percent: payload.percent,
+              currentTime: payload.currentTime,
+              completed: payload.completed,
+            }
+          : contentProgress[selectedContent.id];
+
+        if (progressState) {
+          const message = progressState.completed
+            ? t('videoProgressNotificationCompleted')
+            : t('videoProgressNotificationResume', {
+                time: formatVideoTime(Math.max(0, progressState.currentTime || 0)),
+              });
+
+          setVideoNotification({
+            id: selectedContent.id,
+            title: t('videoProgressNotificationTitle', { title: selectedContent.titulo }),
+            message,
+          });
+        }
+      }
+
+      closeDialog();
+    },
+    [closeDialog, contentProgress, selectedContent, t],
+  );
+
+  useEffect(() => {
+    if (!videoNotification) return undefined;
+    const timeout = setTimeout(() => setVideoNotification(null), 5000);
+    return () => clearTimeout(timeout);
+  }, [videoNotification]);
 
   const learningProgressBaseline = learningPath?.progress_percent ?? 0;
 
@@ -348,7 +386,7 @@ export default function LearningPathPage() {
               videoId={selectedVideoId}
               title={selectedContent.titulo}
               description={selectedContent.descricao}
-              onClose={closeDialog}
+              onClose={handlePlayerClose}
               onProgressChange={handleVideoProgressChange}
               onCompletion={handleVideoCompletion}
               levelLabel={badgeLabels[selectedContent.level]}
@@ -394,6 +432,25 @@ export default function LearningPathPage() {
           ) : null}
         </DialogContent>
       </Dialog>
+      {videoNotification && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-purple-500/40 bg-slate-900/95 p-5 shadow-lg shadow-purple-500/30">
+          <div className="flex items-start gap-3">
+            <div className="mt-1 h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
+            <div className="flex-1 text-text-primary">
+              <p className="text-sm font-semibold text-purple-200">{videoNotification.title}</p>
+              <p className="mt-1 text-xs text-text-secondary/80">{videoNotification.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setVideoNotification(null)}
+              className="rounded-full p-1 text-text-secondary transition hover:text-text-primary"
+              aria-label={t('videoClosePlayer')}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
