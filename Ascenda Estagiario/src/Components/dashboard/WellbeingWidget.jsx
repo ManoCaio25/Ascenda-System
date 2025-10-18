@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Heart, Smile, Meh, Frown, AlertTriangle } from "lucide-react";
 import { Button } from "@estagiario/Components/ui/button";
+import { useI18n } from "@estagiario/Components/utils/i18n";
 
 export default function WellbeingWidget() {
   const [selectedFeeling, setSelectedFeeling] = useState("good");
+  const { t } = useI18n();
 
-  const feelings = [
-    { id: "excellent", icon: Smile, label: "Excellent", color: "text-green-400" },
-    { id: "good", icon: Smile, label: "Good", color: "text-blue-400" },
-    { id: "neutral", icon: Meh, label: "Neutral", color: "text-yellow-400" }, 
-    { id: "stressed", icon: Frown, label: "Stressed", color: "text-orange-400" },
-    { id: "overwhelmed", icon: AlertTriangle, label: "Overwhelmed", color: "text-red-400" }
-  ];
+  const feelings = useMemo(() => ([
+    { id: "excellent", icon: Smile, color: "text-green-400" },
+    { id: "good", icon: Smile, color: "text-blue-400" },
+    { id: "neutral", icon: Meh, color: "text-yellow-400" },
+    { id: "stressed", icon: Frown, color: "text-orange-400" },
+    { id: "overwhelmed", icon: AlertTriangle, color: "text-red-400" }
+  ]), []);
 
   return (
     <motion.div
@@ -22,10 +24,10 @@ export default function WellbeingWidget() {
     >
       <div className="flex items-center gap-2 mb-4">
         <Heart className="w-5 h-5 text-pink-400" />
-        <h2 className="text-lg font-semibold text-white">Well-being Check-in</h2>
+        <h2 className="text-lg font-semibold text-white">{t('wellbeingCheckin')}</h2>
       </div>
 
-      <p className="text-sm text-slate-400 mb-4">How are you feeling today?</p>
+      <p className="text-sm text-slate-400 mb-4">{t('howAreYouFeeling')}</p>
 
       <div className="space-y-2 mb-4">
         {feelings.map((feeling) => (
@@ -39,16 +41,16 @@ export default function WellbeingWidget() {
             }`}
           >
             <feeling.icon className={`w-5 h-5 ${feeling.color}`} />
-            <span className="text-white text-sm">{feeling.label}</span>
+            <span className="text-white text-sm">{t(feeling.id)}</span>
           </button>
         ))}
       </div>
 
-      <Button 
+      <Button
         className="w-full cosmic-gradient text-white font-medium"
         onClick={() => console.log('Wellbeing updated:', selectedFeeling)}
       >
-        Update Status
+        {t('updateStatus')}
       </Button>
     </motion.div>
   );

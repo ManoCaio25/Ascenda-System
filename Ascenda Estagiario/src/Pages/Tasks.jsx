@@ -5,32 +5,34 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { motion } from 'framer-motion';
 import { Plus, Clock, AlertCircle, CheckCircle, Target } from 'lucide-react';
 import { format } from 'date-fns';
+import { useI18n } from '@estagiario/Components/utils/i18n';
 
 const columnsFromBackend = {
   Pendente: {
-    name: 'To Do',
+    name: 'todo',
     items: [],
   },
   'Em Andamento': {
-    name: 'In Progress',
+    name: 'inProgress',
     items: [],
   },
   'Aguardando Revisao': {
-    name: 'In Review',
+    name: 'inReview',
     items: [],
   },
   Concluida: {
-    name: 'Done',
+    name: 'done',
     items: [],
   },
 };
 
 const TaskCard = ({ item, index }) => {
+  const { t } = useI18n();
   const priorityConfig = {
-    low: { color: 'bg-blue-500', label: 'Low' },
-    medium: { color: 'bg-yellow-500', label: 'Medium' },
-    high: { color: 'bg-orange-500', label: 'High' },
-    urgent: { color: 'bg-red-500', label: 'Urgent' }
+    low: { color: 'bg-blue-500', labelKey: 'low' },
+    medium: { color: 'bg-yellow-500', labelKey: 'medium' },
+    high: { color: 'bg-orange-500', labelKey: 'high' },
+    urgent: { color: 'bg-red-500', labelKey: 'urgent' }
   };
 
   // Default to medium if priority is not defined or unrecognized
@@ -48,22 +50,22 @@ const TaskCard = ({ item, index }) => {
           <div className="flex justify-between items-start mb-3">
             <h4 className="font-semibold text-sm flex-1 pr-2">{item.titulo_demanda}</h4>
             <div className="flex items-center gap-2">
-              <div 
+              <div
                 className={`w-3 h-3 rounded-full ${priority.color}`}
-                title={`${priority.label} Priority`}
+                title={t('priorityLevelLabel', { level: t(priority.labelKey) })}
               ></div>
-              <span className="text-xs text-slate-400 font-medium">{priority.label}</span>
+              <span className="text-xs text-slate-400 font-medium">{t(priority.labelKey)}</span>
             </div>
           </div>
-          
+
           <p className="text-xs text-slate-400 mb-3 line-clamp-2">{item.descricao}</p>
-          
+
           <div className="flex justify-between items-center text-xs">
             <div className="flex items-center gap-1 text-slate-400">
               <Clock className="w-3 h-3" />
-              <span>{format(new Date(item.data_limite), 'MMM d')}</span>
+              <span>{t('due', { date: format(new Date(item.data_limite), 'MMM d') })}</span>
             </div>
-            <span className="font-bold text-orange-400">+{item.pontos_gamificacao_associados} pts</span>
+            <span className="font-bold text-orange-400">+{item.pontos_gamificacao_associados} {t('pointsSuffix')}</span>
           </div>
         </div>
       )}
@@ -74,6 +76,7 @@ const TaskCard = ({ item, index }) => {
 export default function TasksPage() {
   const [columns, setColumns] = useState(columnsFromBackend);
   const [sortBy, setSortBy] = useState('none'); // 'none', 'priority', 'due_date'
+  const { t } = useI18n();
   
   useEffect(() => {
     Task.list().then(tasks => {
@@ -172,49 +175,49 @@ export default function TasksPage() {
   return (
     <div className="p-8 text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My Tasks</h1>
+        <h1 className="text-3xl font-bold">{t('myTasks')}</h1>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-400">Sort by:</span>
+            <span className="text-sm text-slate-400">{t('tasksSortBy')}</span>
             <select
               value={sortBy}
               onChange={(e) => handleSort(e.target.value)}
               className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1 text-sm text-white"
             >
-              <option value="none">None</option>
-              <option value="priority">Priority</option>
-              <option value="due_date">Due Date</option>
+              <option value="none">{t('tasksSortNone')}</option>
+              <option value="priority">{t('tasksSortPriority')}</option>
+              <option value="due_date">{t('tasksSortDueDate')}</option>
             </select>
           </div>
           <button className="cosmic-gradient text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <Plus className="w-4 h-4" /> New Task
+            <Plus className="w-4 h-4" /> {t('newTask')}
           </button>
         </div>
       </div>
 
       {/* Priority Legend */}
       <div className="mb-6 cosmic-card rounded-lg p-4 cosmic-glow">
-        <h3 className="text-sm font-medium text-slate-300 mb-3">Priority Legend:</h3>
+        <h3 className="text-sm font-medium text-slate-300 mb-3">{t('tasksPriorityLegend')}</h3>
         <div className="flex flex-wrap gap-4">
           {Object.entries({
-            urgent: { color: 'bg-red-500', label: 'Urgent' },
-            high: { color: 'bg-orange-500', label: 'High' },
-            medium: { color: 'bg-yellow-500', label: 'Medium' },
-            low: { color: 'bg-blue-500', label: 'Low' }
+            urgent: { color: 'bg-red-500', labelKey: 'urgent' },
+            high: { color: 'bg-orange-500', labelKey: 'high' },
+            medium: { color: 'bg-yellow-500', labelKey: 'medium' },
+            low: { color: 'bg-blue-500', labelKey: 'low' }
           }).map(([key, priority]) => (
             <div key={key} className="flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${priority.color}`}></div>
-              <span className="text-xs text-slate-400">{priority.label}</span>
+              <span className="text-xs text-slate-400">{t(priority.labelKey)}</span>
             </div>
           ))}
         </div>
       </div>
-      
+
       <DragDropContext onDragEnd={result => onDragEnd(result, columns, setColumns)}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Object.entries(columns).map(([columnId, column]) => (
             <div key={columnId} className="flex flex-col">
-              <h3 className="font-semibold mb-4 text-slate-300">{column.name} ({column.items.length})</h3>
+              <h3 className="font-semibold mb-4 text-slate-300">{t(column.name)} ({column.items.length})</h3>
               <Droppable droppableId={columnId}>
                 {(provided, snapshot) => (
                   <div

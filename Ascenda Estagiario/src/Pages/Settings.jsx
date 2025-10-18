@@ -87,24 +87,24 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'profile', label: t('profile'), icon: UserIcon },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'accessibility', label: 'Accessibility', icon: Accessibility },
+    { id: 'appearance', label: t('settingsAppearanceTab'), icon: Palette },
+    { id: 'accessibility', label: t('settingsAccessibilityTab'), icon: Accessibility },
     { id: 'language', label: t('language'), icon: Languages },
-    { id: 'notifications', label: 'Notifications', icon: Bell }
+    { id: 'notifications', label: t('settingsNotificationsTab'), icon: Bell }
   ];
 
   const renderProfileTab = () => (
     <div className="space-y-6">
       <Card className="cosmic-card border-purple-700">
         <CardHeader>
-          <CardTitle className="text-white">Profile Information</CardTitle>
-          <CardDescription>Update your personal information and avatar</CardDescription>
+          <CardTitle className="text-white">{t('settingsProfileInfoTitle')}</CardTitle>
+          <CardDescription>{t('settingsProfileInfoDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-6">
             <AvatarWithFallback user={user} size="xl" />
             <div>
-              <h3 className="font-semibold text-white mb-2">Choose Avatar</h3>
+              <h3 className="font-semibold text-white mb-2">{t('settingsChooseAvatar')}</h3>
               <div className="grid grid-cols-4 gap-2">
                 {avatarPlaceholders.slice(0, 8).map((avatar) => (
                   <button
@@ -119,20 +119,20 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-white">Full Name</Label>
-              <Input 
-                value={user?.full_name || ""} 
+              <Label className="text-white">{t('settingsFullName')}</Label>
+              <Input
+                value={user?.full_name || ""}
                 className="bg-slate-800 border-slate-600 text-white"
                 readOnly
               />
             </div>
             <div>
-              <Label className="text-white">Email</Label>
-              <Input 
-                value={user?.email || ""} 
+              <Label className="text-white">{t('settingsEmail')}</Label>
+              <Input
+                value={user?.email || ""}
                 className="bg-slate-800 border-slate-600 text-white"
                 readOnly
               />
@@ -140,9 +140,9 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <Label className="text-white">Work Area</Label>
-            <Input 
-              value={user?.area_atuacao || ""} 
+            <Label className="text-white">{t('settingsWorkArea')}</Label>
+            <Input
+              value={user?.area_atuacao || ""}
               className="bg-slate-800 border-slate-600 text-white"
             />
           </div>
@@ -155,14 +155,14 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <Card className="cosmic-card border-purple-700">
         <CardHeader>
-          <CardTitle className="text-white">Theme Preferences</CardTitle>
-          <CardDescription>Customize the visual appearance of your interface</CardDescription>
+          <CardTitle className="text-white">{t('settingsThemeTitle')}</CardTitle>
+          <CardDescription>{t('settingsThemeDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-white font-medium">Color Theme</Label>
-              <p className="text-sm text-slate-400">Choose between dark and light modes</p>
+              <Label className="text-white font-medium">{t('settingsColorTheme')}</Label>
+              <p className="text-sm text-slate-400">{t('settingsColorThemeDescription')}</p>
             </div>
             <div className="flex gap-2">
               <Button
@@ -194,16 +194,16 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <Card className="cosmic-card border-purple-700">
         <CardHeader>
-          <CardTitle className="text-white">Accessibility Options</CardTitle>
-          <CardDescription>Configure accessibility features for better usability</CardDescription>
+          <CardTitle className="text-white">{t('settingsAccessibilityTitle')}</CardTitle>
+          <CardDescription>{t('settingsAccessibilityDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Contrast className="w-5 h-5 text-purple-400" />
               <div>
-                <Label className="text-white font-medium">High Contrast Mode</Label>
-                <p className="text-sm text-slate-400">Increases color contrast for better visibility</p>
+                <Label className="text-white font-medium">{t('settingsHighContrast')}</Label>
+                <p className="text-sm text-slate-400">{t('settingsHighContrastDescription')}</p>
               </div>
             </div>
             <Switch
@@ -216,8 +216,8 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <Focus className="w-5 h-5 text-blue-400" />
               <div>
-                <Label className="text-white font-medium">Focus Mode</Label>
-                <p className="text-sm text-slate-400">Enhanced focus indicators for keyboard navigation</p>
+                <Label className="text-white font-medium">{t('settingsFocusMode')}</Label>
+                <p className="text-sm text-slate-400">{t('settingsFocusModeDescription')}</p>
               </div>
             </div>
             <Switch
@@ -234,16 +234,16 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <Card className="cosmic-card border-purple-700">
         <CardHeader>
-          <CardTitle className="text-white">Language & Region</CardTitle>
-          <CardDescription>Configure your preferred language and regional settings</CardDescription>
+          <CardTitle className="text-white">{t('settingsLanguageTitle')}</CardTitle>
+          <CardDescription>{t('settingsLanguageDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Globe className="w-5 h-5 text-green-400" />
               <div>
-                <Label className="text-white font-medium">Interface Language</Label>
-                <p className="text-sm text-slate-400">Choose your preferred language for the interface</p>
+                <Label className="text-white font-medium">{t('settingsInterfaceLanguage')}</Label>
+                <p className="text-sm text-slate-400">{t('settingsInterfaceLanguageDescription')}</p>
               </div>
             </div>
             <Select value={language} onValueChange={changeLanguage}>
@@ -251,8 +251,8 @@ export default function SettingsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="pt">Português</SelectItem>
+                <SelectItem value="en">{t('languageEnglish')}</SelectItem>
+                <SelectItem value="pt">{t('languagePortuguese')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -265,27 +265,41 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <Card className="cosmic-card border-purple-700">
         <CardHeader>
-          <CardTitle className="text-white">Notification Preferences</CardTitle>
-          <CardDescription>Manage how and when you receive notifications</CardDescription>
+          <CardTitle className="text-white">{t('settingsNotificationTitle')}</CardTitle>
+          <CardDescription>{t('settingsNotificationDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {Object.entries({
-            email: 'Email Notifications',
-            push: 'Push Notifications', 
-            taskReminders: 'Task Reminders',
-            achievements: 'Achievement Notifications'
-          }).map(([key, label]) => (
-            <div key={key} className="flex items-center justify-between">
+          {[
+            {
+              key: 'email',
+              label: t('settingsNotificationEmail'),
+              description: t('settingsNotificationEmailDescription')
+            },
+            {
+              key: 'push',
+              label: t('settingsNotificationPush'),
+              description: t('settingsNotificationPushDescription')
+            },
+            {
+              key: 'taskReminders',
+              label: t('settingsNotificationTaskReminders'),
+              description: t('settingsNotificationTaskRemindersDescription')
+            },
+            {
+              key: 'achievements',
+              label: t('settingsNotificationAchievements'),
+              description: t('settingsNotificationAchievementsDescription')
+            }
+          ].map((option) => (
+            <div key={option.key} className="flex items-center justify-between">
               <div>
-                <Label className="text-white font-medium">{label}</Label>
-                <p className="text-sm text-slate-400">
-                  Receive {label.toLowerCase()} for important updates
-                </p>
+                <Label className="text-white font-medium">{option.label}</Label>
+                <p className="text-sm text-slate-400">{option.description}</p>
               </div>
               <Switch
-                checked={notifications[key]}
-                onCheckedChange={(checked) => 
-                  setNotifications(prev => ({ ...prev, [key]: checked }))
+                checked={notifications[option.key]}
+                onCheckedChange={(checked) =>
+                  setNotifications(prev => ({ ...prev, [option.key]: checked }))
                 }
               />
             </div>
@@ -307,7 +321,7 @@ export default function SettingsPage() {
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">{t('settings')}</h1>
-        <p className="text-slate-400">Manage your account preferences and application settings</p>
+        <p className="text-slate-400">{t('settingsPageSubtitle')}</p>
       </div>
 
       <div className="flex gap-8">
