@@ -221,6 +221,25 @@ export default function LearningPathPage() {
     setSelectedContent(null);
   };
 
+  const learningProgressBaseline = learningPath?.progress_percent ?? 0;
+
+  const computedLearningProgress = useMemo(() => {
+    if (!Array.isArray(contents) || contents.length === 0) {
+      return learningProgressBaseline;
+    }
+
+    const completedCount = contents.reduce((count, item) => {
+      const progressState = contentProgress[item.id];
+      if (progressState?.completed || item.status_conclusao === 'Concluido') {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+
+    const localPercent = Math.round((completedCount / contents.length) * 100);
+    return Math.max(localPercent, learningProgressBaseline);
+  }, [contentProgress, contents, learningProgressBaseline]);
+
   if (isLoading || !learningPath) {
     return <div className="text-center p-10 text-text-secondary">{t('learningPathLoading')}</div>;
   }
