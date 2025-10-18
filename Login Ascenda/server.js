@@ -6,30 +6,6 @@ import url from 'node:url';
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000;
 const HOST = process.env.HOST ?? '127.0.0.1';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const PROJECT_ROOT = path.resolve(__dirname, '..');
-
-const STATIC_MOUNTS = [
-  {
-    prefix: '/loading-page',
-    directory: path.resolve(PROJECT_ROOT, 'loading-page'),
-    defaultFile: 'index.html',
-  },
-  {
-    prefix: '/Ascenda Estagiario',
-    directory: path.resolve(PROJECT_ROOT, 'Ascenda Estagiario'),
-    defaultFile: 'index.html',
-  },
-  {
-    prefix: '/Ascenda Padrinho att',
-    directory: path.resolve(PROJECT_ROOT, 'Ascenda Padrinho att'),
-    defaultFile: 'index.html',
-  },
-  {
-    prefix: '/',
-    directory: __dirname,
-    defaultFile: 'index.html',
-  },
-];
 
 const MIME_TYPES = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -59,40 +35,17 @@ async function readFileSafe(filePath) {
   }
 }
 
-function resolveFilePath(pathname) {
-  for (const { prefix, directory, defaultFile } of STATIC_MOUNTS) {
-    if (prefix !== '/' && pathname !== prefix && !pathname.startsWith(`${prefix}/`)) {
-      continue;
-    }
-
-    const baseLength = prefix === '/' ? 1 : prefix.length;
-    let relativePath = pathname.slice(baseLength);
-
-    if (!relativePath || relativePath === '/') {
-      relativePath = defaultFile ?? 'index.html';
-    }
-
-    relativePath = relativePath.replace(/^\/+/u, '');
-
-    const resolvedPath = path.resolve(directory, relativePath);
-    const relativeToDir = path.relative(directory, resolvedPath);
-
-    if (relativeToDir.startsWith('..') || path.isAbsolute(relativeToDir)) {
-      return null;
-    }
-
-    return resolvedPath;
-  }
-
-  return null;
-}
-
 async function handleRequest(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = decodeURIComponent(parsedUrl.pathname);
-  const filePath = resolveFilePath(pathname);
+  let pathname = decodeURIComponent(parsedUrl.pathname);
 
-  if (!filePath) {
+  if (pathname === '/') {
+    pathname = '/index.html';
+  }
+
+  const filePath = path.join(__dirname, pathname);
+
+  if (!filePath.startsWith(__dirname)) {
     res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Acesso negado');
     return;
