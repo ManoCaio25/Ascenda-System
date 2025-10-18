@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,15 +7,44 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
- <link rel="stylesheet" href="/Login Ascenda/style.css">
-    <title>Login Page | Caged coder</title>
+    <link rel="stylesheet" href="style.css" />
+    <title>Ascenda | Portal de Login</title>
   </head>
 
   <body>
+    <div class="language-selector" role="group" aria-label="Selecionar idioma">
+      <button
+        type="button"
+        class="lang-button"
+        data-lang="pt"
+        aria-label="Português"
+      >
+        <span aria-hidden="true">🇧🇷</span>
+        <span class="sr-only">Português</span>
+      </button>
+      <button
+        type="button"
+        class="lang-button"
+        data-lang="en"
+        aria-label="English"
+      >
+        <span aria-hidden="true">🇺🇸</span>
+        <span class="sr-only">English</span>
+      </button>
+      <button
+        type="button"
+        class="lang-button"
+        data-lang="es"
+        aria-label="Español"
+      >
+        <span aria-hidden="true">🇪🇸</span>
+        <span class="sr-only">Español</span>
+      </button>
+    </div>
     <div class="container" id="container">
       <div class="form-container sign-up">
         <form id="mentorForm" autocomplete="on">
-          <h1>Bem Vindo Padrinho!</h1>
+          <h1 id="mentorTitle" data-i18n="mentorTitle">Bem-vindo, Padrinho!</h1>
           <div class="social-icons">
             <a href="#" class="icon"
               ><i class="fa-brands fa-google-plus-g"></i
@@ -26,12 +55,15 @@
               ><i class="fa-brands fa-linkedin-in"></i
             ></a> -->
           </div>
-          <span>Entre com seu nome, e-mail e senha</span>
+          <span class="form-subtitle" data-i18n="formSubtitle"
+            >Entre com seu nome, e-mail e senha</span
+          >
           <input
             id="mentorName"
             type="text"
             name="name"
             placeholder="Nome"
+            data-i18n-placeholder="namePlaceholder"
             autocomplete="name"
             required
           />
@@ -39,7 +71,8 @@
             id="mentorEmail"
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="E-mail"
+            data-i18n-placeholder="emailPlaceholder"
             autocomplete="email"
             required
           />
@@ -47,18 +80,21 @@
             id="mentorPassword"
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="Senha"
+            data-i18n-placeholder="passwordPlaceholder"
             autocomplete="current-password"
             required
           />
-          <a href="#">Esqueceu sua senha?</a>
-          <button type="submit">Sign Up</button>
+          <a href="#" data-i18n="forgotPassword">Esqueceu sua senha?</a>
+          <button id="mentorSubmitBtn" type="submit" data-i18n="mentorSubmit">
+            Cadastrar
+          </button>
           <p id="mentorFeedback" class="feedback" aria-live="polite"></p>
         </form>
       </div>
       <div class="form-container sign-in">
         <form id="internForm" autocomplete="on">
-          <h1>Bem Vindo Estagiário!</h1>
+          <h1 id="internTitle" data-i18n="internTitle">Bem-vindo, Estagiário!</h1>
           <div class="social-icons">
             <a href="#" class="icon"
               ><i class="fa-brands fa-google-plus-g"></i
@@ -69,12 +105,15 @@
               ><i class="fa-brands fa-linkedin-in"></i
             ></a> -->
           </div>
-          <span>Entre com seu nome, e-mail e senha</span>
+          <span class="form-subtitle" data-i18n="formSubtitle"
+            >Entre com seu nome, e-mail e senha</span
+          >
           <input
             id="internName"
             type="text"
             name="name"
             placeholder="Nome"
+            data-i18n-placeholder="namePlaceholder"
             autocomplete="name"
             required
           />
@@ -82,7 +121,8 @@
             id="internEmail"
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="E-mail"
+            data-i18n-placeholder="emailPlaceholder"
             autocomplete="email"
             required
           />
@@ -90,28 +130,39 @@
             id="internPassword"
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="Senha"
+            data-i18n-placeholder="passwordPlaceholder"
             autocomplete="current-password"
             required
           />
-          <a href="#">Esqueceu sua senha?</a>
-          <button type="submit">Sign In</button>
+          <a href="#" data-i18n="forgotPassword">Esqueceu sua senha?</a>
+          <button id="internSubmitBtn" type="submit" data-i18n="internSubmit">
+            Entrar
+          </button>
           <p id="internFeedback" class="feedback" aria-live="polite"></p>
         </form>
       </div>
       <div class="toggle-container">
         <div class="toggle">
           <div class="toggle-panel toggle-left">
-            <h1>Estagiário</h1>
+            <h1 id="internToggleTitle" data-i18n="internToggleTitle">Estagiário</h1>
             <!-- <p>Entre com seu login de Estagiário</p> -->
-            <button class="hidden" id="login">Entrar</button>
+            <button class="hidden" id="login" data-i18n="toggleButtonLogin">
+              Entrar
+            </button>
           </div>
           <div class="toggle-panel toggle-right">
-            <h1>Padrinho</h1>
+            <h1 id="mentorToggleTitle" data-i18n="mentorToggleTitle">Padrinho</h1>
             <!-- <p>
               Register with your personal details to use all of site features
             </p> -->
-            <button class="hidden" id="register">Entrar</button>
+            <button
+              class="hidden"
+              id="register"
+              data-i18n="toggleButtonRegister"
+            >
+              Cadastrar
+            </button>
           </div>
         </div>
       </div>
@@ -147,6 +198,149 @@
         target: "/Ascenda Estagiario/index.html",
       };
 
+      const DEFAULT_LANG = "pt";
+      const LANGUAGE_KEY = "lang";
+      const HTML_LANG_MAP = { pt: "pt-BR", en: "en", es: "es" };
+
+      const translations = {
+        pt: {
+          documentTitle: "Ascenda | Portal de Login",
+          mentorTitle: "Bem-vindo, Padrinho!",
+          internTitle: "Bem-vindo, Estagiário!",
+          formSubtitle: "Entre com seu nome, e-mail e senha",
+          namePlaceholder: "Nome",
+          emailPlaceholder: "E-mail",
+          passwordPlaceholder: "Senha",
+          forgotPassword: "Esqueceu sua senha?",
+          mentorSubmit: "Cadastrar",
+          internSubmit: "Entrar",
+          mentorToggleTitle: "Padrinho",
+          internToggleTitle: "Estagiário",
+          toggleButtonLogin: "Entrar",
+          toggleButtonRegister: "Cadastrar",
+          successMessage: "Login realizado com sucesso! Redirecionando...",
+          errorMessage:
+            "Credenciais incorretas. Verifique nome, e-mail e senha.",
+        },
+        en: {
+          documentTitle: "Ascenda | Login Portal",
+          mentorTitle: "Welcome, Mentor!",
+          internTitle: "Welcome, Intern!",
+          formSubtitle: "Enter your name, email, and password",
+          namePlaceholder: "Name",
+          emailPlaceholder: "Email",
+          passwordPlaceholder: "Password",
+          forgotPassword: "Forgot your password?",
+          mentorSubmit: "Sign Up",
+          internSubmit: "Sign In",
+          mentorToggleTitle: "Mentor",
+          internToggleTitle: "Intern",
+          toggleButtonLogin: "Sign In",
+          toggleButtonRegister: "Sign Up",
+          successMessage: "Login successful! Redirecting...",
+          errorMessage:
+            "Incorrect credentials. Please check your name, email, and password.",
+        },
+        es: {
+          documentTitle: "Ascenda | Portal de Acceso",
+          mentorTitle: "¡Bienvenido, Padrino!",
+          internTitle: "¡Bienvenido, Becario!",
+          formSubtitle: "Ingresa tu nombre, correo y contraseña",
+          namePlaceholder: "Nombre",
+          emailPlaceholder: "Correo",
+          passwordPlaceholder: "Contraseña",
+          forgotPassword: "¿Olvidaste tu contraseña?",
+          mentorSubmit: "Registrarse",
+          internSubmit: "Iniciar sesión",
+          mentorToggleTitle: "Padrino",
+          internToggleTitle: "Becario",
+          toggleButtonLogin: "Ingresar",
+          toggleButtonRegister: "Registrarse",
+          successMessage: "¡Inicio de sesión exitoso! Redirigiendo...",
+          errorMessage:
+            "Credenciales incorrectas. Verifica tu nombre, correo y contraseña.",
+        },
+      };
+
+      const languageButtons = Array.from(
+        document.querySelectorAll(".lang-button")
+      );
+      const textElements = document.querySelectorAll("[data-i18n]");
+      const placeholderElements = document.querySelectorAll(
+        "[data-i18n-placeholder]"
+      );
+      const feedbackElements = document.querySelectorAll(".feedback");
+
+      let currentLang = loadLanguage();
+
+      languageButtons.forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
+
+      function loadLanguage() {
+        try {
+          const stored = sessionStorage.getItem(LANGUAGE_KEY);
+          if (stored && translations[stored]) {
+            return stored;
+          }
+        } catch (error) {
+          console.warn("sessionStorage unavailable", error);
+        }
+        return DEFAULT_LANG;
+      }
+
+      function setLanguage(lang, { persist = true } = {}) {
+        if (!translations[lang]) {
+          return;
+        }
+        currentLang = lang;
+        if (persist) {
+          try {
+            sessionStorage.setItem(LANGUAGE_KEY, lang);
+          } catch (error) {
+            console.warn("sessionStorage unavailable", error);
+          }
+        }
+        document.documentElement.lang = HTML_LANG_MAP[lang] || "en";
+        updateLanguageButtons();
+        applyTranslations();
+      }
+
+      function updateLanguageButtons() {
+        languageButtons.forEach((button) => {
+          const isActive = button.dataset.lang === currentLang;
+          button.classList.toggle("active", isActive);
+          button.setAttribute("aria-pressed", String(isActive));
+        });
+      }
+
+      function applyTranslations() {
+        const dict = translations[currentLang];
+        document.title = dict.documentTitle;
+        textElements.forEach((el) => {
+          const key = el.dataset.i18n;
+          if (key && dict[key]) {
+            el.textContent = dict[key];
+          }
+        });
+        placeholderElements.forEach((el) => {
+          const key = el.dataset.i18nPlaceholder;
+          if (key && dict[key]) {
+            el.placeholder = dict[key];
+          }
+        });
+        feedbackElements.forEach((el) => {
+          const state = el.dataset.feedbackState;
+          if (!state) {
+            return;
+          }
+          const key = state === "success" ? "successMessage" : "errorMessage";
+          el.textContent = dict[key];
+        });
+      }
+
+      setLanguage(currentLang, { persist: false });
+
       function goThroughLoading(toUrl) {
         try {
           sessionStorage.setItem("nextUrl", toUrl);
@@ -156,8 +350,10 @@
         window.location.href = LOADING_URL;
       }
 
-      function showFeedback(el, msg, ok = false) {
-        el.textContent = msg;
+      function showFeedback(el, ok = false) {
+        const dict = translations[currentLang];
+        el.textContent = ok ? dict.successMessage : dict.errorMessage;
+        el.dataset.feedbackState = ok ? "success" : "error";
         el.classList.toggle("ok", ok);
         el.classList.toggle("err", !ok);
       }
@@ -180,17 +376,15 @@
         if (valid) {
           try {
             sessionStorage.setItem("role", "intern");
+            sessionStorage.setItem(LANGUAGE_KEY, currentLang);
+            sessionStorage.setItem("mode", "enter");
           } catch (error) {
             console.warn("sessionStorage unavailable", error);
           }
-          showFeedback(fb, "Login realizado com sucesso! Redirecionando...", true);
+          showFeedback(fb, true);
           goThroughLoading(INTERN.target);
         } else {
-          showFeedback(
-            fb,
-            "Credenciais incorretas. Verifique nome, e-mail e senha.",
-            false,
-          );
+          showFeedback(fb, false);
         }
       });
 
@@ -212,17 +406,15 @@
         if (valid) {
           try {
             sessionStorage.setItem("role", "mentor");
+            sessionStorage.setItem(LANGUAGE_KEY, currentLang);
+            sessionStorage.setItem("mode", "enter");
           } catch (error) {
             console.warn("sessionStorage unavailable", error);
           }
-          showFeedback(fb, "Login realizado com sucesso! Redirecionando...", true);
+          showFeedback(fb, true);
           goThroughLoading(MENTOR.target);
         } else {
-          showFeedback(
-            fb,
-            "Credenciais incorretas. Verifique nome, e-mail e senha.",
-            false,
-          );
+          showFeedback(fb, false);
         }
       });
     </script>

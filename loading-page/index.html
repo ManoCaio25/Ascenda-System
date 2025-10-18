@@ -101,6 +101,7 @@
                 </g>
             </svg>
         </div>
+        <p class="tagline" aria-live="polite"></p>
 
         <!-- Linhas de carregamento inferiores -->
         <div class="loading-lines bottom">
@@ -115,13 +116,6 @@
         <div class="beta-badge">BETA</div>
     </div>
     <script src="script.js"></script>
-    <script>
-const nextUrl = sessionStorage.getItem("nextUrl");
-const fallbackLogin = "/Login Ascenda/index.html";
-setTimeout(() => {
-  window.location.href = nextUrl || fallbackLogin;
-}, 7000);
-    </script>
   </body>
 </html>
 
