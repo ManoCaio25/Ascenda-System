@@ -5,13 +5,11 @@ const loginBtn = document.getElementById("login");
 // Alterna para o painel do Padrinho
 registerBtn.addEventListener("click", () => {
   container.classList.add("active");
-  limparMensagens();
 });
 
 // Alterna para o painel do Estagiário
 loginBtn.addEventListener("click", () => {
   container.classList.remove("active");
-  limparMensagens();
 });
 
 const formPadrinho = document.querySelector(".form-container.sign-up form");
