@@ -14,7 +14,20 @@ export function Dialog({ open, onOpenChange, children }) {
 }
 
 export function DialogContent({ className = "", children }) {
-  return <div className={`max-h-full w-full max-w-2xl overflow-y-auto rounded-xl bg-slate-900 shadow-xl ${className}`}>{children}</div>;
+  const tokens = className.split(/\s+/).filter(Boolean);
+  const hasCustomMaxWidth = tokens.some((token) =>
+    token.startsWith('max-w-') || token.startsWith('!max-w-') || token.startsWith('max-w[') || token.startsWith('!max-w['),
+  );
+
+  const classes = ['max-h-full', 'w-full', 'overflow-y-auto', 'rounded-xl', 'bg-slate-900', 'shadow-xl'];
+  if (!hasCustomMaxWidth) {
+    classes.push('max-w-2xl');
+  }
+  if (className) {
+    classes.push(className);
+  }
+
+  return <div className={classes.join(' ')}>{children}</div>;
 }
 
 export function DialogHeader({ className = "", children }) {
