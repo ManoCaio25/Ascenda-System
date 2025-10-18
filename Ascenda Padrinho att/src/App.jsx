@@ -8,6 +8,9 @@ import ActivityGenerator from './pages/ActivityGenerator.jsx';
 import ContentManagement from './pages/ContentManagement.jsx';
 import VacationRequests from './pages/VacationRequests.jsx';
 import Reports from './pages/Reports.jsx';
+import Forum from './pages/Forum.jsx';
+import ForumTopics from './pages/ForumTopics.jsx';
+import ForumTopicView from './pages/ForumTopicView.jsx';
 import { PAGE_URLS } from './utils/index.js';
 
 const routes = [
@@ -46,6 +49,18 @@ const routes = [
       {
         path: PAGE_URLS.Reports.replace(/^\//, ''),
         element: <Reports />,
+      },
+      {
+        path: PAGE_URLS.Forum.replace(/^\//, ''),
+        element: <Forum />,
+      },
+      {
+        path: PAGE_URLS.ForumTopics.replace(/^\//, ''),
+        element: <ForumTopics />,
+      },
+      {
+        path: PAGE_URLS.ForumTopicView.replace(/^\//, ''),
+        element: <ForumTopicView />,
       },
       {
         path: '*',

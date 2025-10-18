@@ -5,6 +5,9 @@ export const PAGE_URLS = {
   ContentManagement: '/content',
   VacationRequests: '/vacation-requests',
   Reports: '/reports',
+  Forum: '/forum',
+  ForumTopics: '/forum/topics',
+  ForumTopicView: '/forum/topic',
 };
 
 export function createPageUrl(pageName) {
