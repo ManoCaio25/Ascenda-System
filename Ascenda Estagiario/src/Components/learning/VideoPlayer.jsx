@@ -78,6 +78,17 @@ export default function VideoPlayer({
   const statusLabel = getStatusLabel(completed);
   const progressLabel = `Progress: ${Math.round(percent)}% | Remaining: ${formatVideoTime(remainingTime)}`;
 
+  const handleCloseRequest = useCallback(() => {
+    if (typeof onClose === 'function') {
+      onClose({
+        contentId,
+        percent,
+        currentTime,
+        completed,
+      });
+    }
+  }, [completed, contentId, currentTime, onClose, percent]);
+
   return (
     <div className={gradientBackground}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.35),_transparent_70%)]" />
@@ -85,7 +96,7 @@ export default function VideoPlayer({
         <div className="flex items-start justify-between gap-3">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleCloseRequest}
             className="group inline-flex items-center gap-2 rounded-full border border-purple-400/50 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20"
           >
             <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-0.5" />
@@ -93,7 +104,7 @@ export default function VideoPlayer({
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleCloseRequest}
             className="rounded-full border border-transparent p-2 text-text-secondary transition hover:border-purple-400/40 hover:bg-purple-500/10 hover:text-text-primary"
             aria-label="Fechar player"
           >
