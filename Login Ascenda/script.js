@@ -2,28 +2,6 @@ const container = document.getElementById("container");
 const registerBtn = document.getElementById("register");
 const loginBtn = document.getElementById("login");
 
-const formPadrinho = document.querySelector(".form-container.sign-up form");
-const formEstagiario = document.querySelector(".form-container.sign-in form");
-
-function atualizarMensagem(form, mensagem, status = "") {
-  const feedback = form.querySelector(".feedback-message");
-  if (!feedback) {
-    return;
-  }
-
-  feedback.textContent = mensagem;
-  if (status) {
-    feedback.dataset.status = status;
-  } else {
-    delete feedback.dataset.status;
-  }
-}
-
-function limparMensagens() {
-  atualizarMensagem(formPadrinho, "");
-  atualizarMensagem(formEstagiario, "");
-}
-
 // Alterna para o painel do Padrinho
 registerBtn.addEventListener("click", () => {
   container.classList.add("active");
@@ -35,6 +13,9 @@ loginBtn.addEventListener("click", () => {
   container.classList.remove("active");
   limparMensagens();
 });
+
+const formPadrinho = document.querySelector(".form-container.sign-up form");
+const formEstagiario = document.querySelector(".form-container.sign-in form");
 
 const PADRINHO = {
   nome: "Paulo Henrique Vieira",
@@ -51,23 +32,13 @@ const ESTAGIARIO = {
   senha: "123456",
 };
 
-function mostrarSucesso(form, tipo) {
-  atualizarMensagem(
-    form,
-    `Login do ${tipo} bem-sucedido! Redirecionando...`,
-    "success"
-  );
-}
-
-function mostrarErro(form) {
-  atualizarMensagem(form, "Credenciais incorretas.", "error");
+function mostrarSucesso(tipo) {
+  alert(`Login do ${tipo} bem-sucedido! Redirecionando...`);
 }
 
 function redirecionarParaLoading(alvo) {
   const destino = encodeURIComponent(alvo);
-  setTimeout(() => {
-    window.location.href = `../loading-page/index.html?target=${destino}`;
-  }, 800);
+  window.location.href = `../loading-page/index.html?target=${destino}`;
 }
 
 function obterValores(form) {
@@ -86,10 +57,10 @@ formEstagiario.addEventListener("submit", (event) => {
   const senhaValida = senha === ESTAGIARIO.senha;
 
   if (nomeValido && emailValido && senhaValida) {
-    mostrarSucesso(formEstagiario, "Estagiário");
+    mostrarSucesso("Estagiário");
     redirecionarParaLoading("estagiario");
   } else {
-    mostrarErro(formEstagiario);
+    alert("Credenciais incorretas.");
   }
 });
 
@@ -102,9 +73,9 @@ formPadrinho.addEventListener("submit", (event) => {
   const senhaValida = senha === PADRINHO.senha;
 
   if (nomeValido && emailValido && senhaValida) {
-    mostrarSucesso(formPadrinho, "Padrinho");
+    mostrarSucesso("Padrinho");
     redirecionarParaLoading("padrinho");
   } else {
-    mostrarErro(formPadrinho);
+    alert("Credenciais incorretas.");
   }
 });

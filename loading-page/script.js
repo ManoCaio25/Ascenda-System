@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const destinoNormalizado = target.toLowerCase();
         const rotas = {
-            estagiario: '../Ascenda Estagiario/dist/index.html',
-            padrinho: '../Ascenda Padrinho att/dist/index.html',
+            estagiario: '../Ascenda Estagiario/index.html',
+            padrinho: '../Ascenda Padrinho att/index.html',
         };
 
         return rotas[destinoNormalizado] ?? null;
