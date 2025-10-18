@@ -10,7 +10,6 @@ import { Textarea } from '@padrinho/components/ui/textarea';
 import { Button } from '@padrinho/components/ui/button';
 import { useTranslation } from '@padrinho/i18n';
 import { useForumAuthors } from '@padrinho/hooks/useForumAuthors';
-import Avatar from '@padrinho/components/ui/Avatar';
 
 const ReplyCard = ({ reply, formattedDate, author, t }) => {
   const authorProfile = author || { full_name: t('forum.anonymous'), avatar: '' };
@@ -24,16 +23,15 @@ const ReplyCard = ({ reply, formattedDate, author, t }) => {
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-start gap-4 rounded-lg border bg-surface p-5 shadow-e1 ${highlightClasses}`}
     >
-      <div className="flex items-center justify-center">
+      <div className="h-10 w-10 overflow-hidden rounded-full border border-border bg-surface2">
         {authorProfile.avatar ? (
-          <Avatar
+          <img
             src={authorProfile.avatar}
             alt={authorProfile.displayName || authorProfile.full_name}
-            size={40}
-            className="border border-border bg-surface2"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface2 text-xs text-muted">
+          <div className="flex h-full w-full items-center justify-center text-xs text-muted">
             <User className="h-4 w-4" />
           </div>
         )}

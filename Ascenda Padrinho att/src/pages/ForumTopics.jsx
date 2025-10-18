@@ -19,7 +19,6 @@ import {
 } from '@padrinho/components/ui/dialog';
 import { useTranslation } from '@padrinho/i18n';
 import { useForumAuthors } from '@padrinho/hooks/useForumAuthors';
-import Avatar from '@padrinho/components/ui/Avatar';
 
 const initialTopicState = { title: '', content: '' };
 
@@ -134,16 +133,15 @@ export default function ForumTopicsPage() {
               className="block rounded-lg border border-border bg-surface p-5 shadow-e1 transition hover:border-brand"
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                <div className="flex items-center justify-center">
+                <div className="h-12 w-12 overflow-hidden rounded-full border border-border bg-surface2">
                   {topic.creator.avatar_url ? (
-                    <Avatar
+                    <img
                       src={topic.creator.avatar_url}
                       alt={topic.creator.full_name}
-                      size={48}
-                      className="border border-border bg-surface2"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface2 text-sm text-muted">
+                    <div className="flex h-full w-full items-center justify-center text-sm text-muted">
                       <User className="h-4 w-4" />
                     </div>
                   )}
