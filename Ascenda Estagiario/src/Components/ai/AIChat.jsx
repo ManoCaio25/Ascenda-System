@@ -7,7 +7,7 @@ import { InvokeLLM } from "@estagiario/integrations/Core";
 import { useI18n } from "@estagiario/Components/utils/i18n";
 
 const AIChatWidget = () => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const initialBotMessage = useMemo(() => ({
     id: 'welcome',
@@ -53,19 +53,8 @@ const AIChatWidget = () => {
 
     try {
       const response = await InvokeLLM({
-        prompt: `You are an AI assistant for the Ascenda Cosmic Intern Portal platform.
-        
-        Context about the platform:
-        - Ascenda is an internship management platform with a cosmic theme
-        - Users can manage tasks, learning paths, participate in forums, and track their progress
-        - The platform has gamification elements like points, badges, and achievements
-        - Users have mentors and can collaborate on projects
-        - Features include: Dashboard, Learning Paths, Task Management (Kanban), Forum, Calendar, Knowledge Base, Profile with badges/shop
-        
-        User question: "${input}"
-        
-        Please provide helpful, concise answers about the platform. If the question is not related to the platform, gently redirect to platform-related topics. Keep responses friendly and engaging with the cosmic theme.`,
-        add_context_from_internet: false
+        message: input,
+        language
       });
 
       const botMessage = {
