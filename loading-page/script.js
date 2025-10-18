@@ -1,4 +1,4 @@
-wrap.classList.add(mode === "exit" ? "anim-exit" : "anim-enter");
+// wrap.classList.add(mode === "exit" ? "anim-exit" : "anim-enter");
 
 const HTML_LANG_MAP = { pt: "pt-BR", en: "en", es: "es" };
 
