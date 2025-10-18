@@ -11,6 +11,16 @@ export const PAGE_URLS = {
 };
 
 export function createPageUrl(pageName) {
+  if (!pageName) {
+    return '/';
+  }
+
+  if (pageName.includes('?')) {
+    const [pageKey, search] = pageName.split('?');
+    const baseUrl = PAGE_URLS[pageKey] ?? '/';
+    return search ? `${baseUrl}?${search}` : baseUrl;
+  }
+
   return PAGE_URLS[pageName] ?? '/';
 }
 
