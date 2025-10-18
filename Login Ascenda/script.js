@@ -30,13 +30,18 @@ const ESTAGIARIO = {
   senha: "123456",
 };
 
+function construirUrlLoading(alvo) {
+  const url = new URL("../loading-page/index.html", window.location.href);
+  url.searchParams.set("target", alvo);
+  return url.toString();
+}
+
 function mostrarSucesso(tipo) {
   alert(`Login do ${tipo} bem-sucedido! Redirecionando...`);
 }
 
 function redirecionarParaLoading(alvo) {
-  const destino = encodeURIComponent(alvo);
-  window.location.href = `../loading-page/index.html?target=${destino}`;
+  window.location.href = construirUrlLoading(alvo);
 }
 
 function obterValores(form) {
