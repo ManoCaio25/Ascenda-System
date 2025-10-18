@@ -41,10 +41,69 @@ const loadYouTubeApi = () => {
   return apiPromise;
 };
 
-export default function YouTubePlayer({ videoId, startTime = 0, onProgress }) {
+export default function YouTubePlayer({
+  videoId,
+  startTime = 0,
+  onProgress,
+  onDuration,
+  onPlaybackStateChange,
+}) {
   const containerRef = useRef(null);
   const playerRef = useRef(null);
   const progressTimer = useRef(null);
+  const durationRef = useRef(0);
+
+  const emitProgress = () => {
+    if (!playerRef.current || typeof onProgress !== 'function') return;
+
+    const currentTime = Math.floor(playerRef.current.getCurrentTime() || 0);
+    const duration = Math.floor(playerRef.current.getDuration() || 0);
+
+    if (duration > 0) {
+      durationRef.current = duration;
+      if (typeof onDuration === 'function') {
+        onDuration(durationRef.current);
+      }
+    }
+
+    const percent = durationRef.current
+      ? Math.min(100, Math.round((currentTime / durationRef.current) * 100))
+      : 0;
+
+    onProgress({ currentTime, duration: durationRef.current, percent });
+  };
+
+  const handleStateChange = (event) => {
+    const YTPlayerState = window.YT?.PlayerState;
+    if (!YTPlayerState) return;
+
+    const stateMap = {
+      [YTPlayerState.UNSTARTED]: 'unstarted',
+      [YTPlayerState.ENDED]: 'ended',
+      [YTPlayerState.PLAYING]: 'playing',
+      [YTPlayerState.PAUSED]: 'paused',
+      [YTPlayerState.BUFFERING]: 'buffering',
+      [YTPlayerState.CUED]: 'cued',
+    };
+
+    const mappedState = stateMap[event.data] || 'unknown';
+
+    if (typeof onPlaybackStateChange === 'function') {
+      onPlaybackStateChange(mappedState);
+    }
+
+    if (mappedState === 'playing') {
+      clearInterval(progressTimer.current);
+      progressTimer.current = setInterval(() => {
+        emitProgress();
+      }, 2000);
+    }
+
+    if (mappedState === 'paused' || mappedState === 'ended') {
+      clearInterval(progressTimer.current);
+      emitProgress();
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -67,28 +126,22 @@ export default function YouTubePlayer({ videoId, startTime = 0, onProgress }) {
             if (startTime > 0) {
               event.target.seekTo(startTime, true);
             }
-          },
-          onStateChange: (event) => {
-            const YTPlayerState = window.YT?.PlayerState;
-            if (!YTPlayerState) return;
 
-            if (event.data === YTPlayerState.PLAYING) {
-              clearInterval(progressTimer.current);
-              progressTimer.current = setInterval(() => {
-                if (!playerRef.current || typeof onProgress !== 'function') return;
-                const currentTime = Math.floor(playerRef.current.getCurrentTime());
-                onProgress(currentTime);
-              }, 2000);
-            }
-
-            if (event.data === YTPlayerState.PAUSED || event.data === YTPlayerState.ENDED) {
-              clearInterval(progressTimer.current);
-              if (typeof onProgress === 'function') {
-                const currentTime = Math.floor(playerRef.current?.getCurrentTime() || 0);
-                onProgress(currentTime);
+            const duration = Math.floor(event.target.getDuration() || 0);
+            if (duration > 0) {
+              durationRef.current = duration;
+              if (typeof onDuration === 'function') {
+                onDuration(durationRef.current);
               }
             }
+
+            if (typeof onPlaybackStateChange === 'function') {
+              onPlaybackStateChange('ready');
+            }
+
+            emitProgress();
           },
+          onStateChange: handleStateChange,
         },
       });
     };
@@ -98,12 +151,13 @@ export default function YouTubePlayer({ videoId, startTime = 0, onProgress }) {
     return () => {
       isMounted = false;
       clearInterval(progressTimer.current);
+      emitProgress();
       if (playerRef.current) {
         playerRef.current.destroy();
         playerRef.current = null;
       }
     };
-  }, [videoId, startTime, onProgress]);
+  }, [videoId, startTime, onProgress, onDuration, onPlaybackStateChange]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 }
