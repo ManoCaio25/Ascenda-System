@@ -98,6 +98,16 @@ export default function VideoPlayer({
     <div className={containerClass}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.35),_transparent_70%)]" />
       <div className="relative flex flex-col gap-6 p-6 text-text-primary">
+        {isInlineVariant && (
+          <button
+            type="button"
+            onClick={handleCloseRequest}
+            className="absolute right-6 top-6 rounded-full border border-transparent p-2 text-text-secondary transition hover:border-purple-400/40 hover:bg-purple-500/10 hover:text-text-primary"
+            aria-label="Fechar player"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
         {!isInlineVariant && (
           <div className="flex items-start justify-between gap-3">
             <button
