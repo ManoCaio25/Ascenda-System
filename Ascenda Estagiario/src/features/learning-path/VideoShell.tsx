@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ExternalLink, RotateCcw, X, AlertTriangle } from 'lucide-react';
 import VideoPlayer, { VideoPlayerHandle } from './VideoPlayer';
 import { loadProgress, saveProgress } from './progressStorage';
@@ -129,10 +129,6 @@ export default function VideoShell({ lessonId, title, youtubeId, onBack, onClose
     playerHandleRef.current?.reload();
   }, []);
 
-  useEffect(() => {
-    setErrorCode(undefined);
-  }, [lessonId, youtubeId]);
-
   const startAt = saved && saved.currentTime >= 5 ? saved.currentTime : 0;
 
   return (
@@ -157,12 +153,10 @@ export default function VideoShell({ lessonId, title, youtubeId, onBack, onClose
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center gap-2 rounded-full border border-purple-500/40 bg-purple-500/10 px-3 py-1.5 text-sm font-medium text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-purple-500/40 bg-purple-500/10 text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20"
           aria-label={t('learningVideoClose')}
         >
           <X className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('learningVideoClose')}</span>
-          <span className="sr-only sm:hidden">{t('learningVideoClose')}</span>
         </button>
       </header>
 
@@ -178,9 +172,7 @@ export default function VideoShell({ lessonId, title, youtubeId, onBack, onClose
         </div>
 
         <div className="relative flex min-h-0 flex-col">
-          <div
-            className={`flex-1 overflow-hidden rounded-xl border border-purple-700/40 bg-black/80 transition-opacity ${errorCode !== undefined ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
-          >
+          <div className={`flex-1 overflow-hidden rounded-xl border border-purple-700/40 bg-black/80 ${errorCode ? 'opacity-20' : ''}`}>
             <VideoPlayer
               ref={(instance) => {
                 playerHandleRef.current = instance;
@@ -200,15 +192,7 @@ export default function VideoShell({ lessonId, title, youtubeId, onBack, onClose
               <AlertTriangle className="h-10 w-10 text-rose-300" />
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-rose-100">{t('learningVideoUnavailableTitle')}</h3>
-                <p className="text-sm text-rose-100/80">
-                  {t('learningVideoUnavailableDescription')}
-                  {errorCode !== undefined ? (
-                    <>
-                      {' '}
-                      {t('learningVideoUnavailableCode', { code: errorCode })}
-                    </>
-                  ) : null}
-                </p>
+                <p className="text-sm text-rose-100/80">{t('learningVideoUnavailableDescription')}</p>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
