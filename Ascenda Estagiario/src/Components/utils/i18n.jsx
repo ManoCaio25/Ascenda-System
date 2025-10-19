@@ -116,6 +116,10 @@ const translations = {
     activitiesSummaryCompleted: 'Completed',
     activitiesSummaryNextDeadline: 'Next deadline',
     activitiesNoUpcomingDeadline: 'No upcoming deadlines',
+    activitiesCategoryRitual: 'Ritual',
+    activitiesCategoryProject: 'Project',
+    activitiesCategoryReflection: 'Reflection',
+    activitiesCategoryOther: 'Activity',
     activitiesFilterLabel: 'Filter by status',
     activitiesFilterAll: 'All',
     activitiesFilterOpen: 'Open',
@@ -146,6 +150,8 @@ const translations = {
     activitiesRetry: 'Try again',
     activitiesSubmitError: 'Something went wrong. Please try again.',
     activitiesInternFallback: 'You',
+    defaultWorkArea: 'Frontend Development',
+    defaultEquippedTag: 'Cosmic Explorer',
 
     // Profile
     myBadges: 'My Badges',
@@ -448,6 +454,10 @@ const translations = {
     activitiesSummaryCompleted: 'Concluídas',
     activitiesSummaryNextDeadline: 'Próximo prazo',
     activitiesNoUpcomingDeadline: 'Sem prazos próximos',
+    activitiesCategoryRitual: 'Ritual',
+    activitiesCategoryProject: 'Projeto',
+    activitiesCategoryReflection: 'Reflexão',
+    activitiesCategoryOther: 'Atividade',
     activitiesFilterLabel: 'Filtrar por status',
     activitiesFilterAll: 'Todas',
     activitiesFilterOpen: 'Abertas',
@@ -478,6 +488,8 @@ const translations = {
     activitiesRetry: 'Tentar novamente',
     activitiesSubmitError: 'Algo deu errado. Tente de novo.',
     activitiesInternFallback: 'Você',
+    defaultWorkArea: 'Desenvolvimento Frontend',
+    defaultEquippedTag: 'Explorador Cósmico',
 
     // Profile
     myBadges: 'Minhas Conquistas',
