@@ -22,6 +22,7 @@ export default function VideoPlayer({
   levelLabel,
   estimatedMinutes,
   contentType,
+  variant = 'modal',
 }) {
   const {
     percent,
@@ -77,6 +78,10 @@ export default function VideoPlayer({
   const cosmicMessage = getMissionMessage(completed);
   const statusLabel = getStatusLabel(completed);
   const progressLabel = `Progress: ${Math.round(percent)}% | Remaining: ${formatVideoTime(remainingTime)}`;
+  const isInlineVariant = variant === 'inline';
+  const containerClass = isInlineVariant
+    ? 'relative overflow-hidden rounded-2xl border border-purple-500/30 bg-slate-950/80 shadow-[0_0_24px_rgba(168,85,247,0.18)]'
+    : gradientBackground;
 
   const handleCloseRequest = useCallback(() => {
     if (typeof onClose === 'function') {
@@ -90,33 +95,37 @@ export default function VideoPlayer({
   }, [completed, contentId, currentTime, onClose, percent]);
 
   return (
-    <div className={gradientBackground}>
+    <div className={containerClass}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.35),_transparent_70%)]" />
       <div className="relative flex flex-col gap-6 p-6 text-text-primary">
-        <div className="flex items-start justify-between gap-3">
-          <button
-            type="button"
-            onClick={handleCloseRequest}
-            className="group inline-flex items-center gap-2 rounded-full border border-purple-400/50 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20"
-          >
-            <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-0.5" />
-            Voltar
-          </button>
-          <button
-            type="button"
-            onClick={handleCloseRequest}
-            className="rounded-full border border-transparent p-2 text-text-secondary transition hover:border-purple-400/40 hover:bg-purple-500/10 hover:text-text-primary"
-            aria-label="Fechar player"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        {!isInlineVariant && (
+          <div className="flex items-start justify-between gap-3">
+            <button
+              type="button"
+              onClick={handleCloseRequest}
+              className="group inline-flex items-center gap-2 rounded-full border border-purple-400/50 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20"
+            >
+              <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-0.5" />
+              Voltar
+            </button>
+            <button
+              type="button"
+              onClick={handleCloseRequest}
+              className="rounded-full border border-transparent p-2 text-text-secondary transition hover:border-purple-400/40 hover:bg-purple-500/10 hover:text-text-primary"
+              aria-label="Fechar player"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        )}
 
-        <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-200/90">{cosmicMessage}</p>
-          <h2 className="mt-3 text-3xl font-semibold text-text-primary">{title}</h2>
-          {description && <p className="mt-2 text-sm text-text-secondary">{description}</p>}
-        </div>
+        {!isInlineVariant && (
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-200/90">{cosmicMessage}</p>
+            <h2 className="mt-3 text-3xl font-semibold text-text-primary">{title}</h2>
+            {description && <p className="mt-2 text-sm text-text-secondary">{description}</p>}
+          </div>
+        )}
 
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,_rgba(168,85,247,0.1),_transparent_60%)]" />
