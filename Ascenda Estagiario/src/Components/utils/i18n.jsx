@@ -95,6 +95,18 @@ const translations = {
     contentStatusNotStarted: 'Not started',
     contentStatusLocked: 'Locked',
     noContentAvailable: 'No materials available yet.',
+    learningContentEmptyTitle: 'Select a lesson to explore',
+    learningContentEmptyDescription: 'Choose a module from the list to watch the video or open materials here.',
+    learningContentCloseViewer: 'Close viewer',
+    learningContentDetailsHeading: 'Content details',
+    learningContentMetaType: 'Type',
+    learningContentMetaLevel: 'Level',
+    learningContentMetaDuration: 'Estimated time',
+    learningContentMetaProgress: 'Progress',
+    learningContentMetaStatus: 'Status',
+    learningContentVideoUnavailableTitle: 'Video unavailable',
+    learningContentVideoUnavailableDescription:
+      'We could not load this video right now. Try again later or open it directly on YouTube.',
 
     // Activities
     mentorActivitiesTag: 'Mentor activities',
@@ -415,6 +427,18 @@ const translations = {
     contentStatusNotStarted: 'Não iniciado',
     contentStatusLocked: 'Bloqueado',
     noContentAvailable: 'Ainda não há materiais disponíveis.',
+    learningContentEmptyTitle: 'Escolha um conteúdo para explorar',
+    learningContentEmptyDescription: 'Selecione um módulo na lista para assistir ao vídeo ou abrir os materiais aqui.',
+    learningContentCloseViewer: 'Fechar visualização',
+    learningContentDetailsHeading: 'Detalhes do conteúdo',
+    learningContentMetaType: 'Tipo',
+    learningContentMetaLevel: 'Nível',
+    learningContentMetaDuration: 'Tempo estimado',
+    learningContentMetaProgress: 'Progresso',
+    learningContentMetaStatus: 'Status',
+    learningContentVideoUnavailableTitle: 'Vídeo indisponível',
+    learningContentVideoUnavailableDescription:
+      'Não foi possível carregar este vídeo agora. Tente novamente mais tarde ou abra diretamente no YouTube.',
 
     // Activities
     mentorActivitiesTag: 'Atividades do padrinho',
