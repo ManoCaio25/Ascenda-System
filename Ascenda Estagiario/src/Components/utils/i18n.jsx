@@ -107,25 +107,6 @@ const translations = {
     learningContentVideoUnavailableTitle: 'Video unavailable',
     learningContentVideoUnavailableDescription:
       'We could not load this video right now. Try again later or open it directly on YouTube.',
-    learningVideoBack: 'Back',
-    learningVideoClose: 'Close',
-    learningVideoNowPlaying: 'Now playing',
-    learningVideoProgress: 'Progress',
-    learningVideoAutoSaving: 'We are saving your progress automatically.',
-    learningVideoCompleted: 'Video completed!',
-    learningVideoUnavailableTitle: 'Video unavailable',
-    learningVideoUnavailableDescription:
-      'We could not load this video right now. Try again later or open it directly on YouTube.',
-    learningVideoUnavailableCode: 'Error code: {code}',
-    learningVideoRetry: 'Try again',
-    learningVideoOpenYoutube: 'Open on YouTube',
-    learningVideoStatusLabel: 'Status',
-    learningVideoStatusWatching: 'Watching',
-    learningVideoStatusCompleted: 'Completed',
-    learningVideoTimeLabel: 'Time watched',
-    learningVideoModuleDescription: 'Follow the lessons in order to unlock new knowledge.',
-    learningVideoNoStreamTitle: 'Content without embedded video',
-    learningVideoNoStreamDescription: 'Open the resource below to continue this lesson.',
 
     // Activities
     mentorActivitiesTag: 'Mentor activities',
@@ -458,25 +439,6 @@ const translations = {
     learningContentVideoUnavailableTitle: 'Vídeo indisponível',
     learningContentVideoUnavailableDescription:
       'Não foi possível carregar este vídeo agora. Tente novamente mais tarde ou abra diretamente no YouTube.',
-    learningVideoBack: 'Voltar',
-    learningVideoClose: 'Fechar',
-    learningVideoNowPlaying: 'Assistindo agora',
-    learningVideoProgress: 'Progresso',
-    learningVideoAutoSaving: 'Salvamos seu progresso automaticamente.',
-    learningVideoCompleted: 'Vídeo concluído!',
-    learningVideoUnavailableTitle: 'Vídeo indisponível',
-    learningVideoUnavailableDescription:
-      'Não foi possível carregar este vídeo agora. Tente novamente ou abra diretamente no YouTube.',
-    learningVideoUnavailableCode: 'Código do erro: {code}',
-    learningVideoRetry: 'Tentar novamente',
-    learningVideoOpenYoutube: 'Abrir no YouTube',
-    learningVideoStatusLabel: 'Status',
-    learningVideoStatusWatching: 'Assistindo',
-    learningVideoStatusCompleted: 'Concluído',
-    learningVideoTimeLabel: 'Tempo assistido',
-    learningVideoModuleDescription: 'Siga as aulas na ordem para desbloquear novos aprendizados.',
-    learningVideoNoStreamTitle: 'Conteúdo sem vídeo incorporado',
-    learningVideoNoStreamDescription: 'Abra o recurso abaixo para continuar esta aula.',
 
     // Activities
     mentorActivitiesTag: 'Atividades do padrinho',

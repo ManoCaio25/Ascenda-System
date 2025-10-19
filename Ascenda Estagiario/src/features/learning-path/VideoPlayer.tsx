@@ -9,8 +9,6 @@ type YouTubePlayerInstance = {
   loadVideoById: (options: { videoId: string; startSeconds?: number }) => void;
   cueVideoById: (options: { videoId: string; startSeconds?: number }) => void;
   seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
-  playVideo: () => void;
-  stopVideo: () => void;
 };
 
 type Props = {
@@ -118,7 +116,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
           const player = playerRef.current;
           if (!player) return;
           try {
-            player.loadVideoById({ videoId, startSeconds: latestStartAtRef.current || 0 });
+            player.cueVideoById({ videoId, startSeconds: latestStartAtRef.current || 0 });
           } catch (error) {
             console.error('Failed to reload video', error);
           }
