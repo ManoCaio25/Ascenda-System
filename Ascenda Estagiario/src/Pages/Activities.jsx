@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Activity, User } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { enUS, ptBR } from 'date-fns/locale';
 import {
   ClipboardList,
   Clock,
@@ -22,11 +23,25 @@ const rarityColor = {
   reflection: 'from-blue-500/80 to-blue-300/30',
 };
 
-function formatDeadline(dateString) {
+const categoryLabels = {
+  ritual: 'activitiesCategoryRitual',
+  project: 'activitiesCategoryProject',
+  reflection: 'activitiesCategoryReflection',
+};
+
+function formatDeadline(dateInput, language) {
+  if (!dateInput) return '';
+
   try {
-    return format(new Date(dateString), "dd MMM, HH:mm");
+    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const locale = language === 'pt' ? ptBR : enUS;
+    const pattern = language === 'pt' ? "dd MMM, HH:mm" : 'MMM d, HH:mm';
+    return format(date, pattern, { locale });
   } catch (error) {
-    return dateString;
+    return String(dateInput);
   }
 }
 
@@ -37,7 +52,7 @@ export default function ActivitiesPage() {
   const [responseLinks, setResponseLinks] = useState('');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   const statusConfig = useMemo(() => ({
     open: {
@@ -77,9 +92,9 @@ export default function ActivitiesPage() {
     return {
       open: open.length,
       completed: completed.length,
-      nextDeadline: next ? formatDeadline(next) : t('activitiesNoUpcomingDeadline'),
+      nextDeadline: next ? formatDeadline(next, language) : t('activitiesNoUpcomingDeadline'),
     };
-  }, [activities, t]);
+  }, [activities, language, t]);
 
   const handleRespond = async () => {
     if (!selectedActivity || !responseText.trim()) return;
@@ -161,7 +176,8 @@ export default function ActivitiesPage() {
         <div className="grid gap-6">
           {activities.map((activity, index) => {
             const status = statusConfig[activity.status] || statusConfig.open;
-            const gradient = rarityColor[activity.categoria] || 'from-purple-500/80 to-slate-700/30';
+            const categoryKey = categoryLabels[String(activity.categoria).toLowerCase()] || 'activitiesCategoryOther';
+            const gradient = rarityColor[String(activity.categoria).toLowerCase()] || 'from-purple-500/80 to-slate-700/30';
             return (
               <motion.div
                 key={activity.id}
@@ -174,13 +190,13 @@ export default function ActivitiesPage() {
                   <div className="space-y-4 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
                       <span className={`rounded-full px-3 py-1 text-xs font-semibold bg-gradient-to-r ${gradient}`}>
-                        {activity.categoria}
+                        {t(categoryKey)}
                       </span>
                       <span className={`px-3 py-1 text-xs font-semibold rounded-full ${status.badge}`}>
                         {status.label}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-slate-400">
-                        <Clock className="w-4 h-4" /> {formatDeadline(activity.prazo_resposta)}
+                        <Clock className="w-4 h-4" /> {formatDeadline(activity.prazo_resposta, language)}
                       </span>
                     </div>
                     <div>
@@ -253,7 +269,7 @@ export default function ActivitiesPage() {
               </DialogTitle>
               <DialogDescription>
                 {t('activitiesDialogDetails', {
-                  deadline: formatDeadline(selectedActivity.prazo_resposta),
+                  deadline: formatDeadline(selectedActivity.prazo_resposta, language),
                   mentor: selectedActivity.mentor,
                 })}
               </DialogDescription>
@@ -301,7 +317,7 @@ export default function ActivitiesPage() {
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-semibold text-white">{resposta.autor}</span>
                             <span className="text-xs text-slate-400">
-                              {formatDeadline(resposta.created_date)}
+                              {formatDeadline(resposta.created_date, language)}
                             </span>
                           </div>
                           <p className="text-slate-300 whitespace-pre-line">{resposta.conteudo}</p>

@@ -100,11 +100,11 @@ export default function Layout({ children, currentPageName }) {
         email: "caio.alvarenga@ascenda.com",
         pontos_gamificacao: 2847,
         avatar_url: "", // Changed to empty string for fallback test
-        area_atuacao: "Frontend Development",
-        equipped_tag: "🚀 Cosmic Explorer"
+        area_atuacao: t('defaultWorkArea'),
+        equipped_tag: `🚀 ${t('defaultEquippedTag')}`
       });
     }
-  }, []);
+  }, [t]);
 
   const navigationItems = useMemo(
     () =>
