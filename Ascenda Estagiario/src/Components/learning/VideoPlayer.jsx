@@ -102,10 +102,10 @@ export default function VideoPlayer({
           <button
             type="button"
             onClick={handleCloseRequest}
-            className="absolute right-6 top-6 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-purple-500/40 bg-purple-500/10 text-purple-100 transition hover:border-purple-300 hover:bg-purple-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-400"
+            className="absolute right-6 top-6 rounded-full border border-transparent p-2 text-text-secondary transition hover:border-purple-400/40 hover:bg-purple-500/10 hover:text-text-primary"
             aria-label="Fechar player"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         )}
         {!isInlineVariant && (
