@@ -187,6 +187,15 @@ export default function VideoShell({ lessonId, title, youtubeId, onBack, onClose
             />
           </div>
 
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-purple-500/40 bg-slate-950/70 text-purple-100 shadow-lg transition hover:border-purple-300 hover:bg-purple-500/20"
+            aria-label={t('learningVideoClose')}
+          >
+            <X className="h-4 w-4" />
+          </button>
+
           {errorCode !== undefined && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl border border-rose-500/40 bg-slate-950/95 p-6 text-center text-rose-100">
               <AlertTriangle className="h-10 w-10 text-rose-300" />
