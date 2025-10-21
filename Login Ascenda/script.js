@@ -22,7 +22,6 @@ const PADRINHO = {
 };
 
 const ESTAGIARIO = {
-  nome: "Caio Menezes",
   emails: new Set([
     "caio.alvarenga@ascenda.com",
     "caio.alvarenga@aperam.com",
@@ -53,13 +52,12 @@ function obterValores(form) {
 
 formEstagiario.addEventListener("submit", (event) => {
   event.preventDefault();
-  const { nome, email, senha } = obterValores(formEstagiario);
+  const { email, senha } = obterValores(formEstagiario);
 
-  const nomeValido = nome === ESTAGIARIO.nome;
   const emailValido = ESTAGIARIO.emails.has(email);
   const senhaValida = senha === ESTAGIARIO.senha;
 
-  if (nomeValido && emailValido && senhaValida) {
+  if (emailValido && senhaValida) {
     mostrarSucesso("Estagiário");
     redirecionarParaLoading("estagiario");
   } else {
