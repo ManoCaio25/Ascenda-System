@@ -16,7 +16,6 @@ const formPadrinho = document.querySelector(".form-container.sign-up form");
 const formEstagiario = document.querySelector(".form-container.sign-in form");
 
 const PADRINHO = {
-  nome: "Paulo Henrique Vieira",
   email: "paulo.henrique@ascenda.com",
   senha: "123456",
 };
@@ -44,10 +43,9 @@ function redirecionarParaLoading(alvo) {
 }
 
 function obterValores(form) {
-  const nome = form.querySelector("input[name='name']")?.value?.trim() ?? "";
   const email = form.querySelector("input[name='email']")?.value?.trim() ?? "";
   const senha = form.querySelector("input[name='password']")?.value ?? "";
-  return { nome, email, senha };
+  return { email, senha };
 }
 
 formEstagiario.addEventListener("submit", (event) => {
@@ -67,13 +65,12 @@ formEstagiario.addEventListener("submit", (event) => {
 
 formPadrinho.addEventListener("submit", (event) => {
   event.preventDefault();
-  const { nome, email, senha } = obterValores(formPadrinho);
+  const { email, senha } = obterValores(formPadrinho);
 
-  const nomeValido = nome === PADRINHO.nome;
   const emailValido = email === PADRINHO.email;
   const senhaValida = senha === PADRINHO.senha;
 
-  if (nomeValido && emailValido && senhaValida) {
+  if (emailValido && senhaValida) {
     mostrarSucesso("Padrinho");
     redirecionarParaLoading("padrinho");
   } else {

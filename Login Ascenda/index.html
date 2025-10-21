@@ -65,15 +65,6 @@
             >Entre com seu e-mail e senha</span
           >
           <input
-            id="mentorName"
-            type="text"
-            name="name"
-            placeholder="Nome"
-            data-i18n-placeholder="namePlaceholder"
-            autocomplete="name"
-            required
-          />
-          <input
             id="mentorEmail"
             type="email"
             name="email"
@@ -179,7 +170,6 @@
       const LOADING_URL = "/loading-page/index.html";
 
       const MENTOR = {
-        name: "Paulo Henrique Vieira",
         email: "paulo.henrique@ascenda.com",
         password: "123456",
         target: "/Ascenda Padrinho att/index.html",
@@ -385,7 +375,6 @@
       document.getElementById("mentorForm").addEventListener("submit", (e) => {
         e.preventDefault();
         const fb = document.getElementById("mentorFeedback");
-        const name = document.getElementById("mentorName").value.trim();
         const email = document
           .getElementById("mentorEmail")
           .value.trim()
@@ -393,7 +382,6 @@
         const pass = document.getElementById("mentorPassword").value.trim();
 
         const valid =
-          name === MENTOR.name &&
           email === MENTOR.email &&
           pass === MENTOR.password;
         if (valid) {
