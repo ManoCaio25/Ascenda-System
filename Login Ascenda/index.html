@@ -62,17 +62,8 @@
             ></a> -->
           </div>
           <span class="form-subtitle" data-i18n="formSubtitle"
-            >Entre com seu nome, e-mail e senha</span
+            >Entre com suas credenciais</span
           >
-          <input
-            id="mentorName"
-            type="text"
-            name="name"
-            placeholder="Nome"
-            data-i18n-placeholder="namePlaceholder"
-            autocomplete="name"
-            required
-          />
           <input
             id="mentorEmail"
             type="email"
@@ -112,17 +103,8 @@
             ></a> -->
           </div>
           <span class="form-subtitle" data-i18n="formSubtitle"
-            >Entre com seu nome, e-mail e senha</span
+            >Entre com suas credenciais</span
           >
-          <input
-            id="internName"
-            type="text"
-            name="name"
-            placeholder="Nome"
-            data-i18n-placeholder="namePlaceholder"
-            autocomplete="name"
-            required
-          />
           <input
             id="internEmail"
             type="email"
@@ -188,7 +170,6 @@
       const LOADING_URL = "/loading-page/index.html";
 
       const MENTOR = {
-        name: "Paulo Henrique Vieira",
         email: "paulo.henrique@ascenda.com",
         password: "123456",
         target: "/Ascenda Padrinho att/index.html",
@@ -199,7 +180,6 @@
         "caio.alvarenga@aperam.com",
       ]);
       const INTERN = {
-        name: "Caio Menezes",
         password: "123456",
         target: "/Ascenda Estagiario/index.html",
       };
@@ -213,8 +193,7 @@
           documentTitle: "Ascenda | Portal de Login",
           mentorTitle: "Bem-vindo, Padrinho!",
           internTitle: "Bem-vindo, Estagiário!",
-          formSubtitle: "Entre com seu nome, e-mail e senha",
-          namePlaceholder: "Nome",
+          formSubtitle: "Entre com suas credenciais",
           emailPlaceholder: "E-mail",
           passwordPlaceholder: "Senha",
           forgotPassword: "Esqueceu sua senha?",
@@ -226,14 +205,13 @@
           toggleButtonRegister: "ENTRAR",
           successMessage: "Login realizado com sucesso! Preparando decolagem...",
           errorMessage:
-            "Credenciais incorretas. Verifique nome, e-mail e senha.",
+            "Credenciais incorretas. Verifique suas informações de acesso.",
         },
         en: {
           documentTitle: "Ascenda | Login Portal",
           mentorTitle: "Welcome, Galactic Mentor!",
           internTitle: "Welcome, Stellar Intern!",
-          formSubtitle: "Enter your name, email, and password",
-          namePlaceholder: "Name",
+          formSubtitle: "Enter your credentials",
           emailPlaceholder: "Email",
           passwordPlaceholder: "Password",
           forgotPassword: "Forgot your password?",
@@ -245,14 +223,13 @@
           toggleButtonRegister: "Sign Up",
           successMessage: "Login successful! Prepping launch...",
           errorMessage:
-            "Incorrect credentials. Please check your name, email, and password.",
+            "Incorrect credentials. Please check your access information.",
         },
         es: {
           documentTitle: "Ascenda | Portal de Acceso",
           mentorTitle: "¡Bienvenido, Padrino!",
           internTitle: "¡Bienvenido, Becario Estelar!",
-          formSubtitle: "Ingresa tu nombre, correo y contraseña",
-          namePlaceholder: "Nombre",
+          formSubtitle: "Ingresa tus credenciales",
           emailPlaceholder: "Correo",
           passwordPlaceholder: "Contraseña",
           forgotPassword: "¿Olvidaste tu contraseña?",
@@ -264,7 +241,7 @@
           toggleButtonRegister: "Registrarse",
           successMessage: "¡Inicio de sesión exitoso! Preparando el despegue...",
           errorMessage:
-            "Credenciales incorrectas. Verifica tu nombre, correo y contraseña.",
+            "Credenciales incorrectas. Verifica tu información de acceso.",
         },
       };
 
@@ -368,7 +345,6 @@
       document.getElementById("internForm").addEventListener("submit", (e) => {
         e.preventDefault();
         const fb = document.getElementById("internFeedback");
-        const name = document.getElementById("internName").value.trim();
         const email = document
           .getElementById("internEmail")
           .value.trim()
@@ -376,9 +352,7 @@
         const pass = document.getElementById("internPassword").value.trim();
 
         const valid =
-          name === INTERN.name &&
-          INTERN_ALLOWED_EMAILS.has(email) &&
-          pass === INTERN.password;
+          INTERN_ALLOWED_EMAILS.has(email) && pass === INTERN.password;
         if (valid) {
           try {
             sessionStorage.setItem("role", "intern");
@@ -398,7 +372,6 @@
       document.getElementById("mentorForm").addEventListener("submit", (e) => {
         e.preventDefault();
         const fb = document.getElementById("mentorFeedback");
-        const name = document.getElementById("mentorName").value.trim();
         const email = document
           .getElementById("mentorEmail")
           .value.trim()
@@ -406,7 +379,6 @@
         const pass = document.getElementById("mentorPassword").value.trim();
 
         const valid =
-          name === MENTOR.name &&
           email === MENTOR.email &&
           pass === MENTOR.password;
         if (valid) {
