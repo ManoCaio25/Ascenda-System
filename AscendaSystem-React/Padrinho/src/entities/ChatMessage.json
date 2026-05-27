@@ -1,0 +1,32 @@
+{
+  "name": "ChatMessage",
+  "type": "object",
+  "properties": {
+    "intern_id": {
+      "type": "string",
+      "description": "ID of the intern this message is with"
+    },
+    "from": {
+      "type": "string",
+      "enum": [
+        "manager",
+        "intern"
+      ],
+      "description": "Who sent the message"
+    },
+    "text": {
+      "type": "string",
+      "description": "Message content"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether message has been read"
+    }
+  },
+  "required": [
+    "intern_id",
+    "from",
+    "text"
+  ]
+}

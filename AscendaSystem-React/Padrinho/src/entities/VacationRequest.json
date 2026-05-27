@@ -1,0 +1,48 @@
+{
+  "name": "VacationRequest",
+  "type": "object",
+  "properties": {
+    "intern_id": {
+      "type": "string",
+      "description": "ID of the intern requesting vacation"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Vacation start date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Vacation end date"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for vacation request"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Request status"
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the decision was made"
+    },
+    "manager_note": {
+      "type": "string",
+      "description": "Optional note from manager"
+    }
+  },
+  "required": [
+    "intern_id",
+    "start_date",
+    "end_date"
+  ]
+}

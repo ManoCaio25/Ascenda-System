@@ -1,0 +1,130 @@
+# Setup Supabase + Backend Ascenda
+
+Este guia acompanha os arquivos:
+
+- `AscendaSystem-Node/database/supabase_schema.sql`
+- `AscendaSystem-Node/`
+
+## 1. Criar projeto Supabase
+
+1. Crie uma conta no Supabase.
+2. Crie um novo projeto.
+3. Guarde a senha do banco em um local seguro.
+4. Abra `Project Settings > API`.
+5. Copie:
+   - Project URL
+   - anon public key
+   - service_role key
+
+Importante: a `service_role key` nunca deve ir para frontend.
+
+## 2. Rodar SQL
+
+1. Abra `SQL Editor`.
+2. Cole todo o conteudo de `AscendaSystem-Node/database/supabase_schema.sql`.
+3. Execute.
+
+O SQL cria:
+
+- tabelas principais do Ascenda;
+- tipos/enums;
+- indices;
+- triggers de `updated_at`;
+- Row Level Security;
+- policies;
+- bucket privado `course-files`;
+- seeds basicos de forum e loja.
+
+## 3. Configurar Auth
+
+Em `Authentication > Providers`:
+
+1. Habilite Email/Password para desenvolvimento.
+2. Depois podemos habilitar Google OAuth.
+
+Em `Authentication > URL Configuration`, adicione os redirects locais:
+
+```txt
+http://localhost:5173
+http://localhost:5174
+http://localhost:5175
+```
+
+Depois de criar sua primeira conta, rode no SQL Editor para tornar esse usuario padrinho:
+
+```sql
+update public.profiles
+set role = 'mentor'
+where email = 'seu-email@exemplo.com';
+```
+
+## 4. Configurar backend
+
+Entre na pasta:
+
+```bash
+cd AscendaSystem-Node
+```
+
+Crie `.env` a partir de `.env.example`:
+
+```bash
+copy .env.example .env
+```
+
+Preencha:
+
+```txt
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
+OPENAI_MODEL=
+```
+
+Instale e rode:
+
+```bash
+npm install
+npm run dev
+```
+
+Teste:
+
+```txt
+GET http://localhost:4000/api/health
+```
+
+## 5. Variaveis futuras do frontend
+
+Quando ligarmos o frontend no backend, usaremos:
+
+```txt
+VITE_API_URL=http://localhost:4000/api
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+## 6. Fluxo esperado da IA
+
+1. Padrinho informa tema, texto, documento ou link.
+2. Frontend chama `POST /api/ai/generate-activities`.
+3. Backend chama OpenAI Responses API com JSON Schema.
+4. Backend grava registro em `ai_generation_jobs`.
+5. Proxima etapa: backend tambem cria registros em `activities` e `activity_questions`.
+
+## 7. Ordem de trabalho sugerida
+
+1. Confirmar SQL rodando no Supabase.
+2. Rodar backend local.
+3. Implementar login real no frontend.
+4. Trocar `localStorage` das entidades por chamadas HTTP.
+5. Migrar tela por tela: login, usuarios, estagiarios, cursos, atividades, chat.
+6. Ligar gerador de IA na tela do padrinho.
+
+## 8. Links oficiais
+
+- Supabase Docs: https://supabase.com/docs
+- Supabase Pricing: https://supabase.com/pricing
+- OpenAI Responses API: https://platform.openai.com/docs/api-reference/responses
+- OpenAI Structured Outputs: https://platform.openai.com/docs/guides/structured-outputs

@@ -1,0 +1,17 @@
+# deps e builds
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+
+# editor/so
+.vscode/
+.DS_Store
+
+# env/logs
+.env
+.env.local
+.env.*.local
+!.env.example
+*.log

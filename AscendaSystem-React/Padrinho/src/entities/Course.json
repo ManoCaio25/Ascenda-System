@@ -1,0 +1,80 @@
+{
+  "name": "Course",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Course title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Course description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Technical",
+        "Leadership",
+        "Communication",
+        "Design",
+        "Business"
+      ],
+      "default": "Technical"
+    },
+    "duration_hours": {
+      "type": "number",
+      "description": "Estimated completion time in hours"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "Beginner",
+        "Intermediate",
+        "Advanced"
+      ],
+      "default": "Beginner"
+    },
+    "youtube_video_id": {
+      "type": "string",
+      "description": "YouTube video ID for video content"
+    },
+    "youtube_url": {
+      "type": "string",
+      "description": "Original YouTube URL"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL for course materials/attachments"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original filename of uploaded material"
+    },
+    "file_mime": {
+      "type": "string",
+      "description": "MIME type of uploaded file"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "published": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether course is visible to interns"
+    },
+    "enrolled_count": {
+      "type": "number",
+      "default": 0
+    },
+    "completion_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage of enrolled interns who completed"
+    }
+  },
+  "required": [
+    "title",
+    "description"
+  ]
+}
