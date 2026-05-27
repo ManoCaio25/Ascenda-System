@@ -35,6 +35,8 @@ O SQL cria:
 - bucket privado `course-files`;
 - seeds basicos de forum e loja.
 
+O perfil do intern possui `mentor_id` e `substitute_mentor_id`. O mentor substituto tambem tem acesso ao intern pelas policies de RLS.
+
 ## 3. Configurar Auth
 
 Em `Authentication > Providers`:
@@ -107,7 +109,7 @@ VITE_SUPABASE_ANON_KEY=
 
 ## 6. Fluxo esperado da IA
 
-1. Padrinho informa tema, texto, documento ou link.
+1. Mentor informa tema, texto, documento ou link.
 2. Frontend chama `POST /api/ai/generate-activities`.
 3. Backend chama OpenAI Responses API com JSON Schema.
 4. Backend grava registro em `ai_generation_jobs`.

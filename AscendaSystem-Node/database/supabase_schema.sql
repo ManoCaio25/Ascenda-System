@@ -91,6 +91,7 @@ create table if not exists public.intern_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid unique references auth.users(id) on delete set null,
   mentor_id uuid references public.profiles(id) on delete set null,
+  substitute_mentor_id uuid references public.profiles(id) on delete set null,
   created_by uuid references public.profiles(id) on delete set null,
   full_name text not null,
   email text unique,
@@ -377,6 +378,7 @@ create table if not exists public.ai_generation_jobs (
 );
 
 create index if not exists idx_intern_profiles_mentor_id on public.intern_profiles(mentor_id);
+create index if not exists idx_intern_profiles_substitute_mentor_id on public.intern_profiles(substitute_mentor_id);
 create index if not exists idx_course_assignments_intern_id on public.course_assignments(intern_id);
 create index if not exists idx_tasks_intern_id_status on public.tasks(intern_id, status);
 create index if not exists idx_activities_intern_id_status on public.activities(intern_id, status);
@@ -481,6 +483,12 @@ as $$
       from public.intern_profiles i
       where i.id = target_intern_id
         and i.mentor_id = auth.uid()
+    )
+    or exists (
+      select 1
+      from public.intern_profiles i
+      where i.id = target_intern_id
+        and i.substitute_mentor_id = auth.uid()
     );
 $$;
 

@@ -1,0 +1,232 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #020617;
+  color: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.launch-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(56, 189, 248, 0.20), transparent 24%),
+    radial-gradient(circle at 72% 30%, rgba(217, 70, 239, 0.16), transparent 28%),
+    linear-gradient(135deg, #020617, #0f172a 52%, #170b27);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.starfield span {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(226, 232, 240, 0.86);
+  box-shadow: 0 0 16px rgba(103, 232, 249, 0.75);
+  animation: pulse-star 2.6s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+.launch-card {
+  position: relative;
+  width: min(760px, 100%);
+  min-height: 520px;
+  padding: clamp(24px, 6vw, 54px);
+  border-radius: 32px;
+  background: rgba(15, 23, 42, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 110px rgba(0, 0, 0, 0.46);
+  backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.rocket-track {
+  position: relative;
+  height: 250px;
+  display: grid;
+  place-items: center;
+}
+
+.rocket-glow {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(103, 232, 249, 0.22), transparent 66%);
+  animation: breathe 1.8s ease-in-out infinite;
+}
+
+.rocket {
+  position: relative;
+  z-index: 2;
+  width: min(168px, 40vw);
+  transform-origin: center;
+  animation: launch 3.6s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+  filter: drop-shadow(0 18px 28px rgba(56, 189, 248, 0.26));
+}
+
+.trail {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  height: 3px;
+  border-radius: 999px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(103, 232, 249, 0), rgba(103, 232, 249, 0.82), rgba(240, 171, 252, 0));
+  animation: trail 1.2s ease-in-out infinite;
+}
+
+.trail-one {
+  width: 260px;
+  transform: rotate(28deg) translateX(-160px);
+}
+
+.trail-two {
+  width: 180px;
+  transform: rotate(28deg) translateX(-130px) translateY(24px);
+  animation-delay: 0.14s;
+}
+
+.trail-three {
+  width: 210px;
+  transform: rotate(28deg) translateX(-150px) translateY(-22px);
+  animation-delay: 0.28s;
+}
+
+.launch-copy {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: #67e8f9;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.launch-copy h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  line-height: 1;
+}
+
+.target-label {
+  margin: 16px 0 0;
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.progress-wrap {
+  display: grid;
+  gap: 12px;
+}
+
+.progress-line {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.progress-line span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22d3ee, #a78bfa, #f0abfc);
+  transition: width 160ms ease;
+}
+
+.step-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+@keyframes launch {
+  0% {
+    transform: translate(-120px, 72px) rotate(35deg) scale(0.82);
+    opacity: 0;
+  }
+  16% {
+    opacity: 1;
+  }
+  58% {
+    transform: translate(0, 0) rotate(35deg) scale(1);
+  }
+  100% {
+    transform: translate(142px, -86px) rotate(35deg) scale(0.92);
+    opacity: 0.84;
+  }
+}
+
+@keyframes trail {
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+  50% {
+    opacity: 0.86;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-star {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+}
+
+@media (max-width: 640px) {
+  .launch-card {
+    min-height: 480px;
+    border-radius: 24px;
+  }
+
+  .rocket-track {
+    height: 210px;
+  }
+}

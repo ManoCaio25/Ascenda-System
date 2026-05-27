@@ -13,8 +13,8 @@ Este documento e o roteiro de trabalho para transformar a simulacao atual em um 
 ```txt
 Ascenda-System/
   AscendaSystem-React/
-    Padrinho/
-    Estagiario/
+    MentorPortal/
+    InternPortal/
     Login/
     LoadingPage/
 
@@ -35,6 +35,8 @@ Ascenda-System/
 - `AscendaSystem-Node/README.md`: instrucoes do backend.
 - `docs/SETUP_SUPABASE_BACKEND.md`: passo a passo de configuracao do Supabase e backend.
 - `.env.example` nos dois frontends: variaveis futuras para API e Supabase.
+- `AscendaSystem-React/Login`: Access Hub em React para login/cadastro local.
+- `AscendaSystem-React/LoadingPage`: Launch Bridge em React para transicao entre portais.
 
 ## O que voce precisa criar no Supabase
 
@@ -84,15 +86,16 @@ where email = 'seu-email@exemplo.com';
    - Testar `GET /api/health`.
 
 3. Migrar autenticacao
-   - Remover login fake do `AscendaSystem-React/Login`.
+   - Trocar o cadastro/login local do `AscendaSystem-React/Login` por Supabase Auth.
    - Usar Supabase Auth.
-   - Redirecionar usuario por role: `mentor` para Padrinho, `intern` para Estagiario.
+   - Redirecionar usuario por role: `mentor` para MentorPortal, `intern` para InternPortal.
+   - Manter o vinculo `mentor_id` e `substitute_mentor_id` no perfil do intern.
 
-4. Migrar dados do Padrinho
+4. Migrar dados do MentorPortal
    - Trocar `localStorage` e stores fake por chamadas ao backend.
    - Prioridade: interns, courses, course_assignments, tasks, chat_messages, vacation_requests.
 
-5. Migrar dados do Estagiario
+5. Migrar dados do InternPortal
    - Ler somente dados autorizados pelo RLS.
    - Prioridade: perfil, atividades, tarefas, cursos, forum e feedback.
 
@@ -111,7 +114,7 @@ Entrada do padrinho:
 - Link de apoio, quando existir.
 - Quantidade de atividades.
 - Quantidade de perguntas.
-- Estagiario alvo, opcional.
+- Intern alvo, opcional.
 
 Saida esperada:
 
@@ -125,22 +128,25 @@ Regra importante: a IA deve gerar sugestoes. O padrinho revisa e publica.
 
 ## Polimento inicial feito no frontend
 
-- Chat do Padrinho ficou mais robusto contra falhas de carregamento/envio.
+- Chat do MentorPortal ficou mais robusto contra falhas de carregamento/envio.
 - Avatar do chat agora aceita URL de imagem, emoji ou iniciais.
 - `eventBus` agora retorna uma funcao de unsubscribe.
 - Sidebar agora acusa erro se for usada fora do provider correto.
 - Notas de curso em `ActiveAssignments` agora renderizam o texto real.
 - `index.html` dos dois frontends agora apontam para `/src/main.jsx`, como esperado pelo Vite em desenvolvimento.
 - `ActivityGenerator` agora possui os helpers de leitura de arquivo que faltavam e usa texto extraido de arquivos simples no planejamento local.
+- Padrinho/Estagiario foram renomeados tecnicamente para `MentorPortal` e `InternPortal`.
+- Login e LoadingPage foram convertidos para React.
+- Cadastro local agora cria mentors e interns, vinculando intern ao mentor principal e ao mentor substituto.
 
 ## Proximos arquivos que precisam de migracao
 
-- `AscendaSystem-React/Padrinho/src/entities/store.js`
-- `AscendaSystem-React/Estagiario/src/Entities/store.js`
+- `AscendaSystem-React/MentorPortal/src/entities/store.js`
+- `AscendaSystem-React/InternPortal/src/Entities/store.js`
 - `AscendaSystem-React/Login/index.html`
 - `AscendaSystem-React/LoadingPage/script.js`
-- `AscendaSystem-React/Padrinho/src/pages/AscendaIA/services/ascendaIAClient.js`
-- `AscendaSystem-React/Padrinho/src/pages/ActivityGenerator.jsx`
+- `AscendaSystem-React/MentorPortal/src/pages/AscendaIA/services/ascendaIAClient.js`
+- `AscendaSystem-React/MentorPortal/src/pages/ActivityGenerator.jsx`
 
 ## Criterio de pronto da primeira fase
 
@@ -148,6 +154,6 @@ Regra importante: a IA deve gerar sugestoes. O padrinho revisa e publica.
 - Mentor consegue cadastrar estagiario.
 - Mentor consegue criar curso.
 - Mentor consegue atribuir curso para estagiario.
-- Estagiario enxerga somente seus dados.
+- Intern enxerga somente seus dados.
 - Chat e ferias usam banco real.
 - IA gera sugestoes e salva historico no Supabase.
