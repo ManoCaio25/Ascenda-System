@@ -26,6 +26,27 @@ function createSupabaseAuthClient() {
   });
 }
 
+function publicSession(session) {
+  if (!session) return null;
+  return {
+    access_token: session.access_token,
+    token_type: session.token_type || "Bearer",
+    expires_at: session.expires_at,
+    provider: "supabase",
+  };
+}
+
+async function createSessionForPasswordLogin({ email, password }) {
+  const client = createSupabaseAuthClient();
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+
+  if (error || !data?.session) {
+    throw unauthorized(error?.message || "Unable to create session");
+  }
+
+  return publicSession(data.session);
+}
+
 async function getProfileById(id) {
   const supabaseAdmin = requireSupabaseAdmin();
   const { data, error } = await supabaseAdmin
@@ -150,12 +171,7 @@ export const supabaseDataAdapter = {
       },
       profile: publicProfile(profile),
       account: publicProfile(profile),
-      session: {
-        access_token: data.session.access_token,
-        token_type: data.session.token_type || "Bearer",
-        expires_at: data.session.expires_at,
-        provider: "supabase",
-      },
+      session: publicSession(data.session),
     };
   },
 
@@ -247,7 +263,7 @@ export const supabaseDataAdapter = {
       },
       profile: publicProfile(profile),
       account: publicProfile(profile),
-      session: null,
+      session: await createSessionForPasswordLogin(payload),
     };
   },
 
@@ -338,7 +354,7 @@ export const supabaseDataAdapter = {
         track: intern.track,
       },
       intern: enriched,
-      session: null,
+      session: context.profile ? null : await createSessionForPasswordLogin(payload),
     };
   },
 

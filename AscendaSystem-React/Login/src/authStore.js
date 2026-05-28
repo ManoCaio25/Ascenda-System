@@ -240,7 +240,8 @@ export function persistAuthenticatedAccount(account, apiSession = null) {
 }
 
 export function persistRemoteAuthResult(result) {
-  const account = result?.account || result?.profile;
+  const payload = result?.data || result;
+  const account = payload?.account || payload?.profile;
 
   if (!account) {
     throw new Error("Resposta de autenticacao invalida.");
@@ -248,23 +249,23 @@ export function persistRemoteAuthResult(result) {
 
   const normalized = {
     ...account,
-    id: account.id || result.user?.id,
-    email: account.email || result.user?.email,
-    full_name: account.full_name || account.fullName || result.user?.email,
-    role: account.role || result.profile?.role || "intern",
+    id: account.id || payload.user?.id,
+    email: account.email || payload.user?.email,
+    full_name: account.full_name || account.fullName || payload.user?.email,
+    role: account.role || payload.profile?.role || "intern",
     password: "",
   };
 
-  if (result.intern) {
-    normalized.intern_id = result.intern.id;
-    normalized.mentor_id = result.intern.mentor_id;
-    normalized.mentor_name = result.intern.mentor_name;
-    normalized.substitute_mentor_id = result.intern.substitute_mentor_id;
-    normalized.substitute_mentor_name = result.intern.substitute_mentor_name;
-    normalized.track = result.intern.track;
+  if (payload.intern) {
+    normalized.intern_id = payload.intern.id;
+    normalized.mentor_id = payload.intern.mentor_id;
+    normalized.mentor_name = payload.intern.mentor_name;
+    normalized.substitute_mentor_id = payload.intern.substitute_mentor_id;
+    normalized.substitute_mentor_name = payload.intern.substitute_mentor_name;
+    normalized.track = payload.intern.track;
   }
 
-  return persistAuthenticatedAccount(normalized, result.session);
+  return persistAuthenticatedAccount(normalized, payload.session);
 }
 
 export function registerMentor(payload) {

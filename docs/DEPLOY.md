@@ -33,6 +33,7 @@ Referencias oficiais:
 - `AscendaSystem-React/.env.production.example` ja aponta para `https://api.ascenda-system.is-a.dev/api`.
 - `AscendaSystem-Node/.env.production.example` ja limita CORS para `https://ascenda-system.is-a.dev`.
 - As chaves sensiveis do Supabase ficam como `sync: false` no `render.yaml`; o Render vai pedir os valores no painel, sem gravar no Git.
+- Para a demonstracao, o cadastro publico esta habilitado no `render.yaml`. Antes de uso real, volte `ALLOW_PUBLIC_MENTOR_SIGNUP` e `ALLOW_PUBLIC_INTERN_SIGNUP` para `false`.
 
 ## Passo 1 - Subir o projeto para GitHub
 
@@ -238,7 +239,14 @@ http://127.0.0.1:5176/**
 - Login dos estagiarios funciona.
 - Mentor ve os estagiarios `SAP HR` e `DEV WEB`.
 - Portal do estagiario mostra mentor/substituto quando configurado.
-- Cadastro publico continua desativado em producao:
+- Para teste/demo, o cadastro publico pode ficar habilitado:
+
+```txt
+ALLOW_PUBLIC_MENTOR_SIGNUP=true
+ALLOW_PUBLIC_INTERN_SIGNUP=true
+```
+
+- Antes de uso real, desative cadastro publico:
 
 ```txt
 ALLOW_PUBLIC_MENTOR_SIGNUP=false
@@ -253,3 +261,29 @@ https://ascenda-system.is-a.dev
 
 - As senhas iniciais foram trocadas antes de qualquer uso real.
 - A `SUPABASE_SERVICE_ROLE_KEY` nao aparece em nenhum frontend, print publico ou commit.
+
+## Troubleshooting - Login retorna 200, mas tela mostra resposta invalida
+
+Isso acontece quando frontend e backend estao em commits diferentes e o frontend ainda nao entende a resposta envelopada do backend:
+
+```json
+{
+  "data": {
+    "account": {},
+    "session": {}
+  }
+}
+```
+
+Solucao:
+
+1. Faca push das ultimas alteracoes.
+2. Rode `Manual Deploy` nos dois servicos do Render:
+   - `ascenda-system-api`
+   - `ascenda-system-web`
+3. No browser, teste em aba anonima ou limpe os dados locais do site.
+4. Confirme que `ascenda-system-web > Environment` aponta para a API correta:
+
+```txt
+VITE_API_URL=https://ascenda-system-api.onrender.com/api
+```

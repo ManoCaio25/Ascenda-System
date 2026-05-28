@@ -26,9 +26,9 @@ services:
       - key: EXPOSE_ERROR_DETAILS
         value: "false"
       - key: ALLOW_PUBLIC_MENTOR_SIGNUP
-        value: "false"
+        value: "true"
       - key: ALLOW_PUBLIC_INTERN_SIGNUP
-        value: "false"
+        value: "true"
       - key: OPENAI_MODEL
         value: gpt-4.1-mini
       - key: SUPABASE_URL
