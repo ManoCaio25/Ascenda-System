@@ -75,6 +75,59 @@ https://ascenda-system-web.onrender.com
 https://ascenda-system-api.onrender.com
 ```
 
+Se o deploy do backend falhar com `Exited with status 1`, confira primeiro as variaveis de ambiente do servico `ascenda-system-api`.
+
+No Render:
+
+1. Abra `ascenda-system-api`.
+2. Va em `Environment`.
+3. Adicione ou confira exatamente estas variaveis:
+
+```txt
+SUPABASE_URL
+SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+```
+
+`SUPABASE_URL` deve ser a URL base do projeto, sem `/rest/v1`:
+
+```txt
+https://seu-projeto.supabase.co
+```
+
+Nao cole assim no campo de valor:
+
+```txt
+SUPABASE_URL=https://seu-projeto.supabase.co
+https://seu-projeto.supabase.co/rest/v1/
+seu-projeto.supabase.co
+```
+
+No Render o preenchimento correto e:
+
+```txt
+Key:   SUPABASE_URL
+Value: https://seu-projeto.supabase.co
+```
+
+Durante teste com as URLs temporarias do Render, deixe `CORS_ORIGIN` assim:
+
+```txt
+https://ascenda-system.is-a.dev,https://ascenda-system-web.onrender.com
+```
+
+Enquanto o dominio `is-a.dev` ainda nao estiver aprovado, no servico `ascenda-system-web` configure temporariamente:
+
+```txt
+VITE_API_URL=https://ascenda-system-api.onrender.com/api
+```
+
+Depois que `api.ascenda-system.is-a.dev` estiver funcionando, volte para:
+
+```txt
+VITE_API_URL=https://api.ascenda-system.is-a.dev/api
+```
+
 Teste:
 
 ```txt
