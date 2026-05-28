@@ -33,6 +33,16 @@ import {
   SidebarTrigger,
 } from "@padrinho/components/ui/sidebar";
 
+const LOGIN_PATH = import.meta.env.VITE_LOGIN_PATH || '/AscendaSystem-React/Login/index.html';
+const LOADING_PATH = import.meta.env.VITE_LOADING_PATH || '/AscendaSystem-React/LoadingPage/index.html';
+
+function portalUrl(path, devPort) {
+  if (/^https?:\/\//i.test(path)) return path;
+  const isLocalDev = ['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.port;
+  if (!isLocalDev) return path;
+  return `${window.location.protocol}//${window.location.hostname}:${devPort}${path}`;
+}
+
 const NAVIGATION_ITEMS = [
   {
     key: "dashboard",
@@ -103,12 +113,12 @@ function LayoutContent() {
       console.log("Logout error:", error);
     } finally {
       try {
-        sessionStorage.setItem('nextUrl', '/AscendaSystem-React/Login/index.html');
+        sessionStorage.setItem('nextUrl', portalUrl(LOGIN_PATH, 5173));
         sessionStorage.removeItem('role');
       } catch (storageError) {
         console.warn('sessionStorage unavailable', storageError);
       }
-      window.location.href = '/AscendaSystem-React/LoadingPage/index.html';
+      window.location.href = portalUrl(LOADING_PATH, 5174);
     }
   }, []);
 

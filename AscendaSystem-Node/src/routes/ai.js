@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { env } from "../config/env.js";
+import { dataAdapter } from "../data/index.js";
 import { requireAuth, requireMentor } from "../middleware/auth.js";
-import { supabaseAdmin } from "../lib/supabase.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { badRequest, HttpError } from "../utils/httpError.js";
 
@@ -81,7 +81,7 @@ function normalizeGenerationRequest(body = {}) {
 
 async function callOpenAI(payload) {
   if (!env.openaiApiKey) {
-    throw new HttpError(501, "OPENAI_API_KEY is not configured");
+    return buildMockActivityResult(payload);
   }
 
   const response = await fetch("https://api.openai.com/v1/responses", {
@@ -133,6 +133,35 @@ async function callOpenAI(payload) {
   return JSON.parse(outputText);
 }
 
+function buildMockActivityResult(payload) {
+  const source = payload.sourceTitle || payload.sourceUrl || "Tema informado";
+  const activities = Array.from({ length: payload.activityCount }, (_, index) => ({
+    title: `Atividade ${index + 1}: ${source}`,
+    description:
+      "Versao mock para desenvolvimento. Quando OPENAI_API_KEY estiver configurada, este conteudo vira uma sugestao gerada pela IA.",
+    category: "AI Generated",
+    suggestedDueDays: 3 + index * 2,
+    objectives: [
+      "Compreender os conceitos centrais do tema.",
+      "Aplicar o conteudo em uma entrega pratica.",
+    ],
+    questions: Array.from({ length: payload.questionCount }, (__, questionIndex) => ({
+      prompt: `Explique o ponto ${questionIndex + 1} relacionado a ${source}.`,
+      type: "reflection",
+      options: [],
+      correctAnswer: "",
+      rubric: "Avaliar clareza, aplicacao pratica e capacidade de justificar decisoes.",
+    })),
+  }));
+
+  return {
+    title: `Plano de atividades: ${source}`,
+    summary:
+      "Resposta mock criada para validar o fluxo ponta a ponta antes da configuracao da chave OpenAI.",
+    activities,
+  };
+}
+
 aiRouter.post(
   "/generate-activities",
   requireAuth,
@@ -141,23 +170,11 @@ aiRouter.post(
     const requestPayload = normalizeGenerationRequest(req.body);
     const result = await callOpenAI(requestPayload);
 
-    const { data: job, error } = await supabaseAdmin
-      .from("ai_generation_jobs")
-      .insert({
-        requested_by: req.user.id,
-        intern_id: requestPayload.internId,
-        source_kind: requestPayload.sourceUrl ? "youtube" : "text",
-        source_title: requestPayload.sourceTitle || requestPayload.sourceUrl || "Untitled source",
-        prompt: requestPayload.sourceText || requestPayload.sourceUrl,
-        request_payload: requestPayload,
-        response_payload: result,
-      })
-      .select("*")
-      .single();
-
-    if (error) {
-      throw badRequest(error.message, error);
-    }
+    const job = await dataAdapter.createAiGenerationJob({
+      requestedBy: req.user.id,
+      requestPayload,
+      responsePayload: result,
+    });
 
     res.json({
       data: result,

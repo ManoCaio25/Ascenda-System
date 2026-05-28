@@ -12,15 +12,16 @@ Backend Node.js separado dos frontends.
 ## Setup
 
 1. Copie `.env.example` para `.env`.
-2. Preencha as chaves do Supabase e da OpenAI.
-3. No Supabase SQL Editor, rode `database/supabase_schema.sql`.
-4. Instale dependencias:
+2. Para desenvolvimento sem Supabase, mantenha `DATA_PROVIDER=mock`.
+3. Quando o Supabase estiver pronto, troque para `DATA_PROVIDER=supabase` e preencha as chaves.
+4. No Supabase SQL Editor, rode `database/supabase_schema.sql`.
+5. Instale dependencias:
 
 ```bash
 npm install
 ```
 
-5. Rode o backend:
+6. Rode o backend:
 
 ```bash
 npm run dev
@@ -35,7 +36,16 @@ http://localhost:4000/api
 ## Endpoints iniciais
 
 - `GET /api/health`
+- `POST /api/auth/login`
+- `POST /api/auth/register-mentor`
+- `POST /api/auth/register-intern`
+- `GET /api/auth/session`
 - `GET /api/me`
+- `GET /api/mentors/public`
+- `GET /api/mentors`
+- `GET /api/interns`
+- `PATCH /api/interns/:id/mentor`
+- `PATCH /api/interns/:id/substitute-mentor`
 - `GET /api/entities/:entity`
 - `POST /api/entities/:entity`
 - `PATCH /api/entities/:entity/:id`
@@ -47,6 +57,17 @@ As rotas protegidas esperam:
 ```txt
 Authorization: Bearer <supabase_access_token>
 ```
+
+Em `DATA_PROVIDER=mock`, o token vem de `POST /api/auth/login` e e salvo pelo Login em `localStorage` como `ascenda_api_token`.
+
+## Camadas de seguranca ja preparadas
+
+- CORS por allowlist usando `CORS_ORIGIN`.
+- Headers defensivos basicos (`nosniff`, `DENY`, `no-referrer`, `Permissions-Policy`).
+- Rate limit em `/api/auth` e `/api/ai`.
+- Validacao de payload antes de criar usuarios ou alterar vinculos.
+- `service_role` isolada no backend.
+- `DATA_PROVIDER=mock` para desenvolver sem chaves reais.
 
 ## Observacao
 

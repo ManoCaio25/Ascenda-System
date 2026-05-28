@@ -1,7 +1,7 @@
-import { createUserSupabase, supabaseAdmin } from "../lib/supabase.js";
+import { dataAdapter } from "../data/index.js";
 import { forbidden, HttpError } from "../utils/httpError.js";
 
-function extractBearerToken(req) {
+export function extractBearerToken(req) {
   const header = req.headers.authorization || "";
   const [type, token] = header.split(" ");
 
@@ -20,23 +20,32 @@ export async function requireAuth(req, _res, next) {
       throw new HttpError(401, "Missing bearer token");
     }
 
-    const { data, error } = await supabaseAdmin.auth.getUser(token);
+    const session = await dataAdapter.getSessionFromToken(token);
+    req.accessToken = token;
+    req.user = session.user;
+    req.profile = session.profile || null;
+    req.account = session.account || null;
+    req.db = session.db || null;
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
 
-    if (error || !data?.user) {
-      throw new HttpError(401, "Invalid or expired token");
+export async function optionalAuth(req, _res, next) {
+  try {
+    const token = extractBearerToken(req);
+    if (!token) {
+      next();
+      return;
     }
 
+    const session = await dataAdapter.getSessionFromToken(token);
     req.accessToken = token;
-    req.user = data.user;
-    req.db = createUserSupabase(token);
-
-    const { data: profile } = await req.db
-      .from("profiles")
-      .select("*")
-      .eq("id", data.user.id)
-      .maybeSingle();
-
-    req.profile = profile || null;
+    req.user = session.user;
+    req.profile = session.profile || null;
+    req.account = session.account || null;
+    req.db = session.db || null;
     next();
   } catch (error) {
     next(error);

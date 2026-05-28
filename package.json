@@ -1,0 +1,17 @@
+{
+  "name": "ascenda-system",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix AscendaSystem-Node install && npm run install:frontend",
+    "install:frontend": "npm --prefix AscendaSystem-React/Login install && npm --prefix AscendaSystem-React/LoadingPage install && npm --prefix AscendaSystem-React/MentorPortal install && npm --prefix AscendaSystem-React/InternPortal install",
+    "dev:backend": "npm --prefix AscendaSystem-Node run dev",
+    "dev:login": "npm --prefix AscendaSystem-React/Login run dev -- --host 127.0.0.1 --port 5173",
+    "dev:loading": "npm --prefix AscendaSystem-React/LoadingPage run dev -- --host 127.0.0.1 --port 5174",
+    "dev:mentor": "npm --prefix AscendaSystem-React/MentorPortal run dev -- --host 127.0.0.1 --port 5175",
+    "dev:intern": "npm --prefix AscendaSystem-React/InternPortal run dev -- --host 127.0.0.1 --port 5176",
+    "build": "npm run build:frontend",
+    "build:frontend": "node scripts/build-frontend.mjs",
+    "render:build": "npm run install:frontend && npm run build:frontend",
+    "start:backend": "npm --prefix AscendaSystem-Node start"
+  }
+}

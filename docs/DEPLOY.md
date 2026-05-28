@@ -1,0 +1,202 @@
+# Deploy com dominio gratuito
+
+Este guia usa uma opcao principal, sem espalhar alternativas: dominio gratuito em `is-a.dev` e hospedagem no Render.
+
+## Dominio escolhido
+
+```txt
+https://ascenda-system.is-a.dev      -> frontend React
+https://api.ascenda-system.is-a.dev  -> backend Node/Express
+```
+
+`ascenda-system.is-a.dev` parecia uma boa opcao na pesquisa, mas a disponibilidade real so e confirmada quando o pull request no repositorio `is-a-dev/register` for aceito.
+
+Referencias oficiais:
+
+- is-a.dev docs: https://docs.is-a.dev/
+- Estrutura dos arquivos is-a.dev: https://docs.is-a.dev/domain-structure/
+- is-a.dev com Render: https://docs.is-a.dev/guides/render/
+- Render Blueprints: https://render.com/docs/blueprint-spec
+- Render custom domains: https://render.com/docs/custom-domains
+- Render free deploy: https://render.com/docs/free
+
+## O que ja esta preparado no projeto
+
+- `render.yaml` na raiz cria dois servicos no Render:
+  - `ascenda-system-api`: backend Node.
+  - `ascenda-system-web`: frontend estatico.
+- `npm run build` agora gera uma saida unica em `dist/`:
+  - `/` para Login.
+  - `/loading/` para LoadingPage.
+  - `/mentor/` para MentorPortal.
+  - `/intern/` para InternPortal.
+- `AscendaSystem-React/.env.production.example` ja aponta para `https://api.ascenda-system.is-a.dev/api`.
+- `AscendaSystem-Node/.env.production.example` ja limita CORS para `https://ascenda-system.is-a.dev`.
+- As chaves sensiveis do Supabase ficam como `sync: false` no `render.yaml`; o Render vai pedir os valores no painel, sem gravar no Git.
+
+## Passo 1 - Subir o projeto para GitHub
+
+1. Crie um repositorio privado ou publico no GitHub.
+2. Envie esta pasta `Ascenda-System` para o repositorio.
+3. Confira antes do push:
+
+```bash
+git status
+git check-ignore -v AscendaSystem-Node/.env AscendaSystem-React/.env
+```
+
+Os arquivos `.env` precisam continuar ignorados.
+
+## Passo 2 - Criar os servicos no Render
+
+1. Acesse https://dashboard.render.com.
+2. Clique em `New > Blueprint`.
+3. Conecte o repositorio do Ascenda System.
+4. Selecione o arquivo `render.yaml` na raiz.
+5. O Render criara:
+   - `ascenda-system-api`
+   - `ascenda-system-web`
+6. Quando o Render pedir variaveis com `sync: false`, preencha:
+
+```txt
+SUPABASE_URL
+SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+```
+
+`OPENAI_API_KEY` ainda nao e obrigatoria. Sem ela, a rota de IA usa resposta mock para validar o fluxo.
+
+## Passo 3 - Validar as URLs temporarias do Render
+
+Depois do primeiro deploy, o Render entregara URLs parecidas com:
+
+```txt
+https://ascenda-system-web.onrender.com
+https://ascenda-system-api.onrender.com
+```
+
+Teste:
+
+```txt
+https://ascenda-system-api.onrender.com/api/health
+```
+
+Tambem abra:
+
+```txt
+https://ascenda-system-web.onrender.com
+https://ascenda-system-web.onrender.com/loading/
+https://ascenda-system-web.onrender.com/mentor/
+https://ascenda-system-web.onrender.com/intern/
+```
+
+## Passo 4 - Registrar o dominio gratuito no is-a.dev
+
+1. Acesse https://github.com/is-a-dev/register.
+2. Faca um fork do repositorio.
+3. No fork, crie dois arquivos dentro da pasta `domains/`.
+
+Arquivo `domains/ascenda-system.json`:
+
+```json
+{
+  "owner": {
+    "username": "SEU_USUARIO_GITHUB",
+    "email": "SEU_EMAIL_PUBLICO"
+  },
+  "records": {
+    "A": ["216.24.57.1"]
+  }
+}
+```
+
+Arquivo `domains/api.ascenda-system.json`:
+
+```json
+{
+  "owner": {
+    "username": "SEU_USUARIO_GITHUB",
+    "email": "SEU_EMAIL_PUBLICO"
+  },
+  "records": {
+    "A": ["216.24.57.1"]
+  }
+}
+```
+
+4. Abra um pull request para `is-a-dev/register`.
+5. Inclua no PR a URL temporaria do Render como preview do site.
+6. Aguarde revisao e merge.
+
+## Passo 5 - Conferir dominios no Render
+
+O `render.yaml` ja declara:
+
+```txt
+ascenda-system.is-a.dev
+api.ascenda-system.is-a.dev
+```
+
+Depois que o PR do is-a.dev for aceito:
+
+1. Entre no servico `ascenda-system-web`.
+2. Va em `Settings > Custom Domains`.
+3. Clique em `Verify` para `ascenda-system.is-a.dev`.
+4. Entre no servico `ascenda-system-api`.
+5. Va em `Settings > Custom Domains`.
+6. Clique em `Verify` para `api.ascenda-system.is-a.dev`.
+
+O Render gerencia TLS automaticamente apos verificacao.
+
+## Passo 6 - Atualizar Supabase Auth
+
+No Supabase:
+
+1. Va em `Authentication > URL Configuration`.
+2. Configure `Site URL`:
+
+```txt
+https://ascenda-system.is-a.dev
+```
+
+3. Em `Redirect URLs`, adicione:
+
+```txt
+https://ascenda-system.is-a.dev/**
+```
+
+4. Mantenha os redirects locais enquanto estivermos desenvolvendo:
+
+```txt
+http://localhost:5173/**
+http://localhost:5174/**
+http://localhost:5175/**
+http://localhost:5176/**
+http://127.0.0.1:5173/**
+http://127.0.0.1:5174/**
+http://127.0.0.1:5175/**
+http://127.0.0.1:5176/**
+```
+
+## Passo 7 - Checklist final
+
+- `https://api.ascenda-system.is-a.dev/api/health` responde `ok`.
+- Login do mentor funciona.
+- Login dos estagiarios funciona.
+- Mentor ve os estagiarios `SAP HR` e `DEV WEB`.
+- Portal do estagiario mostra mentor/substituto quando configurado.
+- Cadastro publico continua desativado em producao:
+
+```txt
+ALLOW_PUBLIC_MENTOR_SIGNUP=false
+ALLOW_PUBLIC_INTERN_SIGNUP=false
+```
+
+- `CORS_ORIGIN` contem apenas:
+
+```txt
+https://ascenda-system.is-a.dev
+```
+
+- As senhas iniciais foram trocadas antes de qualquer uso real.
+- A `SUPABASE_SERVICE_ROLE_KEY` nao aparece em nenhum frontend, print publico ou commit.

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -12,13 +12,8 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import {
-  getMentors,
-  login,
-  redirectThroughLoading,
-  registerIntern,
-  registerMentor,
-} from "./authStore";
+import { redirectThroughLoading } from "./authStore";
+import { getMentors, login, registerIntern, registerMentor } from "./services/authService";
 
 const initialLogin = {
   email: "",
@@ -36,6 +31,8 @@ const initialRegister = {
   mentorId: "",
   substituteMentorId: "",
 };
+
+const areaOptions = ["SAP HR", "DEV WEB"];
 
 function Field({ icon: Icon, label, children }) {
   return (
@@ -64,7 +61,22 @@ export default function App() {
   const [registerForm, setRegisterForm] = useState(initialRegister);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const mentors = useMemo(() => getMentors(), [mode, feedback]);
+  const [mentors, setMentors] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    getMentors()
+      .then((items) => {
+        if (active) setMentors(items);
+      })
+      .catch((error) => {
+        console.warn("Unable to load mentors", error);
+        if (active) setMentors([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [mode, feedback.type]);
 
   const updateLogin = (field, value) => {
     setLoginForm((current) => ({ ...current, [field]: value }));
@@ -76,11 +88,11 @@ export default function App() {
     setFeedback({ type: "", message: "" });
   };
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
     try {
-      const account = login(loginForm);
+      const account = await login(loginForm);
       setFeedback({ type: "success", message: "Acesso validado. Preparando ambiente..." });
       window.setTimeout(() => redirectThroughLoading(account), 380);
     } catch (error) {
@@ -89,19 +101,21 @@ export default function App() {
     }
   };
 
-  const handleRegister = (event) => {
+  const handleRegister = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
     try {
       const account =
         registerForm.role === "mentor"
-          ? registerMentor(registerForm)
-          : registerIntern(registerForm);
-      login({
-        email: account.email,
-        password: account.password,
-        role: account.role,
-      });
+          ? await registerMentor(registerForm)
+          : await registerIntern(registerForm);
+      if (account.password) {
+        await login({
+          email: account.email,
+          password: account.password,
+          role: account.role,
+        });
+      }
       setFeedback({ type: "success", message: "Cadastro criado. Abrindo portal..." });
       window.setTimeout(() => redirectThroughLoading(account), 420);
     } catch (error) {
@@ -170,7 +184,7 @@ export default function App() {
           <Sparkles size={20} />
           <div>
             <h2>{mode === "login" ? "Acessar portal" : "Criar conta operacional"}</h2>
-            <p>{selectedRole === "mentor" ? "Mentor Portal" : "Intern Portal"}</p>
+            <p>{selectedRole === "mentor" ? "Mentor Portal" : "Portal do Estagiario"}</p>
           </div>
         </div>
 
@@ -188,7 +202,7 @@ export default function App() {
           <RoleButton
             active={selectedRole === "intern"}
             icon={GraduationCap}
-            label="Intern"
+            label="Estagiario"
             onClick={() =>
               mode === "login"
                 ? updateLogin("role", "intern")
@@ -262,13 +276,19 @@ export default function App() {
               </Field>
             ) : (
               <>
-                <Field icon={GraduationCap} label="Trilha">
-                  <input
+                <Field icon={GraduationCap} label="Area / trilha">
+                  <select
                     value={registerForm.track}
                     onChange={(event) => updateRegister("track", event.target.value)}
-                    placeholder="Ex.: React + Dados"
                     required
-                  />
+                  >
+                    <option value="">Selecionar area</option>
+                    {areaOptions.map((area) => (
+                      <option key={area} value={area}>
+                        {area}
+                      </option>
+                    ))}
+                  </select>
                 </Field>
                 <Field icon={UsersRound} label="Mentor principal">
                   <select

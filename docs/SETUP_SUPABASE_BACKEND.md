@@ -37,6 +37,18 @@ O SQL cria:
 
 O perfil do intern possui `mentor_id` e `substitute_mentor_id`. O mentor substituto tambem tem acesso ao intern pelas policies de RLS.
 
+Seed opcional dos usuarios iniciais:
+
+1. Abra `AscendaSystem-Node/database/seed_ascenda_users.sql`.
+2. Cole no `SQL Editor`.
+3. Execute depois do schema principal.
+
+Esse seed cria:
+
+- `paulo.viera@ascenda.com` como mentor.
+- `iasmim@ascenda.com` como intern de `SAP HR`.
+- `caio.alvarenga@ascenda.com` como intern de `DEV WEB`.
+
 ## 3. Configurar Auth
 
 Em `Authentication > Providers`:
@@ -77,11 +89,18 @@ copy .env.example .env
 Preencha:
 
 ```txt
+DATA_PROVIDER=mock
 SUPABASE_URL=
 SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
 OPENAI_MODEL=
+```
+
+Enquanto o Supabase nao estiver pronto, mantenha `DATA_PROVIDER=mock`. Quando terminar o setup do Supabase, altere para:
+
+```txt
+DATA_PROVIDER=supabase
 ```
 
 Instale e rode:
@@ -99,12 +118,11 @@ GET http://localhost:4000/api/health
 
 ## 5. Variaveis futuras do frontend
 
-Quando ligarmos o frontend no backend, usaremos:
+Os frontends usam um unico arquivo em `AscendaSystem-React/.env`:
 
 ```txt
 VITE_API_URL=http://localhost:4000/api
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+VITE_ALLOW_LOCAL_AUTH_FALLBACK=false
 ```
 
 ## 6. Fluxo esperado da IA

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { badRequest, notFound } from "../utils/httpError.js";
+import { badRequest, HttpError, notFound } from "../utils/httpError.js";
 
 const ENTITY_TABLES = {
   profiles: "profiles",
@@ -53,6 +53,15 @@ function parseLimit(value) {
 export const entitiesRouter = Router();
 
 entitiesRouter.use(requireAuth);
+
+entitiesRouter.use((req, _res, next) => {
+  if (!req.db) {
+    next(new HttpError(501, "Generic entity routes are available after Supabase is configured"));
+    return;
+  }
+
+  next();
+});
 
 entitiesRouter.get(
   "/:entity",

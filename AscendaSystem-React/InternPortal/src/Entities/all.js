@@ -1,4 +1,5 @@
 import { createEntityStore } from './store.js';
+import { getCurrentIntern } from '../services/sessionService.js';
 import {
   users,
   tasks,
@@ -74,18 +75,41 @@ function resolveCurrentInternUser() {
   };
 }
 
+function toPortalUser(intern) {
+  if (!intern) return null;
+  return {
+    id: intern.id,
+    user_id: intern.user_id,
+    full_name: intern.full_name,
+    email: intern.email,
+    avatar_url: intern.avatar_url || '',
+    area_atuacao: intern.track || intern.area_atuacao || 'General Track',
+    pontos_gamificacao: intern.points ?? intern.pontos_gamificacao ?? 0,
+    equipped_tag: intern.equipped_tag || 'New Intern',
+    mentor_name: intern.mentor_name,
+    mentor_email: intern.mentor_email,
+    substitute_mentor_name: intern.substitute_mentor_name,
+    substitute_mentor_email: intern.substitute_mentor_email,
+  };
+}
+
+async function getLocalUser() {
+  const sessionUser = resolveCurrentInternUser();
+  if (sessionUser) {
+    return sessionUser;
+  }
+
+  const [current] = await userStore.list();
+  if (!current) {
+    throw new Error('User not found');
+  }
+  return current;
+}
+
 export const User = {
   async me() {
-    const sessionUser = resolveCurrentInternUser();
-    if (sessionUser) {
-      return sessionUser;
-    }
-
-    const [current] = await userStore.list();
-    if (!current) {
-      throw new Error('User not found');
-    }
-    return current;
+    const intern = await getCurrentIntern(getLocalUser);
+    return toPortalUser(intern) || intern;
   },
   async list() {
     return userStore.list();

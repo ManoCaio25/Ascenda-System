@@ -9,6 +9,7 @@
     "isolatedModules": true,
     "allowJs": true,
     "checkJs": false,
+    "noEmit": true,
     "esModuleInterop": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "skipLibCheck": true,

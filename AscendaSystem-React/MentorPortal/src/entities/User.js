@@ -1,4 +1,5 @@
 import { users as initialUsers } from './data';
+import { getCurrentSession } from '../services/sessionService';
 
 const STORAGE_KEY = 'ascenda_current_user_id';
 const AUTH_ACCOUNTS_KEY = 'ascenda_auth_accounts';
@@ -25,31 +26,36 @@ const normalizeMentor = (account) => ({
   title: account.title,
 });
 
+async function getLocalUser() {
+  const defaultUser = getDefaultUser();
+  try {
+    const storedId = typeof window !== 'undefined'
+      ? window.localStorage.getItem(STORAGE_KEY)
+      : null;
+    if (storedId) {
+      const account = readAccounts().find((user) => String(user.id) === storedId);
+      if (account?.role === 'mentor') {
+        return normalizeMentor(account);
+      }
+
+      const match = initialUsers.find((user) => String(user.id) === storedId);
+      if (match) {
+        return { ...match, role: 'mentor' };
+      }
+    }
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEY, String(defaultUser.id));
+    }
+  } catch (error) {
+    console.warn('Unable to access storage for user information', error);
+  }
+  return { ...defaultUser, role: 'mentor' };
+}
+
 export const User = {
   async me() {
-    const defaultUser = getDefaultUser();
-    try {
-      const storedId = typeof window !== 'undefined'
-        ? window.localStorage.getItem(STORAGE_KEY)
-        : null;
-      if (storedId) {
-        const account = readAccounts().find((user) => String(user.id) === storedId);
-        if (account?.role === 'mentor') {
-          return normalizeMentor(account);
-        }
-
-        const match = initialUsers.find((user) => String(user.id) === storedId);
-        if (match) {
-          return { ...match, role: 'mentor' };
-        }
-      }
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(STORAGE_KEY, String(defaultUser.id));
-      }
-    } catch (error) {
-      console.warn('Unable to access storage for user information', error);
-    }
-    return { ...defaultUser, role: 'mentor' };
+    const session = await getCurrentSession(getLocalUser);
+    return session?.profile ? { ...session.profile, role: session.profile.role || 'mentor' } : session;
   },
 
   async logout() {

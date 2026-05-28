@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import rocketUrl from "../assets/rocket.svg";
 
-const LOGIN_PATH = "/AscendaSystem-React/Login/index.html";
+const LOGIN_PATH = import.meta.env.VITE_LOGIN_PATH || "/AscendaSystem-React/Login/index.html";
 
 function fallbackUrl() {
   const isLocalDev = ["localhost", "127.0.0.1"].includes(window.location.hostname) && window.location.port;
+  if (/^https?:\/\//i.test(LOGIN_PATH)) return LOGIN_PATH;
   if (!isLocalDev) return LOGIN_PATH;
   return `${window.location.protocol}//${window.location.hostname}:5173${LOGIN_PATH}`;
 }

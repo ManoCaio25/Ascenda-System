@@ -1,15 +1,25 @@
 import { createEntityStore } from './store';
 import { interns as initialInterns } from './data';
+import { filterInterns, listInterns, updateIntern } from '../services/internService';
 
 const store = createEntityStore('ascenda_interns', initialInterns);
 
 export const Intern = {
   list(sort, limit) {
-    return store.list(sort, limit);
+    return listInterns({
+      sort,
+      limit,
+      fallback: () => store.list(sort, limit),
+    });
   },
 
   filter(criteria, sort, limit) {
-    return store.filter(criteria, sort, limit);
+    return filterInterns({
+      criteria,
+      sort,
+      limit,
+      fallback: () => store.filter(criteria, sort, limit),
+    });
   },
 
   find(id) {
@@ -17,8 +27,7 @@ export const Intern = {
   },
 
   async update(id, updates) {
-    const result = await store.update(id, updates);
-    return result;
+    return updateIntern(id, updates, () => store.update(id, updates));
   }
 };
 

@@ -1,17 +1,23 @@
 const AUTH_KEY = "ascenda_auth_accounts";
 const CURRENT_USER_KEY = "ascenda_current_user_id";
 const CURRENT_SESSION_KEY = "ascenda_current_session";
+const API_TOKEN_KEY = "ascenda_api_token";
 const MENTOR_INTERNS_KEY = "ascenda_interns";
 const INTERN_USERS_KEY = "ascenda_estagiario_users";
 
-const APP_PATHS = {
+const DEFAULT_APP_PATHS = {
   loading: "/AscendaSystem-React/LoadingPage/index.html",
   mentor: "/AscendaSystem-React/MentorPortal/index.html",
   intern: "/AscendaSystem-React/InternPortal/index.html",
 };
 
+function envPath(key, fallback) {
+  return import.meta.env[key] || fallback;
+}
+
 function appUrl(path, devPort) {
   if (typeof window === "undefined") return path;
+  if (/^https?:\/\//i.test(path)) return path;
   const isLocalDev = ["localhost", "127.0.0.1"].includes(window.location.hostname) && window.location.port;
   if (!isLocalDev) return path;
   return `${window.location.protocol}//${window.location.hostname}:${devPort}${path}`;
@@ -19,13 +25,13 @@ function appUrl(path, devPort) {
 
 export const ROUTES = {
   get loading() {
-    return appUrl(APP_PATHS.loading, 5174);
+    return appUrl(envPath("VITE_LOADING_PATH", DEFAULT_APP_PATHS.loading), 5174);
   },
   get mentor() {
-    return appUrl(APP_PATHS.mentor, 5175);
+    return appUrl(envPath("VITE_MENTOR_PATH", DEFAULT_APP_PATHS.mentor), 5175);
   },
   get intern() {
-    return appUrl(APP_PATHS.intern, 5176);
+    return appUrl(envPath("VITE_INTERN_PATH", DEFAULT_APP_PATHS.intern), 5176);
   },
 };
 
@@ -33,10 +39,10 @@ const DEFAULT_ACCOUNTS = [
   {
     id: "1",
     role: "mentor",
-    full_name: "Paulo Henrique",
-    email: "paulo.henrique@ascenda.com",
-    password: "123456",
-    title: "Mentor Lead",
+    full_name: "Paulo Henrique Viera",
+    email: "paulo.viera@ascenda.com",
+    password: "123@Mudar.,",
+    title: "Mentor Principal",
     avatar_url: "https://cdn.cloudflare.steamstatic.com/steam/apps/2536830/header.jpg",
   },
   {
@@ -57,15 +63,29 @@ const DEFAULT_ACCOUNTS = [
   },
   {
     id: "intern_caio",
+    intern_id: "intern_profile_caio",
     role: "intern",
-    full_name: "Caio Menezes",
+    full_name: "Caio Alvarenga",
     email: "caio.alvarenga@ascenda.com",
-    password: "123456",
+    password: "123@Mudar.,",
     mentor_id: "mentor_helena",
     mentor_name: "Helena Prado",
     substitute_mentor_id: "1",
-    substitute_mentor_name: "Paulo Henrique",
-    track: "Frontend Development",
+    substitute_mentor_name: "Paulo Henrique Viera",
+    track: "DEV WEB",
+  },
+  {
+    id: "intern_iasmim",
+    intern_id: "intern_profile_iasmim",
+    role: "intern",
+    full_name: "Iasmim",
+    email: "iasmim@ascenda.com",
+    password: "123@Mudar.,",
+    mentor_id: "1",
+    mentor_name: "Paulo Henrique Viera",
+    substitute_mentor_id: "",
+    substitute_mentor_name: "",
+    track: "SAP HR",
   },
 ];
 
@@ -100,6 +120,15 @@ function createId(prefix, source) {
 export function getAccounts() {
   const stored = readJson(AUTH_KEY, null);
   if (Array.isArray(stored) && stored.length > 0) {
+    const emails = new Set(stored.map((account) => normalizeEmail(account.email || "")));
+    const missingDefaults = DEFAULT_ACCOUNTS.filter(
+      (account) => !emails.has(normalizeEmail(account.email)),
+    );
+    if (missingDefaults.length > 0) {
+      const merged = [...stored, ...missingDefaults];
+      writeJson(AUTH_KEY, merged);
+      return merged;
+    }
     return stored;
   }
   writeJson(AUTH_KEY, DEFAULT_ACCOUNTS);
@@ -173,6 +202,71 @@ function syncInternPortalUser(internAccount) {
   ]);
 }
 
+function upsertAccount(account) {
+  const accounts = getAccounts();
+  const next = accounts.filter((item) => String(item.id) !== String(account.id));
+  next.push(account);
+  writeJson(AUTH_KEY, next);
+  return account;
+}
+
+export function persistAuthenticatedAccount(account, apiSession = null) {
+  const normalized = {
+    ...account,
+    email: normalizeEmail(account.email),
+    full_name: account.full_name || account.fullName || account.email,
+    role: account.role || "intern",
+  };
+
+  upsertAccount(normalized);
+  window.localStorage.setItem(CURRENT_USER_KEY, String(normalized.id));
+  writeJson(CURRENT_SESSION_KEY, {
+    user_id: normalized.id,
+    role: normalized.role,
+    email: normalized.email,
+    full_name: normalized.full_name,
+    provider: apiSession?.provider || "local",
+  });
+
+  if (apiSession?.access_token) {
+    window.localStorage.setItem(API_TOKEN_KEY, apiSession.access_token);
+  }
+
+  if (normalized.role === "intern") {
+    syncInternPortalUser(normalized);
+  }
+
+  return normalized;
+}
+
+export function persistRemoteAuthResult(result) {
+  const account = result?.account || result?.profile;
+
+  if (!account) {
+    throw new Error("Resposta de autenticacao invalida.");
+  }
+
+  const normalized = {
+    ...account,
+    id: account.id || result.user?.id,
+    email: account.email || result.user?.email,
+    full_name: account.full_name || account.fullName || result.user?.email,
+    role: account.role || result.profile?.role || "intern",
+    password: "",
+  };
+
+  if (result.intern) {
+    normalized.intern_id = result.intern.id;
+    normalized.mentor_id = result.intern.mentor_id;
+    normalized.mentor_name = result.intern.mentor_name;
+    normalized.substitute_mentor_id = result.intern.substitute_mentor_id;
+    normalized.substitute_mentor_name = result.intern.substitute_mentor_name;
+    normalized.track = result.intern.track;
+  }
+
+  return persistAuthenticatedAccount(normalized, result.session);
+}
+
 export function registerMentor(payload) {
   ensureUniqueEmail(payload.email);
   const account = {
@@ -228,6 +322,7 @@ export function login({ email, password, role }) {
   }
 
   window.localStorage.setItem(CURRENT_USER_KEY, String(account.id));
+  window.localStorage.removeItem(API_TOKEN_KEY);
   writeJson(CURRENT_SESSION_KEY, {
     user_id: account.id,
     role: account.role,

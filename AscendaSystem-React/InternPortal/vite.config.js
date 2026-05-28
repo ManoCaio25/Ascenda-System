@@ -1,15 +1,26 @@
 import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
+import { loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
-export default defineConfig({
-  base: '/AscendaSystem-React/InternPortal/',
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const sharedEnvDir = path.resolve(currentDir, '..');
+
+function appBase(mode) {
+  const env = loadEnv(mode, sharedEnvDir, '');
+  return env.VITE_INTERN_BASE || (mode === 'production' ? '/intern/' : '/AscendaSystem-React/InternPortal/');
+}
+
+export default defineConfig(({ mode }) => ({
+  envDir: sharedEnvDir,
+  base: appBase(mode),
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@intern': path.resolve(__dirname, './src'),
-      '@estagiario': path.resolve(__dirname, './src'),
+      '@': path.resolve(currentDir, './src'),
+      '@intern': path.resolve(currentDir, './src'),
+      '@estagiario': path.resolve(currentDir, './src'),
     },
   },
-});
+}));

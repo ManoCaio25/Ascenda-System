@@ -1,0 +1,103 @@
+services:
+  - type: web
+    name: ascenda-system-api
+    runtime: node
+    plan: free
+    rootDir: AscendaSystem-Node
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    domains:
+      - api.ascenda-system.is-a.dev
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://ascenda-system.is-a.dev
+      - key: DATA_PROVIDER
+        value: supabase
+      - key: JSON_BODY_LIMIT
+        value: 2mb
+      - key: AUTH_TOKEN_TTL_HOURS
+        value: "12"
+      - key: EXPOSE_ERROR_DETAILS
+        value: "false"
+      - key: ALLOW_PUBLIC_MENTOR_SIGNUP
+        value: "false"
+      - key: ALLOW_PUBLIC_INTERN_SIGNUP
+        value: "false"
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+  - type: web
+    name: ascenda-system-web
+    runtime: static
+    buildCommand: npm run render:build
+    staticPublishPath: ./dist
+    domains:
+      - ascenda-system.is-a.dev
+    envVars:
+      - key: VITE_API_URL
+        value: https://api.ascenda-system.is-a.dev/api
+      - key: VITE_ALLOW_LOCAL_AUTH_FALLBACK
+        value: "false"
+      - key: VITE_LOGIN_BASE
+        value: /
+      - key: VITE_LOADING_BASE
+        value: /loading/
+      - key: VITE_MENTOR_BASE
+        value: /mentor/
+      - key: VITE_INTERN_BASE
+        value: /intern/
+      - key: VITE_LOGIN_PATH
+        value: /
+      - key: VITE_LOADING_PATH
+        value: /loading/
+      - key: VITE_MENTOR_PATH
+        value: /mentor/
+      - key: VITE_INTERN_PATH
+        value: /intern/
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()
+    routes:
+      - type: redirect
+        source: /loading
+        destination: /loading/
+      - type: redirect
+        source: /mentor
+        destination: /mentor/
+      - type: redirect
+        source: /intern
+        destination: /intern/
+      - type: rewrite
+        source: /loading/*
+        destination: /loading/index.html
+      - type: rewrite
+        source: /mentor/*
+        destination: /mentor/index.html
+      - type: rewrite
+        source: /intern/*
+        destination: /intern/index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
