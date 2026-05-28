@@ -39,6 +39,29 @@ app.use(
 
 app.use(express.json({ limit: env.jsonBodyLimit }));
 
+app.get("/", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "ascenda-backend",
+    message: "Ascenda API is running. Use /api/health to check service health.",
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth",
+      mentors: "/api/mentors",
+      interns: "/api/interns",
+      ai: "/api/ai",
+    },
+  });
+});
+
+app.get("/api", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "ascenda-backend",
+    health: "/api/health",
+  });
+});
+
 app.use("/api/health", healthRouter);
 app.use("/api/auth", authLimiter, authRouter);
 app.use("/api/me", meRouter);
