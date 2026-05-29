@@ -16,7 +16,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_ORIGIN
-        value: https://ascenda-system.is-a.dev
+        value: https://ascenda-system.is-a.dev,https://ascenda-system-web.onrender.com
       - key: DATA_PROVIDER
         value: supabase
       - key: JSON_BODY_LIMIT
@@ -47,7 +47,7 @@ services:
       - ascenda-system.is-a.dev
     envVars:
       - key: VITE_API_URL
-        value: https://api.ascenda-system.is-a.dev/api
+        value: https://ascenda-system-api.onrender.com/api
       - key: VITE_ALLOW_LOCAL_AUTH_FALLBACK
         value: "false"
       - key: VITE_LOGIN_BASE
