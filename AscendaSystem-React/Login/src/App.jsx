@@ -1,19 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
   BriefcaseBusiness,
   GraduationCap,
+  Languages,
   Lock,
   Mail,
+  Moon,
   Orbit,
+  Palette,
   ShieldCheck,
   Sparkles,
+  Sun,
   UserRound,
   UsersRound,
 } from "lucide-react";
 import { redirectThroughLoading } from "./authStore";
 import { getMentors, login, registerIntern, registerMentor } from "./services/authService";
+import { accentOptions, languageOptions, translations } from "./i18n";
+
+const UI_STORAGE_KEY = "ascenda_login_preferences";
 
 const initialLogin = {
   email: "",
@@ -33,6 +40,15 @@ const initialRegister = {
 };
 
 const areaOptions = ["SAP HR", "DEV WEB"];
+
+function readPreferences() {
+  try {
+    const value = window.localStorage.getItem(UI_STORAGE_KEY);
+    return value ? JSON.parse(value) : {};
+  } catch {
+    return {};
+  }
+}
 
 function Field({ icon: Icon, label, children }) {
   return (
@@ -55,13 +71,103 @@ function RoleButton({ active, icon: Icon, label, onClick }) {
   );
 }
 
+function PreferenceBar({ theme, language, accentId, t, onThemeChange, onLanguageChange, onAccentChange }) {
+  return (
+    <div className="preference-bar" aria-label={t.controls.preferences}>
+      <div className="control-cluster">
+        <span>{t.controls.theme}</span>
+        <div className="theme-switch" aria-label={t.controls.theme}>
+          <button
+            type="button"
+            className={theme === "dark" ? "active" : ""}
+            onClick={() => onThemeChange("dark")}
+            aria-label={t.controls.dark}
+            title={t.controls.dark}
+          >
+            <Moon size={16} />
+          </button>
+          <button
+            type="button"
+            className={theme === "light" ? "active" : ""}
+            onClick={() => onThemeChange("light")}
+            aria-label={t.controls.light}
+            title={t.controls.light}
+          >
+            <Sun size={16} />
+          </button>
+        </div>
+      </div>
+
+      <div className="control-cluster">
+        <span>{t.controls.language}</span>
+        <div className="language-switch" aria-label={t.controls.language}>
+          <Languages size={16} aria-hidden="true" />
+          {languageOptions.map((item) => (
+            <button
+              key={item.code}
+              type="button"
+              className={language === item.code ? "active" : ""}
+              onClick={() => onLanguageChange(item.code)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="control-cluster color-cluster">
+        <span>{t.controls.accent}</span>
+        <div className="accent-switch" aria-label={t.controls.accent}>
+          <Palette size={16} aria-hidden="true" />
+          {accentOptions.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={accentId === item.id ? "active" : ""}
+              onClick={() => onAccentChange(item.id)}
+              aria-label={item.label}
+              title={item.label}
+              style={{ "--swatch": item.value, "--swatch-pair": item.pair }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function translateError(error, t) {
+  const message = error?.message || t.feedback.invalidAuth;
+  if (message === "Failed to fetch") return t.feedback.network;
+  if (message === "Resposta de autenticacao invalida.") return t.feedback.invalidAuth;
+  return message;
+}
+
 export default function App() {
+  const storedPreferences = useMemo(readPreferences, []);
+  const [theme, setTheme] = useState(storedPreferences.theme || "dark");
+  const [language, setLanguage] = useState(storedPreferences.language || "pt");
+  const [accentId, setAccentId] = useState(storedPreferences.accentId || "cyan");
   const [mode, setMode] = useState("login");
   const [loginForm, setLoginForm] = useState(initialLogin);
   const [registerForm, setRegisterForm] = useState(initialRegister);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mentors, setMentors] = useState([]);
+
+  const t = translations[language] || translations.pt;
+  const accent = accentOptions.find((item) => item.id === accentId) || accentOptions[0];
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      UI_STORAGE_KEY,
+      JSON.stringify({
+        theme,
+        language,
+        accentId,
+      }),
+    );
+  }, [theme, language, accentId]);
 
   useEffect(() => {
     let active = true;
@@ -93,10 +199,10 @@ export default function App() {
     setIsSubmitting(true);
     try {
       const account = await login(loginForm);
-      setFeedback({ type: "success", message: "Acesso validado. Preparando ambiente..." });
+      setFeedback({ type: "success", message: t.feedback.loginSuccess });
       window.setTimeout(() => redirectThroughLoading(account), 380);
     } catch (error) {
-      setFeedback({ type: "error", message: error.message });
+      setFeedback({ type: "error", message: translateError(error, t) });
       setIsSubmitting(false);
     }
   };
@@ -116,10 +222,10 @@ export default function App() {
           role: account.role,
         });
       }
-      setFeedback({ type: "success", message: "Cadastro criado. Abrindo portal..." });
+      setFeedback({ type: "success", message: t.feedback.registerSuccess });
       window.setTimeout(() => redirectThroughLoading(account), 420);
     } catch (error) {
-      setFeedback({ type: "error", message: error.message });
+      setFeedback({ type: "error", message: translateError(error, t) });
       setIsSubmitting(false);
     }
   };
@@ -128,8 +234,14 @@ export default function App() {
   const selectedRole = activeForm.role;
 
   return (
-    <main className="auth-shell">
-      <section className="hero-panel" aria-label="Ascenda Access Hub">
+    <main
+      className={`auth-shell theme-${theme}`}
+      style={{
+        "--accent": accent.value,
+        "--accent-pair": accent.pair,
+      }}
+    >
+      <section className="hero-panel" aria-label={t.appLabel}>
         <div className="orbital-field" aria-hidden="true">
           <span className="orbit orbit-one" />
           <span className="orbit orbit-two" />
@@ -142,198 +254,216 @@ export default function App() {
             <Orbit size={28} />
           </div>
           <div>
-            <p className="eyebrow">Ascenda System</p>
-            <h1>Access Hub</h1>
+            <p className="eyebrow">{t.brand}</p>
+            <h1>{t.product}</h1>
           </div>
         </div>
 
         <div className="hero-copy">
-          <h2>Portais conectados por mentoria operacional.</h2>
-          <p>
-            Cadastro, autenticação local e vínculo mentor-intern preparados para migrar direto para Supabase Auth.
-          </p>
+          <h2>{t.hero.title}</h2>
+          <p>{t.hero.text}</p>
+        </div>
+
+        <div className="hero-stats" aria-label={t.controls.metrics}>
+          {t.hero.stats.map((item) => (
+            <div key={item.label}>
+              <strong>{item.value}</strong>
+              <span>{item.label}</span>
+            </div>
+          ))}
         </div>
 
         <div className="signal-grid">
-          <div>
-            <ShieldCheck size={20} />
-            <span>Role-based access</span>
-          </div>
-          <div>
-            <UsersRound size={20} />
-            <span>Mentor ownership</span>
-          </div>
-          <div>
-            <BadgeCheck size={20} />
-            <span>Substitute mentor</span>
-          </div>
+          {t.hero.features.map((item, index) => {
+            const icons = [ShieldCheck, UsersRound, BadgeCheck];
+            const Icon = icons[index] || ShieldCheck;
+            return (
+              <div key={item.title}>
+                <Icon size={20} />
+                <strong>{item.title}</strong>
+                <span>{item.text}</span>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       <section className="form-panel">
-        <div className="mode-tabs" role="tablist" aria-label="Modo de acesso">
-          <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
-            Entrar
-          </button>
-          <button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>
-            Cadastrar
-          </button>
-        </div>
-
-        <div className="form-heading">
-          <Sparkles size={20} />
-          <div>
-            <h2>{mode === "login" ? "Acessar portal" : "Criar conta operacional"}</h2>
-            <p>{selectedRole === "mentor" ? "Mentor Portal" : "Portal do Estagiario"}</p>
-          </div>
-        </div>
-
-        <div className="role-grid">
-          <RoleButton
-            active={selectedRole === "mentor"}
-            icon={BriefcaseBusiness}
-            label="Mentor"
-            onClick={() =>
-              mode === "login"
-                ? updateLogin("role", "mentor")
-                : updateRegister("role", "mentor")
-            }
+        <div className="auth-card">
+          <PreferenceBar
+            theme={theme}
+            language={language}
+            accentId={accentId}
+            t={t}
+            onThemeChange={setTheme}
+            onLanguageChange={setLanguage}
+            onAccentChange={setAccentId}
           />
-          <RoleButton
-            active={selectedRole === "intern"}
-            icon={GraduationCap}
-            label="Estagiario"
-            onClick={() =>
-              mode === "login"
-                ? updateLogin("role", "intern")
-                : updateRegister("role", "intern")
-            }
-          />
-        </div>
 
-        {mode === "login" ? (
-          <form className="access-form" onSubmit={handleLogin}>
-            <Field icon={Mail} label="E-mail">
-              <input
-                type="email"
-                value={loginForm.email}
-                onChange={(event) => updateLogin("email", event.target.value)}
-                autoComplete="email"
-                required
-              />
-            </Field>
-            <Field icon={Lock} label="Senha">
-              <input
-                type="password"
-                value={loginForm.password}
-                onChange={(event) => updateLogin("password", event.target.value)}
-                autoComplete="current-password"
-                required
-              />
-            </Field>
-            <button type="submit" className="submit-button" disabled={isSubmitting}>
-              <span>{isSubmitting ? "Validando..." : "Entrar"}</span>
-              <ArrowRight size={18} />
+          <div className="mode-tabs" role="tablist" aria-label={t.controls.mode}>
+            <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
+              {t.modes.login}
             </button>
-          </form>
-        ) : (
-          <form className="access-form" onSubmit={handleRegister}>
-            <Field icon={UserRound} label="Nome completo">
-              <input
-                value={registerForm.fullName}
-                onChange={(event) => updateRegister("fullName", event.target.value)}
-                autoComplete="name"
-                required
-              />
-            </Field>
-            <Field icon={Mail} label="E-mail">
-              <input
-                type="email"
-                value={registerForm.email}
-                onChange={(event) => updateRegister("email", event.target.value)}
-                autoComplete="email"
-                required
-              />
-            </Field>
-            <Field icon={Lock} label="Senha">
-              <input
-                type="password"
-                value={registerForm.password}
-                onChange={(event) => updateRegister("password", event.target.value)}
-                autoComplete="new-password"
-                minLength={6}
-                required
-              />
-            </Field>
+            <button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>
+              {t.modes.register}
+            </button>
+          </div>
 
-            {registerForm.role === "mentor" ? (
-              <Field icon={BriefcaseBusiness} label="Especialidade">
+          <div className="form-heading">
+            <Sparkles size={20} />
+            <div>
+              <h2>{mode === "login" ? t.heading.login : t.heading.register}</h2>
+              <p>{selectedRole === "mentor" ? t.heading.mentorPortal : t.heading.internPortal}</p>
+            </div>
+          </div>
+
+          <div className="role-grid">
+            <RoleButton
+              active={selectedRole === "mentor"}
+              icon={BriefcaseBusiness}
+              label={t.roles.mentor}
+              onClick={() =>
+                mode === "login"
+                  ? updateLogin("role", "mentor")
+                  : updateRegister("role", "mentor")
+              }
+            />
+            <RoleButton
+              active={selectedRole === "intern"}
+              icon={GraduationCap}
+              label={t.roles.intern}
+              onClick={() =>
+                mode === "login"
+                  ? updateLogin("role", "intern")
+                  : updateRegister("role", "intern")
+              }
+            />
+          </div>
+
+          {mode === "login" ? (
+            <form className="access-form" onSubmit={handleLogin}>
+              <Field icon={Mail} label={t.fields.email}>
                 <input
-                  value={registerForm.title}
-                  onChange={(event) => updateRegister("title", event.target.value)}
-                  placeholder="Ex.: Frontend Mentor"
+                  type="email"
+                  value={loginForm.email}
+                  onChange={(event) => updateLogin("email", event.target.value)}
+                  autoComplete="email"
+                  required
                 />
               </Field>
-            ) : (
-              <>
-                <Field icon={GraduationCap} label="Area / trilha">
-                  <select
-                    value={registerForm.track}
-                    onChange={(event) => updateRegister("track", event.target.value)}
-                    required
-                  >
-                    <option value="">Selecionar area</option>
-                    {areaOptions.map((area) => (
-                      <option key={area} value={area}>
-                        {area}
-                      </option>
-                    ))}
-                  </select>
+              <Field icon={Lock} label={t.fields.password}>
+                <input
+                  type="password"
+                  value={loginForm.password}
+                  onChange={(event) => updateLogin("password", event.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+              </Field>
+              <button type="submit" className="submit-button" disabled={isSubmitting}>
+                <span>{isSubmitting ? t.actions.validating : t.actions.login}</span>
+                <ArrowRight size={18} />
+              </button>
+            </form>
+          ) : (
+            <form className="access-form" onSubmit={handleRegister}>
+              <Field icon={UserRound} label={t.fields.fullName}>
+                <input
+                  value={registerForm.fullName}
+                  onChange={(event) => updateRegister("fullName", event.target.value)}
+                  autoComplete="name"
+                  required
+                />
+              </Field>
+              <Field icon={Mail} label={t.fields.email}>
+                <input
+                  type="email"
+                  value={registerForm.email}
+                  onChange={(event) => updateRegister("email", event.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </Field>
+              <Field icon={Lock} label={t.fields.password}>
+                <input
+                  type="password"
+                  value={registerForm.password}
+                  onChange={(event) => updateRegister("password", event.target.value)}
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                />
+              </Field>
+
+              {registerForm.role === "mentor" ? (
+                <Field icon={BriefcaseBusiness} label={t.fields.title}>
+                  <input
+                    value={registerForm.title}
+                    onChange={(event) => updateRegister("title", event.target.value)}
+                    placeholder={t.placeholders.title}
+                  />
                 </Field>
-                <Field icon={UsersRound} label="Mentor principal">
-                  <select
-                    value={registerForm.mentorId}
-                    onChange={(event) => updateRegister("mentorId", event.target.value)}
-                    required
-                  >
-                    <option value="">Selecionar mentor</option>
-                    {mentors.map((mentor) => (
-                      <option key={mentor.id} value={mentor.id}>
-                        {mentor.full_name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <Field icon={BadgeCheck} label="Mentor substituto">
-                  <select
-                    value={registerForm.substituteMentorId}
-                    onChange={(event) => updateRegister("substituteMentorId", event.target.value)}
-                  >
-                    <option value="">Sem substituto</option>
-                    {mentors
-                      .filter((mentor) => mentor.id !== registerForm.mentorId)
-                      .map((mentor) => (
+              ) : (
+                <>
+                  <Field icon={GraduationCap} label={t.fields.track}>
+                    <select
+                      value={registerForm.track}
+                      onChange={(event) => updateRegister("track", event.target.value)}
+                      required
+                    >
+                      <option value="">{t.placeholders.selectArea}</option>
+                      {areaOptions.map((area) => (
+                        <option key={area} value={area}>
+                          {area}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field icon={UsersRound} label={t.fields.mentor}>
+                    <select
+                      value={registerForm.mentorId}
+                      onChange={(event) => updateRegister("mentorId", event.target.value)}
+                      required
+                    >
+                      <option value="">{t.placeholders.selectMentor}</option>
+                      {mentors.map((mentor) => (
                         <option key={mentor.id} value={mentor.id}>
                           {mentor.full_name}
                         </option>
                       ))}
-                  </select>
-                </Field>
-              </>
-            )}
+                    </select>
+                  </Field>
+                  <Field icon={BadgeCheck} label={t.fields.substituteMentor}>
+                    <select
+                      value={registerForm.substituteMentorId}
+                      onChange={(event) => updateRegister("substituteMentorId", event.target.value)}
+                    >
+                      <option value="">{t.placeholders.noSubstitute}</option>
+                      {mentors
+                        .filter((mentor) => mentor.id !== registerForm.mentorId)
+                        .map((mentor) => (
+                          <option key={mentor.id} value={mentor.id}>
+                            {mentor.full_name}
+                          </option>
+                        ))}
+                    </select>
+                  </Field>
+                </>
+              )}
 
-            <button type="submit" className="submit-button" disabled={isSubmitting}>
-              <span>{isSubmitting ? "Criando..." : "Criar e entrar"}</span>
-              <ArrowRight size={18} />
-            </button>
-          </form>
-        )}
+              <button type="submit" className="submit-button" disabled={isSubmitting}>
+                <span>{isSubmitting ? t.actions.creating : t.actions.create}</span>
+                <ArrowRight size={18} />
+              </button>
+            </form>
+          )}
 
-        {feedback.message && (
-          <p className={`feedback ${feedback.type}`} role="status">
-            {feedback.message}
-          </p>
-        )}
+          {feedback.message && (
+            <p className={`feedback ${feedback.type}`} role="status">
+              {feedback.message}
+            </p>
+          )}
+        </div>
       </section>
     </main>
   );

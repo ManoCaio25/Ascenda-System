@@ -14,7 +14,36 @@ function parseCors(value) {
     .filter(Boolean);
 }
 
-function readEnvValue(key) {
+function readEnvValue(key, aliases = []) {
+  const keys = [key, ...aliases];
+  const foundKey = keys.find((candidate) => process.env[candidate] != null);
+  const sourceKey = foundKey || key;
+  const rawValue = process.env[sourceKey];
+
+  if (rawValue == null) return undefined;
+
+  let value = String(rawValue).trim();
+
+  for (const candidate of keys) {
+    const accidentalAssignmentPrefix = `${candidate}=`;
+
+    if (value.startsWith(accidentalAssignmentPrefix)) {
+      value = value.slice(accidentalAssignmentPrefix.length).trim();
+      break;
+    }
+  }
+
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+
+  return value;
+}
+
+function readLegacyEnvValue(key) {
   const rawValue = process.env[key];
 
   if (rawValue == null) return undefined;
@@ -54,13 +83,26 @@ function assertHttpUrl(key, value) {
   }
 }
 
+function assertSupabaseKeyKind(label, value, expectedPrefix, wrongPrefix) {
+  if (value.startsWith(wrongPrefix)) {
+    throw new Error(`${label} received the wrong Supabase key type. Expected ${expectedPrefix}..., got ${wrongPrefix}...`);
+  }
+
+  const isModernKey = value.startsWith("sb_");
+  const isLegacyJwt = value.startsWith("eyJ");
+
+  if (!isModernKey && !isLegacyJwt) {
+    throw new Error(`${label} does not look like a Supabase key. Copy the full key from Settings > API Keys.`);
+  }
+}
+
 const supabaseUrl = readEnvValue("SUPABASE_URL");
-const supabaseAnonKey = readEnvValue("SUPABASE_ANON_KEY");
-const supabaseServiceRoleKey = readEnvValue("SUPABASE_SERVICE_ROLE_KEY");
+const supabaseAnonKey = readEnvValue("SUPABASE_PUBLISHABLE_KEY", ["SUPABASE_ANON_KEY"]);
+const supabaseServiceRoleKey = readEnvValue("SUPABASE_SECRET_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]);
 const requiredSupabaseValues = {
   SUPABASE_URL: supabaseUrl,
-  SUPABASE_ANON_KEY: supabaseAnonKey,
-  SUPABASE_SERVICE_ROLE_KEY: supabaseServiceRoleKey,
+  "SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY": supabaseAnonKey,
+  "SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY": supabaseServiceRoleKey,
 };
 const hasSupabaseConfig = Object.values(requiredSupabaseValues).every(Boolean);
 const requestedProvider = String(process.env.DATA_PROVIDER || "").trim().toLowerCase();
@@ -78,6 +120,8 @@ if (dataProvider === "supabase") {
   }
 
   assertHttpUrl("SUPABASE_URL", supabaseUrl);
+  assertSupabaseKeyKind("SUPABASE_PUBLISHABLE_KEY", supabaseAnonKey, "sb_publishable", "sb_secret");
+  assertSupabaseKeyKind("SUPABASE_SECRET_KEY", supabaseServiceRoleKey, "sb_secret", "sb_publishable");
 }
 
 export const env = {
@@ -89,7 +133,7 @@ export const env = {
   supabaseUrl,
   supabaseAnonKey,
   supabaseServiceRoleKey,
-  openaiApiKey: readEnvValue("OPENAI_API_KEY"),
+  openaiApiKey: readLegacyEnvValue("OPENAI_API_KEY"),
   openaiModel: process.env.OPENAI_MODEL || "gpt-4.1-mini",
   jsonBodyLimit: process.env.JSON_BODY_LIMIT || "2mb",
   authTokenTtlHours: Number(process.env.AUTH_TOKEN_TTL_HOURS || 12),

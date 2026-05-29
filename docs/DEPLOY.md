@@ -61,8 +61,8 @@ Os arquivos `.env` precisam continuar ignorados.
 
 ```txt
 SUPABASE_URL
-SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SECRET_KEY
 ```
 
 `OPENAI_API_KEY` ainda nao e obrigatoria. Sem ela, a rota de IA usa resposta mock para validar o fluxo.
@@ -86,8 +86,8 @@ No Render:
 
 ```txt
 SUPABASE_URL
-SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SECRET_KEY
 ```
 
 `SUPABASE_URL` deve ser a URL base do projeto, sem `/rest/v1`:
@@ -110,6 +110,24 @@ No Render o preenchimento correto e:
 Key:   SUPABASE_URL
 Value: https://seu-projeto.supabase.co
 ```
+
+Para as chaves, use `Settings > API Keys` no Supabase:
+
+```txt
+Key:   SUPABASE_PUBLISHABLE_KEY
+Value: sb_publishable_...
+
+Key:   SUPABASE_SECRET_KEY
+Value: sb_secret_...
+```
+
+Se aparecer `Invalid API key`, geralmente uma destas coisas aconteceu:
+
+- `SUPABASE_PUBLISHABLE_KEY` recebeu a secret key por engano.
+- `SUPABASE_SECRET_KEY` recebeu a publishable key por engano.
+- A chave foi copiada truncada, com `...`, aspas, espaco ou quebra de linha.
+- Foi copiado o nome da variavel junto no campo de valor, como `SUPABASE_PUBLISHABLE_KEY=...`.
+- A key foi regenerada no Supabase e o Render ainda esta usando a antiga.
 
 Durante teste com as URLs temporarias do Render, deixe `CORS_ORIGIN` assim:
 
@@ -260,7 +278,7 @@ https://ascenda-system.is-a.dev
 ```
 
 - As senhas iniciais foram trocadas antes de qualquer uso real.
-- A `SUPABASE_SERVICE_ROLE_KEY` nao aparece em nenhum frontend, print publico ou commit.
+- A `SUPABASE_SECRET_KEY` nao aparece em nenhum frontend, print publico ou commit.
 
 ## Troubleshooting - Login retorna 200, mas tela mostra resposta invalida
 
