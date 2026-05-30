@@ -23,6 +23,7 @@ const forumTopicStore = createEntityStore('ascenda_estagiario_forum_topics', for
 const forumReplyStore = createEntityStore('ascenda_estagiario_forum_replies', forumReplies);
 const calendarStore = createEntityStore('ascenda_estagiario_calendar_events', calendarEvents);
 const activityStore = createEntityStore('ascenda_estagiario_activities', activities);
+const activityResponseStore = createEntityStore('ascenda_estagiario_activity_responses', []);
 const achievementStore = createEntityStore('ascenda_estagiario_achievements', achievements);
 const shopItemStore = createEntityStore('ascenda_estagiario_shop_items', shopItems);
 
@@ -154,9 +155,43 @@ export const CalendarEvent = {
   },
 };
 
+function toActivityResponse(response = {}) {
+  return {
+    id: response.id,
+    created_date: response.created_date || response.submitted_at || response.created_at || new Date().toISOString(),
+    autor: response.autor || response.author_name || response.intern_name || 'Estagiario',
+    conteudo: response.conteudo || response.content || '',
+    links: response.links || [],
+    tipo: response.tipo || 'intern',
+  };
+}
+
+function mergeActivityResponses(activity, responses = []) {
+  const localResponses = (activity.respostas || []).map(toActivityResponse);
+  const remoteResponses = responses
+    .filter((response) => String(response.id_atividade || response.activity_id) === String(activity.id))
+    .map(toActivityResponse);
+  const byId = new Map();
+
+  [...localResponses, ...remoteResponses].forEach((response) => {
+    byId.set(String(response.id), response);
+  });
+
+  const respostas = Array.from(byId.values()).sort((a, b) => {
+    return new Date(a.created_date).getTime() - new Date(b.created_date).getTime();
+  });
+
+  return {
+    ...activity,
+    respostas,
+  };
+}
+
 export const Activity = {
   async list(sort, limit) {
-    return activityStore.list(sort, limit);
+    const activityItems = await activityStore.list(sort, limit);
+    const responses = await activityResponseStore.list('-created_date').catch(() => []);
+    return activityItems.map((activity) => mergeActivityResponses(activity, responses));
   },
   async update(id, updates) {
     return activityStore.update(id, updates);
@@ -164,13 +199,27 @@ export const Activity = {
   async addResponse(id, response) {
     const current = await activityStore.findById(id);
     if (!current) return null;
-    const newResponse = {
-      id: response?.id ?? `resp-${Date.now()}`,
-      created_date: new Date().toISOString(),
-      ...response,
-    };
+    const created = await activityResponseStore.create({
+      activity_id: id,
+      intern_id: response?.intern_id,
+      content: response?.conteudo,
+      links: response?.links || [],
+    });
+    const newResponse = toActivityResponse({
+      ...created,
+      autor: response?.autor,
+      conteudo: created.conteudo || created.content || response?.conteudo,
+      tipo: response?.tipo || 'intern',
+    });
     const respostas = [...(current.respostas || []), newResponse];
-    return activityStore.update(id, { respostas });
+    let nextActivity = current;
+    if (current.status === 'open') {
+      nextActivity = await activityStore.update(id, { status: 'in_progress' }).catch((error) => {
+        console.warn('Unable to update activity status after response.', error);
+        return current;
+      });
+    }
+    return { ...nextActivity, respostas };
   },
 };
 

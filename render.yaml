@@ -37,6 +37,10 @@ services:
         value: "true"
       - key: OPENAI_MODEL
         value: gpt-4.1-mini
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_PUBLISHABLE_KEY
@@ -53,7 +57,7 @@ services:
       - ascenda-system.is-a.dev
     envVars:
       - key: VITE_API_URL
-        value: https://api.ascenda-system.is-a.dev/api
+        value: https://ascenda-system-api.onrender.com/api
       - key: VITE_ALLOW_LOCAL_AUTH_FALLBACK
         value: "false"
       - key: VITE_ALLOW_LOCAL_DATA_FALLBACK

@@ -9,6 +9,7 @@ import {
   BookOpen,
   FileText,
   Youtube,
+  ExternalLink,
   CheckCircle,
   Trash2,
   AlertCircle,
@@ -34,8 +35,7 @@ import {
 } from "@padrinho/components/ui/select";
 import { useTranslation } from "@padrinho/i18n";
 import { Intern } from "@padrinho/entities/Intern";
-import { Course } from "@padrinho/entities/Course";
-import { CourseAssignment } from "@padrinho/entities/CourseAssignment";
+import { generateLearningPackage } from "@padrinho/services/aiLearningService";
 
 function parseYoutubeVideoId(url) {
   if (!url) return null;
@@ -144,6 +144,10 @@ function isTextLikeFile(file) {
   );
 }
 
+function isPdfFile(file) {
+  return file?.type === "application/pdf" || getFileExtension(file) === "pdf";
+}
+
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -153,9 +157,14 @@ function readFileAsDataUrl(file) {
   });
 }
 
-function extractTextFromFile(file) {
+async function extractTextFromFile(file) {
+  if (isPdfFile(file)) {
+    const { extractPdfText } = await import("../lib/pdfText.js");
+    return extractPdfText(file);
+  }
+
   if (!isTextLikeFile(file)) {
-    return Promise.resolve("");
+    return "";
   }
 
   return new Promise((resolve, reject) => {
@@ -302,6 +311,36 @@ function buildCourseDescription(blueprint) {
   return sections.join("\n\n");
 }
 
+function createPreviewFromPackage(packageResult, fallback) {
+  const challenges = Array.isArray(packageResult?.challenges) ? packageResult.challenges : [];
+  const videoLessons = Array.isArray(packageResult?.videoLessons) ? packageResult.videoLessons : [];
+  const keywords = Array.from(
+    new Set([
+      packageResult?.difficulty,
+      ...videoLessons.map((lesson) => lesson.title),
+      ...challenges.flatMap((challenge) => challenge.objectives || []),
+    ].filter(Boolean)),
+  ).slice(0, 8);
+
+  return {
+    analysis: {
+      topic: packageResult?.title || fallback.resourceTitle,
+      summary: packageResult?.summary || fallback.description || packageResult?.title || "",
+      keywords,
+    },
+    plan: challenges.map((challenge) => ({
+      title: challenge.title,
+      overview: challenge.description,
+      keyTopics: (challenge.objectives || []).slice(0, 3),
+      objectives: challenge.objectives || [],
+      practice: challenge.description,
+      quizQuestions: (challenge.questions || []).map((question) => question.prompt),
+      challenge,
+    })),
+    videoLessons,
+  };
+}
+
 function createActivityPlan({ analysis, activityCount, quizCount }) {
   const plan = [];
   const totalActivities = Math.max(1, activityCount);
@@ -359,8 +398,10 @@ export default function ActivityGenerator() {
   const [resourceContent, setResourceContent] = useState("");
   const [resourceContentWords, setResourceContentWords] = useState(0);
   const [isExtractingContent, setIsExtractingContent] = useState(false);
+  const [difficulty, setDifficulty] = useState("Medium");
   const [activityCount, setActivityCount] = useState(3);
   const [quizCount, setQuizCount] = useState(5);
+  const [videoLessonCount, setVideoLessonCount] = useState(3);
   const [selectedIntern, setSelectedIntern] = useState(null);
   const [notes, setNotes] = useState("");
   const [isPlanning, setIsPlanning] = useState(false);
@@ -408,7 +449,7 @@ export default function ActivityGenerator() {
       setResourceContent(normalizedExtracted);
       setResourceContentWords(computeWordCount(normalizedExtracted));
 
-      if (derivedSource === "document" && !normalizedExtracted && isTextLikeFile(file)) {
+      if (derivedSource === "document" && !normalizedExtracted && (isTextLikeFile(file) || isPdfFile(file))) {
         setFeedback({
           type: "error",
           message: t("activityGenerator.feedback.emptyDocument"),
@@ -444,8 +485,10 @@ export default function ActivityGenerator() {
     setResourceFile(null);
     setResourceContent("");
     setResourceContentWords(0);
+    setDifficulty("Medium");
     setActivityCount(3);
     setQuizCount(5);
+    setVideoLessonCount(3);
     setSelectedIntern(null);
     setNotes("");
     if (fileInputRef.current) {
@@ -491,6 +534,7 @@ export default function ActivityGenerator() {
 
     const sanitizedActivityCount = Number(activityCount) || 0;
     const sanitizedQuizCount = Number(quizCount) || 0;
+    const sanitizedVideoLessonCount = Number(videoLessonCount) || 0;
 
     if (isExtractingContent) {
       setFeedback({
@@ -524,7 +568,7 @@ export default function ActivityGenerator() {
       return;
     }
 
-    if (sanitizedActivityCount < 1 || sanitizedQuizCount < 1) {
+    if (sanitizedActivityCount < 1 || sanitizedQuizCount < 1 || sanitizedVideoLessonCount < 0) {
       setFeedback({
         type: "error",
         message: t("activityGenerator.feedback.missingCounts"),
@@ -538,26 +582,35 @@ export default function ActivityGenerator() {
     setActivityPreview(null);
 
     try {
-      const analysis = analyzeResource({
+      const previewPayload = {
+        internId: selectedIntern,
+        sourceTitle: resourceTitle.trim(),
+        sourceText: [description, resourceContent].filter(Boolean).join("\n\n"),
+        sourceUrl: videoUrl.trim() || "",
+        fileName: resourceFile?.name || "",
+        difficulty,
+        challengeCount: sanitizedActivityCount,
+        questionCount: sanitizedQuizCount,
+        videoLessonCount: sanitizedVideoLessonCount,
+        persist: false,
+      };
+      const result = await generateLearningPackage(previewPayload);
+      const learningPackage = result.package;
+      const preview = createPreviewFromPackage(learningPackage, {
         resourceTitle,
         description,
-        sourceType,
-        resourceFile,
-        resourceContent,
-        videoUrl,
-      });
-
-      const plan = createActivityPlan({
-        analysis,
-        activityCount: sanitizedActivityCount,
-        quizCount: sanitizedQuizCount,
       });
 
       setActivityPreview({
-        plan,
-        analysis,
+        plan: preview.plan,
+        analysis: preview.analysis,
+        package: learningPackage,
+        videoLessons: preview.videoLessons,
+        requestPayload: previewPayload,
+        difficulty,
         sanitizedActivityCount,
         sanitizedQuizCount,
+        sanitizedVideoLessonCount,
         internId: selectedIntern,
         internName: chosenIntern?.full_name || selectedIntern,
         notes: notes.trim(),
@@ -579,7 +632,7 @@ export default function ActivityGenerator() {
       setFeedback({
         type: "success",
         message: t("activityGenerator.feedback.previewReady", undefined, {
-          count: sanitizedActivityCount,
+          count: preview.plan.length,
         }),
       });
     } catch (error) {
@@ -602,78 +655,50 @@ export default function ActivityGenerator() {
     try {
       const {
         plan,
-        analysis,
         sanitizedQuizCount,
-        internId,
         internName,
-        notes: previewNotes,
-        sourceType: previewSource,
-        videoUrl: previewVideoUrl,
-        resourceFile: previewFile,
+        requestPayload,
+        package: learningPackage,
         generatedAt,
+        videoLessons,
       } = activityPreview;
 
-      const createdAt = generatedAt || new Date().toISOString();
-      const createdRecords = [];
-
-      for (let index = 0; index < plan.length; index += 1) {
-        const blueprint = plan[index];
-        const payload = {
-          title: blueprint.title,
-          description: buildCourseDescription(blueprint),
-          category: "AI Generated",
-          difficulty: "Intermediate",
-          duration_hours: Math.max(1, Math.ceil(sanitizedQuizCount * 0.5 + 1)),
-          enrolled_count: 0,
-          completion_rate: 0,
-          tags: Array.from(
-            new Set([
-              "AI Generated",
-              previewSource === "video" ? "Video" : "Document",
-              ...blueprint.keyTopics.slice(0, 3),
-            ]),
-          ),
-          generated_metadata: {
-            sourceType: previewSource,
-            quizCount: sanitizedQuizCount,
-            activityIndex: index + 1,
-            generatedAt: createdAt,
-            internId,
-            blueprint,
-            analysis,
-          },
-        };
-
-        if (previewVideoUrl) {
-          const parsedId = parseYoutubeVideoId(previewVideoUrl);
-          payload.youtube_url = previewVideoUrl;
-          if (parsedId) {
-            payload.youtube_video_id = parsedId;
-          }
-        }
-
-        if (previewFile) {
-          payload.file_url = previewFile.dataUrl;
-          payload.file_name = previewFile.name;
-          payload.file_mime = previewFile.type;
-        }
-
-        const createdCourse = await Course.create(payload);
-        await CourseAssignment.create({
-          course_id: createdCourse.id,
-          intern_id: internId,
-          notes: previewNotes || undefined,
+      if (!plan.length) {
+        setFeedback({
+          type: "error",
+          message: t("activityGenerator.feedback.missingPreviewActivities"),
         });
-
-        createdRecords.push({
-          course: createdCourse,
-          internName,
-          quizCount: sanitizedQuizCount,
-          generatedAt: createdAt,
-          blueprint,
-          keyTopics: blueprint.keyTopics,
-        });
+        setIsSaving(false);
+        return;
       }
+
+      const createdAt = generatedAt || new Date().toISOString();
+      const saved = await generateLearningPackage({
+        ...requestPayload,
+        challengeCount: plan.length,
+        videoLessonCount: videoLessons?.length || 0,
+        package: {
+          ...learningPackage,
+          challenges: (learningPackage?.challenges || []).slice(0, plan.length),
+          videoLessons: videoLessons || [],
+        },
+        persist: true,
+      });
+      const createdRecords = (saved.created?.activities || []).map((activity, index) => ({
+        course: {
+          id: activity.id,
+          title: activity.title,
+          description: activity.description,
+          youtube_url: videoLessons?.[0]?.url || (videoLessons?.[0]?.searchQuery
+            ? `https://www.youtube.com/results?search_query=${encodeURIComponent(videoLessons[0].searchQuery)}`
+            : ""),
+        },
+        internName,
+        quizCount: sanitizedQuizCount,
+        generatedAt: createdAt,
+        blueprint: plan[index],
+        keyTopics: plan[index]?.keyTopics || [],
+      }));
 
       setGeneratedActivities((previous) => [...createdRecords, ...previous]);
       setFeedback({
@@ -698,6 +723,47 @@ export default function ActivityGenerator() {
 
   const handleClearPreview = () => {
     setActivityPreview(null);
+  };
+
+  const handleRemovePreviewChallenge = (indexToRemove) => {
+    setActivityPreview((current) => {
+      if (!current) return current;
+      const nextPlan = current.plan.filter((_, index) => index !== indexToRemove);
+      if (nextPlan.length === 0) return current;
+      return {
+        ...current,
+        plan: nextPlan,
+        package: {
+          ...current.package,
+          challenges: (current.package?.challenges || []).filter((_, index) => index !== indexToRemove),
+        },
+        sanitizedActivityCount: nextPlan.length,
+        requestPayload: {
+          ...current.requestPayload,
+          challengeCount: nextPlan.length,
+        },
+      };
+    });
+  };
+
+  const handleRemovePreviewLesson = (indexToRemove) => {
+    setActivityPreview((current) => {
+      if (!current) return current;
+      const nextLessons = (current.videoLessons || []).filter((_, index) => index !== indexToRemove);
+      return {
+        ...current,
+        videoLessons: nextLessons,
+        package: {
+          ...current.package,
+          videoLessons: (current.package?.videoLessons || []).filter((_, index) => index !== indexToRemove),
+        },
+        sanitizedVideoLessonCount: nextLessons.length,
+        requestPayload: {
+          ...current.requestPayload,
+          videoLessonCount: nextLessons.length,
+        },
+      };
+    });
   };
 
   return (
@@ -823,7 +889,20 @@ export default function ActivityGenerator() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4">
+                <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="difficulty-select">{t("activityGenerator.form.difficulty")}</Label>
+                    <Select value={difficulty} onValueChange={setDifficulty}>
+                      <SelectTrigger id="difficulty-select">
+                        <SelectValue placeholder={t("activityGenerator.form.difficulty")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Basic">{t("activityGenerator.difficulty.Basic")}</SelectItem>
+                        <SelectItem value="Medium">{t("activityGenerator.difficulty.Medium")}</SelectItem>
+                        <SelectItem value="Advanced">{t("activityGenerator.difficulty.Advanced")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="activity-count">{t("activityGenerator.form.activityCount")}</Label>
                     <Input
@@ -842,6 +921,16 @@ export default function ActivityGenerator() {
                       min={1}
                       value={quizCount}
                       onChange={(event) => setQuizCount(event.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="video-lesson-count">{t("activityGenerator.form.videoLessonCount")}</Label>
+                    <Input
+                      id="video-lesson-count"
+                      type="number"
+                      min={0}
+                      value={videoLessonCount}
+                      onChange={(event) => setVideoLessonCount(event.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -994,6 +1083,57 @@ export default function ActivityGenerator() {
                     </div>
                   </div>
                 )}
+                {activityPreview.videoLessons?.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                      {t("activityGenerator.preview.videoLessonsTitle")}
+                    </p>
+                    <div className="grid gap-2 md:grid-cols-2">
+                      {activityPreview.videoLessons.map((lesson, index) => (
+                        <div key={`${lesson.title}-${index}`} className="rounded-lg border border-border bg-surface p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm font-semibold text-primary">{lesson.title}</p>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemovePreviewLesson(index)}
+                              className="h-7 px-2 text-muted hover:text-error"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                          <p className="mt-1 text-xs text-secondary">{lesson.description}</p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
+                            <span>
+                              {t("activityGenerator.preview.lessonMeta", {
+                                minutes: lesson.estimatedMinutes,
+                                level: t(`activityGenerator.difficulty.${lesson.level}`, lesson.level),
+                              })}
+                            </span>
+                            {lesson.channelTitle && <span>{lesson.channelTitle}</span>}
+                            {lesson.recommendationSource === "youtube_api" && (
+                              <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+                                YouTube
+                              </Badge>
+                            )}
+                          </div>
+                          {lesson.url && (
+                            <a
+                              href={lesson.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+                            >
+                              {t("activityGenerator.preview.viewLesson")}
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-5">
@@ -1004,13 +1144,25 @@ export default function ActivityGenerator() {
                   >
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-brand">
-                        <span>
-                          {t("activityGenerator.preview.activityHeading", undefined, {
-                            index: index + 1,
-                          })}
-                        </span>
-                        <span className="h-1 w-1 rounded-full bg-brand" />
-                        <span>{blueprint.title}</span>
+                        <div className="flex flex-1 flex-wrap items-center gap-2">
+                          <span>
+                            {t("activityGenerator.preview.activityHeading", undefined, {
+                              index: index + 1,
+                            })}
+                          </span>
+                          <span className="h-1 w-1 rounded-full bg-brand" />
+                          <span>{blueprint.title}</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemovePreviewChallenge(index)}
+                          disabled={activityPreview.plan.length <= 1}
+                          className="h-7 px-2 text-muted hover:text-error"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                       <p className="text-sm text-secondary leading-relaxed">{blueprint.overview}</p>
                       {blueprint.keyTopics.length > 0 && (
@@ -1077,7 +1229,7 @@ export default function ActivityGenerator() {
                   type="button"
                   onClick={handleConfirmSave}
                   className="bg-brand text-white hover:bg-brand/90"
-                  disabled={isSaving}
+                  disabled={isSaving || activityPreview.plan.length === 0}
                 >
                   {isSaving
                     ? t("activityGenerator.actions.saving")

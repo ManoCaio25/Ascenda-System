@@ -30,7 +30,7 @@ Referencias oficiais:
   - `/loading/` para LoadingPage.
   - `/mentor/` para MentorPortal.
   - `/intern/` para InternPortal.
-- `AscendaSystem-React/.env.production.example` ja aponta para `https://api.ascenda-system.is-a.dev/api`.
+- `AscendaSystem-React/.env.production.example` aponta para a API Render temporaria: `https://ascenda-system-api.onrender.com/api`.
 - `AscendaSystem-Node/.env.production.example` ja limita CORS para `https://ascenda-system.is-a.dev`.
 - As chaves sensiveis do Supabase ficam como `sync: false` no `render.yaml`; o Render vai pedir os valores no painel, sem gravar no Git.
 - Para a demonstracao, o cadastro publico esta habilitado no `render.yaml`. Antes de uso real, volte `ALLOW_PUBLIC_MENTOR_SIGNUP` e `ALLOW_PUBLIC_INTERN_SIGNUP` para `false`.
@@ -66,6 +66,7 @@ SUPABASE_SECRET_KEY
 ```
 
 `OPENAI_API_KEY` e obrigatoria para IA em producao. Sem ela, a rota de IA responde `503`.
+`YOUTUBE_API_KEY` e opcional. Quando configurada, a IA recomenda videoaulas com links reais do YouTube; sem ela, o sistema usa links de busca do YouTube.
 
 ## Passo 3 - Validar as URLs temporarias do Render
 
@@ -88,6 +89,8 @@ No Render:
 SUPABASE_URL
 SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SECRET_KEY
+OPENAI_API_KEY
+YOUTUBE_API_KEY
 ```
 
 `SUPABASE_URL` deve ser a URL base do projeto, sem `/rest/v1`:
@@ -138,7 +141,7 @@ https://ascenda-system.is-a.dev,https://ascenda-system-web.onrender.com
 Enquanto o dominio `is-a.dev` ainda nao estiver aprovado, no servico `ascenda-system-web` configure temporariamente:
 
 ```txt
-VITE_API_URL=https://api.ascenda-system.is-a.dev/api
+VITE_API_URL=https://ascenda-system-api.onrender.com/api
 ```
 
 Depois que `api.ascenda-system.is-a.dev` estiver funcionando, volte para:
@@ -303,5 +306,5 @@ Solucao:
 4. Confirme que `ascenda-system-web > Environment` aponta para a API correta:
 
 ```txt
-VITE_API_URL=https://api.ascenda-system.is-a.dev/api
+VITE_API_URL=https://ascenda-system-api.onrender.com/api
 ```

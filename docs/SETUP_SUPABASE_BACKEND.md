@@ -87,6 +87,7 @@ SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
 OPENAI_MODEL=
+YOUTUBE_API_KEY=
 ```
 
 Enquanto o Supabase nao estiver pronto, mantenha `DATA_PROVIDER=mock`. Quando terminar o setup do Supabase, altere para:
@@ -121,10 +122,12 @@ VITE_ALLOW_LOCAL_DATA_FALLBACK=false
 ## 6. Fluxo esperado da IA
 
 1. Mentor informa tema, texto, documento ou link.
-2. Frontend chama `POST /api/ai/generate-activities`.
-3. Backend chama OpenAI Responses API com JSON Schema.
-4. Backend grava registro em `ai_generation_jobs`.
-5. Proxima etapa: backend tambem cria registros em `activities` e `activity_questions`.
+2. Para o fluxo simples, o frontend chama `POST /api/ai/generate-activities`.
+3. Para o fluxo completo do padrinho, o frontend chama `POST /api/ai/generate-learning-package`.
+4. Backend extrai o pacote estruturado com desafios, perguntas e videoaulas recomendadas.
+5. Se `persist=false`, o backend devolve uma pre-visualizacao para revisao.
+6. Se `persist=true`, o backend cria `learning_paths`, `contents`, `activities` e `activity_questions` para aparecer no portal do estagiario.
+7. Quando `YOUTUBE_API_KEY` estiver configurada, as videoaulas recebem links reais do YouTube; sem ela, recebem links de busca.
 
 ## 7. Ordem de trabalho sugerida
 

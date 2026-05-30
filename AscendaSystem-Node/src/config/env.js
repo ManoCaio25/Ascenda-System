@@ -143,6 +143,7 @@ export const env = {
   supabaseServiceRoleKey,
   openaiApiKey: readLegacyEnvValue("OPENAI_API_KEY"),
   openaiModel: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+  youtubeApiKey: readLegacyEnvValue("YOUTUBE_API_KEY"),
   jsonBodyLimit: process.env.JSON_BODY_LIMIT || "2mb",
   authTokenTtlHours: Number(process.env.AUTH_TOKEN_TTL_HOURS || 12),
   authCookieName: process.env.AUTH_COOKIE_NAME || "ascenda_session",

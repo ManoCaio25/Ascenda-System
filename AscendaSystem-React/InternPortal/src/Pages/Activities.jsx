@@ -92,9 +92,10 @@ export default function ActivitiesPage() {
   }, [activities, language, t]);
 
   const handleRespond = async () => {
-    if (!selectedActivity || !responseText.trim()) return;
+    if (!selectedActivity || !responseText.trim() || !user?.id) return;
 
     const payload = {
+      intern_id: user?.id,
       autor: user?.full_name || t('activitiesInternFallback'),
       conteudo: responseText.trim(),
       links: responseLinks
@@ -116,8 +117,16 @@ export default function ActivitiesPage() {
   const handleMarkComplete = async (activityId) => {
     const updated = await Activity.update(activityId, { status: 'completed' });
     if (updated) {
-      setActivities((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-      setSelectedActivity((current) => (current?.id === updated.id ? updated : current));
+      setActivities((prev) => prev.map((item) => (
+        item.id === updated.id
+          ? { ...updated, respostas: updated.respostas || item.respostas || [] }
+          : item
+      )));
+      setSelectedActivity((current) => (
+        current?.id === updated.id
+          ? { ...updated, respostas: updated.respostas || current.respostas || [] }
+          : current
+      ));
     }
   };
 

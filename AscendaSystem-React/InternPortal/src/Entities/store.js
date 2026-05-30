@@ -14,6 +14,7 @@ const REMOTE_ENTITY_BY_STORAGE_KEY = {
   ascenda_estagiario_forum_replies: 'forumReplies',
   ascenda_estagiario_calendar_events: 'calendarEvents',
   ascenda_estagiario_activities: 'activities',
+  ascenda_estagiario_activity_responses: 'activityResponses',
   ascenda_estagiario_achievements: 'badges',
   ascenda_estagiario_shop_items: 'shopItems',
 };
@@ -171,15 +172,46 @@ const FIELD_MAPPERS = {
     sortAliases: { created_date: 'created_at', data_hora_inicio: 'starts_at' },
   },
   ascenda_estagiario_activities: {
+    fromRemote: (item) => {
+      const videoLessons = Array.isArray(item.ai_metadata?.videoLessons)
+        ? item.ai_metadata.videoLessons
+        : [];
+      const recursosSugeridos = [
+        item.source_url,
+        ...videoLessons.map((lesson) => lesson.url || lesson.searchQuery),
+      ].filter(Boolean);
+
+      return {
+        ...item,
+        titulo: item.titulo ?? item.title,
+        descricao: item.descricao ?? item.description,
+        prazo_resposta: item.prazo_resposta ?? item.due_at,
+        categoria: item.categoria ?? item.category,
+        recursos_sugeridos: item.recursos_sugeridos ?? recursosSugeridos,
+        created_date: item.created_date ?? item.created_at,
+      };
+    },
+    sortAliases: { created_date: 'created_at', prazo_resposta: 'due_at' },
+  },
+  ascenda_estagiario_activity_responses: {
     fromRemote: (item) => ({
       ...item,
-      titulo: item.titulo ?? item.title,
-      descricao: item.descricao ?? item.description,
-      prazo_resposta: item.prazo_resposta ?? item.due_at,
-      categoria: item.categoria ?? item.category,
-      created_date: item.created_date ?? item.created_at,
+      id_atividade: item.activity_id,
+      id_estagiario: item.intern_id,
+      conteudo: item.content,
+      links: item.links || [],
+      created_date: item.submitted_at || item.created_at,
+      tipo: 'intern',
     }),
-    sortAliases: { created_date: 'created_at', prazo_resposta: 'due_at' },
+    toRemote: (item) => ({
+      activity_id: item.activity_id || item.id_atividade,
+      intern_id: item.intern_id || item.id_estagiario,
+      content: item.content || item.conteudo,
+      links: item.links || [],
+      status: item.status || 'submitted',
+    }),
+    sortAliases: { created_date: 'submitted_at' },
+    criteriaAliases: { id_atividade: 'activity_id', id_estagiario: 'intern_id' },
   },
   ascenda_estagiario_achievements: {
     fromRemote: (item) => ({

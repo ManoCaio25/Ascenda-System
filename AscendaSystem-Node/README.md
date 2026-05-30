@@ -7,7 +7,8 @@ Backend Node.js separado dos frontends.
 - Node.js 20+
 - Express
 - Supabase PostgreSQL/Auth/Storage
-- OpenAI Responses API para gerar atividades
+- OpenAI Responses API para gerar atividades, desafios e trilhas
+- YouTube Data API opcional para recomendar videoaulas com links reais
 
 ## Setup
 
@@ -51,6 +52,7 @@ http://localhost:4000/api
 - `PATCH /api/entities/:entity/:id`
 - `DELETE /api/entities/:entity/:id`
 - `POST /api/ai/generate-activities`
+- `POST /api/ai/generate-learning-package`
 
 As rotas protegidas usam a sessao enviada em cookie HttpOnly:
 

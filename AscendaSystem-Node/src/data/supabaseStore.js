@@ -427,9 +427,11 @@ export const supabaseDataAdapter = {
       .insert({
         requested_by: requestedBy,
         intern_id: requestPayload.internId,
-        source_kind: requestPayload.sourceUrl ? "youtube" : "text",
-        source_title: requestPayload.sourceTitle || requestPayload.sourceUrl || "Untitled source",
-        prompt: requestPayload.sourceText || requestPayload.sourceUrl,
+        source_kind: requestPayload.sourceUrl
+          ? (/youtu\.?be|youtube\.com/i.test(requestPayload.sourceUrl) ? "youtube" : "mixed")
+          : (requestPayload.fileName ? "document" : "text"),
+        source_title: requestPayload.sourceTitle || requestPayload.fileName || requestPayload.sourceUrl || "Untitled source",
+        prompt: requestPayload.sourceText || requestPayload.sourceUrl || requestPayload.fileName,
         request_payload: requestPayload,
         response_payload: responsePayload,
       })
