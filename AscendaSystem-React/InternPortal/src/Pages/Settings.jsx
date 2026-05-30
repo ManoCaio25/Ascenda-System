@@ -51,14 +51,7 @@ export default function SettingsPage() {
       const userData = await User.me();
       setUser(userData);
     } catch (error) {
-      // Mock user for demo
-      setUser({
-        full_name: "Caio Menezes",
-        email: "caio.alvarenga@ascenda.com",
-        avatar_url: "",
-        area_atuacao: "Frontend Development",
-        pontos_gamificacao: 2847
-      });
+      setUser(null);
     }
   };
 

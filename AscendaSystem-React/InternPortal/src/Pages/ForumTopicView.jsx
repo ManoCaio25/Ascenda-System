@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ForumTopic, ForumReply } from '@estagiario/Entities/all';
+import { ForumTopic, ForumReply, User } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -9,25 +9,29 @@ import { useI18n } from '@estagiario/Components/utils/i18n';
 import { Textarea } from '@estagiario/Components/ui/textarea';
 import { Button } from '@estagiario/Components/ui/button';
 
-const mockUsers = {
-  user_1: { full_name: 'Galileo', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face' },
-  user_2: { full_name: 'Newton', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face' },
-  user_3: { full_name: 'Curie', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face' },
-};
+const getAuthorName = (record) => (
+  record.creator_name ||
+  record.author_name ||
+  record.autor ||
+  record.id_usuario_criador ||
+  'Anonymous'
+);
 
 const ReplyCard = ({ reply, formattedDate, t }) => {
-  const author = mockUsers[reply.id_usuario_criador] || { full_name: 'Anonymous', avatar_url: '' };
+  const authorName = getAuthorName(reply);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-start gap-4 p-5 rounded-lg cosmic-card border ${reply.melhor_resposta ? 'border-green-500/60' : 'border-transparent'}`}
     >
-      <img src={author.avatar_url} alt={author.full_name} className="w-10 h-10 rounded-full object-cover" />
+      <div className="w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-sm font-semibold text-purple-100">
+        {authorName.charAt(0).toUpperCase()}
+      </div>
       <div className="flex-grow space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
-            <span className="font-semibold text-text-primary">{author.full_name}</span>
+            <span className="font-semibold text-text-primary">{authorName}</span>
             <span>·</span>
             <span>{formattedDate}</span>
           </div>
@@ -55,15 +59,18 @@ export default function ForumTopicViewPage() {
   const [newReply, setNewReply] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     if (!topicId) return;
     const fetchData = async () => {
       setIsLoading(true);
-      const [topicData, repliesData] = await Promise.all([
+      const [topicData, repliesData, userData] = await Promise.all([
         ForumTopic.get(topicId),
-        ForumReply.filter({ id_topico: topicId }, 'created_date')
+        ForumReply.filter({ id_topico: topicId }, 'created_date'),
+        User.me().catch(() => null),
       ]);
+      setCurrentUser(userData);
 
       if (topicData) {
         const updatedTopic = await ForumTopic.update(topicData.id, {
@@ -96,7 +103,7 @@ export default function ForumTopicViewPage() {
       const payload = {
         id_topico: topic.id,
         conteudo_resposta: newReply.trim(),
-        id_usuario_criador: 'user_1',
+        id_usuario_criador: currentUser?.user_id || currentUser?.id,
         melhor_resposta: false,
       };
       const created = await ForumReply.create(payload);
@@ -115,7 +122,7 @@ export default function ForumTopicViewPage() {
   if (isLoading) return <div className="text-center p-10 text-text-secondary">{t('loading')}</div>;
   if (!topic) return <div className="text-center p-10 text-text-secondary">{t('forumNoCategoriesLoaded')}</div>;
 
-  const creator = mockUsers[topic.id_usuario_criador] || { full_name: 'Anonymous' };
+  const creatorName = getAuthorName(topic);
   const formattedDate = format(new Date(topic.created_date), language === 'pt' ? 'dd/MM/yyyy' : 'MMMM d, yyyy', { locale });
   const bestAnswer = formattedReplies.find((item) => item.reply.melhor_resposta);
   const otherReplies = formattedReplies.filter((item) => !item.reply.melhor_resposta);
@@ -125,7 +132,7 @@ export default function ForumTopicViewPage() {
       <div className="space-y-2">
         <h1 className="text-4xl font-bold">{topic.titulo}</h1>
         <div className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
-          <span>{creator.full_name}</span>
+          <span>{creatorName}</span>
           <span>·</span>
           <span>{formattedDate}</span>
           <span>·</span>

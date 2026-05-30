@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@estagiario/utils";
@@ -29,34 +29,7 @@ export default function TasksPreview({ tasks, isLoading }) {
     }
   };
 
-  const mockTasks = useMemo(() => ([
-    {
-      id: "1",
-      titulo_demanda: t('tasksFallbackReactComponents'),
-      status_demanda: "Em Andamento",
-      data_limite: "2024-01-15",
-      pontos_gamificacao_associados: 150,
-      priority: "high"
-    },
-    {
-      id: "2",
-      titulo_demanda: t('tasksFallbackWeeklyReport'),
-      status_demanda: "Pendente",
-      data_limite: "2024-01-12",
-      pontos_gamificacao_associados: 50,
-      priority: "medium"
-    },
-    {
-      id: "3",
-      titulo_demanda: t('tasksFallbackDocumentation'),
-      status_demanda: "Pendente",
-      data_limite: "2024-01-18",
-      pontos_gamificacao_associados: 75,
-      priority: "low"
-    }
-  ]), [t]);
-
-  const displayTasks = tasks.length > 0 ? tasks.slice(0, 4) : mockTasks;
+  const displayTasks = tasks.slice(0, 4);
 
   const translateStatus = (status) => {
     switch (status) {
@@ -148,6 +121,9 @@ export default function TasksPreview({ tasks, isLoading }) {
             </div>
           </motion.div>
         ))}
+        {displayTasks.length === 0 && (
+          <p className="text-sm text-slate-400">{t('noActiveTasks')}</p>
+        )}
       </div>
     </motion.div>
   );

@@ -81,6 +81,9 @@ function normalizeGenerationRequest(body = {}) {
 
 async function callOpenAI(payload) {
   if (!env.openaiApiKey) {
+    if (env.nodeEnv === "production") {
+      throw new HttpError(503, "OPENAI_API_KEY is not configured");
+    }
     return buildMockActivityResult(payload);
   }
 

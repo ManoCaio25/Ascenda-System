@@ -4,7 +4,6 @@ import {
   Route,
   Routes,
   useLocation,
-  useParams,
 } from 'react-router-dom';
 import Layout from './layout.jsx';
 import Dashboard from './Pages/Dashboard.jsx';
@@ -17,9 +16,8 @@ import ForumTopicView from './Pages/ForumTopicView.jsx';
 import Calendar from './Pages/Calendar.jsx';
 import Profile from './Pages/Profile.jsx';
 import Settings from './Pages/Settings.jsx';
-import { I18nProvider, useI18n } from './Components/utils/i18n.jsx';
+import { I18nProvider } from './Components/utils/i18n.jsx';
 import { AccessibilityProvider } from './Components/utils/accessibility.jsx';
-import interns from '@/data/interns.json';
 
 const InternContext = createContext(null);
 
@@ -37,14 +35,8 @@ function Page({ pageName, intern, children }) {
 
 function InternPortalRouter({ fallbackIntern }) {
   const { state } = useLocation();
-  const { internId } = useParams();
-  const { t } = useI18n();
 
-  const intern = fallbackIntern || state || interns.find((item) => item.id === internId);
-
-  if (!intern) {
-    return <div>{t('internNotFound')}</div>;
-  }
+  const intern = fallbackIntern || state || null;
 
   return (
     <Routes>

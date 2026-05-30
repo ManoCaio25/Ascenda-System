@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@estagiario/utils";
@@ -11,41 +11,8 @@ import { useI18n } from "@estagiario/Components/utils/i18n";
 export default function LearningProgress({ learningPaths, content, isLoading }) {
   const { t } = useI18n();
 
-  const mockPath = useMemo(() => ({
-    nome_trilha: t('learningFallbackPathTitle'),
-    descricao: t('learningFallbackPathDescription'),
-    progress_percent: 73
-  }), [t]);
-
-  const mockContent = useMemo(() => ([
-    {
-      id: "1",
-      titulo: t('learningFallbackContentReactHooks'),
-      tipo_conteudo: "Video",
-      status_conclusao: "Em Progresso",
-      duracao_estimada_minutos: 45,
-      ordem_na_trilha: 4
-    },
-    {
-      id: "2",
-      titulo: t('learningFallbackContentRedux'),
-      tipo_conteudo: "Video",
-      status_conclusao: "Nao Iniciado",
-      duracao_estimada_minutos: 60,
-      ordem_na_trilha: 5
-    },
-    {
-      id: "3",
-      titulo: t('learningFallbackContentPerformance'),
-      tipo_conteudo: "PDF",
-      status_conclusao: "Concluido",
-      duracao_estimada_minutos: 30,
-      ordem_na_trilha: 3
-    }
-  ]), [t]);
-
-  const currentPath = learningPaths[0] || mockPath;
-  const pathContent = content.length > 0 ? content.slice(0, 3) : mockContent;
+  const currentPath = learningPaths[0] || null;
+  const pathContent = content.slice(0, 3);
 
   const getContentIcon = (type) => {
     switch (type) {
@@ -121,11 +88,11 @@ export default function LearningProgress({ learningPaths, content, isLoading }) 
 
       <div className="space-y-4">
         <div>
-          <h3 className="font-semibold text-white mb-2">{currentPath.nome_trilha}</h3>
-          <p className="text-sm text-slate-400 mb-3">{currentPath.descricao}</p>
+          <h3 className="font-semibold text-white mb-2">{currentPath?.nome_trilha || t('learningProgress')}</h3>
+          <p className="text-sm text-slate-400 mb-3">{currentPath?.descricao || ''}</p>
           <div className="flex items-center gap-3">
-            <Progress value={currentPath.progress_percent || 73} className="flex-1 h-2" />
-            <span className="text-sm font-medium text-white">{currentPath.progress_percent || 73}%</span>
+            <Progress value={currentPath?.progress_percent || 0} className="flex-1 h-2" />
+            <span className="text-sm font-medium text-white">{currentPath?.progress_percent || 0}%</span>
           </div>
         </div>
 
@@ -160,6 +127,9 @@ export default function LearningProgress({ learningPaths, content, isLoading }) 
                 </div>
               </motion.div>
             ))}
+            {pathContent.length === 0 && (
+              <p className="text-sm text-slate-400">{t('nextLessons')}</p>
+            )}
           </div>
         </div>
       </div>

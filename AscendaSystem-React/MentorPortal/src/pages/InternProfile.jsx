@@ -17,6 +17,7 @@ import Avatar from "@padrinho/components/ui/Avatar";
 import PerformancePanel from "@padrinho/components/interns/PerformancePanel";
 import FeedbackTimeline from "@padrinho/components/interns/FeedbackTimeline";
 import { getDaysLeft, getDaysLeftBadgeColor } from "@padrinho/components/utils/dates";
+import { listMentors } from "@padrinho/services/internService";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -37,18 +38,6 @@ const slugify = (value = "") =>
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const readMentorAccounts = () => {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = window.localStorage.getItem("ascenda_auth_accounts");
-    const accounts = stored ? JSON.parse(stored) : [];
-    return accounts.filter((account) => account.role === "mentor");
-  } catch (error) {
-    console.warn("Unable to read mentor accounts", error);
-    return [];
-  }
-};
-
 export default function InternProfile() {
   const navigate = useNavigate();
   const { internId } = useParams();
@@ -56,21 +45,29 @@ export default function InternProfile() {
   const [intern, setIntern] = React.useState(null);
   const [feedbackItems, setFeedbackItems] = React.useState([]);
   const [mentorOptions, setMentorOptions] = React.useState([]);
+  const [mentorAccounts, setMentorAccounts] = React.useState([]);
   const [customResponsible, setCustomResponsible] = React.useState("");
   const [isSavingResponsible, setIsSavingResponsible] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const resolveMentor = React.useCallback((name) => {
     if (!name) return null;
-    return readMentorAccounts().find((mentor) => mentor.full_name === name) || null;
-  }, []);
+    return mentorAccounts.find((mentor) => mentor.full_name === name) || null;
+  }, [mentorAccounts]);
 
   React.useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const list = await Intern.list();
-        const accountMentors = readMentorAccounts().map((mentor) => mentor.full_name);
+        const [list, accounts] = await Promise.all([
+          Intern.list(),
+          listMentors().catch((error) => {
+            console.warn("Unable to load mentor accounts", error);
+            return [];
+          }),
+        ]);
+        setMentorAccounts(accounts);
+        const accountMentors = accounts.map((mentor) => mentor.full_name);
         const mentors = Array.from(
           new Set([
             ...accountMentors,

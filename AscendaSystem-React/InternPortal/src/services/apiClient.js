@@ -1,12 +1,14 @@
 const API_URL = import.meta.env.VITE_API_URL || "";
-const API_TOKEN_KEY = "ascenda_api_token";
 
 export function isApiReady() {
-  return Boolean(API_URL && window.localStorage.getItem(API_TOKEN_KEY));
+  return Boolean(API_URL);
 }
 
-export function getApiToken() {
-  return window.localStorage.getItem(API_TOKEN_KEY);
+export function isLocalDataFallbackEnabled() {
+  return (
+    import.meta.env.VITE_ALLOW_LOCAL_DATA_FALLBACK === "true" ||
+    import.meta.env.VITE_ALLOW_LOCAL_AUTH_FALLBACK === "true"
+  );
 }
 
 export async function apiRequest(path, options = {}) {
@@ -14,16 +16,15 @@ export async function apiRequest(path, options = {}) {
     throw new Error("VITE_API_URL is not configured");
   }
 
-  const token = options.token ?? getApiToken();
   const headers = {
     Accept: "application/json",
     ...(options.body ? { "Content-Type": "application/json" } : {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
   const response = await fetch(`${API_URL}${path}`, {
     method: options.method || "GET",
+    credentials: "include",
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
@@ -39,12 +40,18 @@ export async function apiRequest(path, options = {}) {
 
 export async function withApiFallback(apiCall, fallbackCall) {
   if (!isApiReady()) {
-    return fallbackCall();
+    if (isLocalDataFallbackEnabled()) {
+      return fallbackCall();
+    }
+    throw new Error("VITE_API_URL is not configured and local data fallback is disabled.");
   }
 
   try {
     return await apiCall();
   } catch (error) {
+    if (!isLocalDataFallbackEnabled()) {
+      throw error;
+    }
     console.warn("API unavailable, using local InternPortal data.", error);
     return fallbackCall();
   }

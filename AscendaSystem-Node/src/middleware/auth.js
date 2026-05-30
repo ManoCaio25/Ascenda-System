@@ -1,4 +1,5 @@
 import { dataAdapter } from "../data/index.js";
+import { env } from "../config/env.js";
 import { forbidden, HttpError } from "../utils/httpError.js";
 
 export function extractBearerToken(req) {
@@ -12,12 +13,33 @@ export function extractBearerToken(req) {
   return token;
 }
 
+function parseCookies(header = "") {
+  return header
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .reduce((cookies, part) => {
+      const separator = part.indexOf("=");
+      if (separator === -1) return cookies;
+      const key = part.slice(0, separator).trim();
+      const value = part.slice(separator + 1).trim();
+      if (key) {
+        cookies[key] = decodeURIComponent(value);
+      }
+      return cookies;
+    }, {});
+}
+
+export function extractAuthToken(req) {
+  return extractBearerToken(req) || parseCookies(req.headers.cookie)[env.authCookieName] || null;
+}
+
 export async function requireAuth(req, _res, next) {
   try {
-    const token = extractBearerToken(req);
+    const token = extractAuthToken(req);
 
     if (!token) {
-      throw new HttpError(401, "Missing bearer token");
+      throw new HttpError(401, "Missing authentication token");
     }
 
     const session = await dataAdapter.getSessionFromToken(token);
@@ -34,7 +56,7 @@ export async function requireAuth(req, _res, next) {
 
 export async function optionalAuth(req, _res, next) {
   try {
-    const token = extractBearerToken(req);
+    const token = extractAuthToken(req);
     if (!token) {
       next();
       return;

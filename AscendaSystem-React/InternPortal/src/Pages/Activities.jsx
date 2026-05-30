@@ -70,15 +70,10 @@ export default function ActivitiesPage() {
   }), [t]);
 
   useEffect(() => {
-    Activity.list('-created_date').then(setActivities);
+    Activity.list('-created_date').then(setActivities).catch(() => setActivities([]));
     User.me()
       .then(setUser)
-      .catch(() =>
-        setUser({
-          full_name: 'Caio Menezes',
-          email: 'caio.alvarenga@ascenda.com',
-        }),
-      )
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 

@@ -59,7 +59,7 @@ src/
 
 - `components`: componentes visuais reutilizaveis.
 - `pages`: telas completas e rotas.
-- `entities`: camada legada de dados/localStorage. Deve diminuir com o tempo.
+- `entities`: camada de acesso a dados. Deve chamar backend ou fallback em memoria, sem persistir dados de negocio no navegador.
 - `services`: comunicacao com backend e APIs externas. Novas integracoes devem entrar aqui.
 - `hooks`: regras reutilizaveis de React.
 - `utils`: helpers puros.

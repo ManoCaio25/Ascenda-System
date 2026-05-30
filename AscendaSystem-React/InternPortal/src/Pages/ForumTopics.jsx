@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@estagiario/utils';
-import { ForumTopic, ForumCategory } from '@estagiario/Entities/all';
+import { ForumTopic, ForumCategory, User as UserEntity } from '@estagiario/Entities/all';
 import { motion } from 'framer-motion';
-import { User, Calendar, ChevronLeft, Plus } from 'lucide-react';
+import { User as UserIcon, Calendar, ChevronLeft, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useI18n } from '@estagiario/Components/utils/i18n';
@@ -18,13 +18,15 @@ import {
   DialogDescription
 } from '@estagiario/Components/ui/dialog';
 
-const mockUsers = {
-  user_1: { full_name: 'Silva', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face' },
-  user_2: { full_name: 'Jose', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face' },
-  user_3: { full_name: 'Laila', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face' },
-};
-
 const initialTopicState = { title: '', content: '' };
+
+const getAuthorName = (record) => (
+  record.creator_name ||
+  record.author_name ||
+  record.full_name ||
+  record.id_usuario_criador ||
+  'Anonymous'
+);
 
 export default function ForumTopicsPage() {
   const location = useLocation();
@@ -38,17 +40,20 @@ export default function ForumTopicsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newTopic, setNewTopic] = useState(initialTopicState);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     if (!categoryId) return;
     const fetchData = async () => {
       setIsLoading(true);
-      const [categoryData, topicsData] = await Promise.all([
+      const [categoryData, topicsData, userData] = await Promise.all([
         ForumCategory.get(categoryId),
-        ForumTopic.filter({ id_categoria_forum: categoryId }, '-created_date')
+        ForumTopic.filter({ id_categoria_forum: categoryId }, '-created_date'),
+        UserEntity.me().catch(() => null),
       ]);
       setCategory(categoryData);
       setTopics(topicsData);
+      setCurrentUser(userData);
       setIsLoading(false);
     };
     fetchData();
@@ -58,10 +63,9 @@ export default function ForumTopicsPage() {
 
   const formattedTopics = useMemo(() => {
     return topics.map((topic) => {
-      const creator = mockUsers[topic.id_usuario_criador] || { full_name: 'Anonymous', avatar_url: '' };
       return {
         ...topic,
-        creator,
+        creatorName: getAuthorName(topic),
         formattedDate: format(new Date(topic.created_date), language === 'pt' ? 'dd/MM/yyyy' : 'MMM d, yyyy', { locale }),
       };
     });
@@ -78,7 +82,7 @@ export default function ForumTopicsPage() {
         id_categoria_forum: category.id,
         titulo: newTopic.title.trim(),
         conteudo_topico: newTopic.content.trim(),
-        id_usuario_criador: 'user_1',
+        id_usuario_criador: currentUser?.user_id || currentUser?.id,
         reply_count: 0,
         visualizacoes: 1,
       };
@@ -126,11 +130,13 @@ export default function ForumTopicsPage() {
           >
             <Link to={createPageUrl(`ForumTopicView?id=${topic.id}`)} className="block cosmic-card rounded-lg p-5 hover:border-purple-500 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                <img src={topic.creator.avatar_url} alt={topic.creator.full_name} className="w-12 h-12 rounded-full object-cover" />
+                <div className="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-sm font-semibold text-purple-100">
+                  {topic.creatorName.charAt(0).toUpperCase()}
+                </div>
                 <div className="flex-grow space-y-2">
                   <h2 className="font-semibold text-lg text-text-primary">{topic.titulo}</h2>
                   <div className="flex flex-wrap items-center gap-4 text-xs text-text-secondary/80">
-                    <span className="inline-flex items-center gap-1"><User className="w-3 h-3" />{topic.creator.full_name}</span>
+                    <span className="inline-flex items-center gap-1"><UserIcon className="w-3 h-3" />{topic.creatorName}</span>
                     <span className="inline-flex items-center gap-1"><Calendar className="w-3 h-3" />{topic.formattedDate}</span>
                   </div>
                 </div>

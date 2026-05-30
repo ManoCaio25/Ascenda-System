@@ -30,7 +30,7 @@ Ascenda-System/
 ## O que ja foi criado
 
 - `AscendaSystem-Node/database/supabase_schema.sql`: schema completo para rodar no SQL Editor do Supabase.
-- `AscendaSystem-Node/database/seed_ascenda_users.sql`: seed inicial com mentor Paulo e interns por area (`SAP HR`, `DEV WEB`).
+- `AscendaSystem-Node/database/seed_ascenda_users.sql`: nota segura para promover o primeiro mentor, sem usuarios ou senhas versionados.
 - `AscendaSystem-Node/`: API Node/Express inicial.
 - `AscendaSystem-Node/.env.example`: variaveis necessarias para rodar o backend.
 - `AscendaSystem-Node/README.md`: instrucoes do backend.
@@ -38,7 +38,7 @@ Ascenda-System/
 - `docs/ESTRUTURA_DE_PASTAS.md`: mapa de pastas e regra de onde modificar cada coisa.
 - `docs/DEPLOY.md`: checklist e variaveis para publicar em dominio real.
 - `AscendaSystem-React/.env.example`: variaveis compartilhadas dos frontends.
-- `AscendaSystem-React/Login`: Access Hub em React para login/cadastro local.
+- `AscendaSystem-React/Login`: Access Hub em React para login/cadastro via API.
 - `AscendaSystem-React/LoadingPage`: Launch Bridge em React para transicao entre portais.
 - Backend agora suporta `DATA_PROVIDER=mock`, permitindo desenvolver sem Supabase pronto.
 - Backend ja possui rotas especificas de auth, mentors, interns e IA em modo mock-ready.
@@ -177,13 +177,7 @@ https://app.seudominio.com/**
 
 O primeiro usuario deve ser criado no Supabase Auth. O trigger do schema cria automaticamente uma linha em `public.profiles`.
 
-Se voce quiser usar os usuarios iniciais do Ascenda, rode o arquivo `AscendaSystem-Node/database/seed_ascenda_users.sql` depois do schema principal. Ele cria:
-
-- Mentor: `paulo.viera@ascenda.com`
-- Intern SAP HR: `iasmim@ascenda.com`
-- Intern DEV WEB: `caio.alvarenga@ascenda.com`
-
-Senha inicial de todos nesse seed: `123@Mudar.,`
+O repositorio nao versiona usuarios ou senhas iniciais. Crie o primeiro usuario no Supabase Auth e promova esse perfil para mentor/admin com um SQL privado ou pelo Dashboard.
 
 Opcao manual pelo Dashboard:
 
@@ -423,6 +417,7 @@ Os apps React usam um unico arquivo em `AscendaSystem-React/.env`:
 ```env
 VITE_API_URL=http://localhost:4000/api
 VITE_ALLOW_LOCAL_AUTH_FALLBACK=false
+VITE_ALLOW_LOCAL_DATA_FALLBACK=false
 ```
 
 Regra:
@@ -559,13 +554,13 @@ where email = 'seu-email@exemplo.com';
 
 3. Migrar autenticacao
    - O `Login` ja possui camada de servico para chamar `VITE_API_URL`.
-   - Enquanto `VITE_API_URL` nao existir, ele continua usando fluxo local.
+   - `VITE_API_URL` e obrigatorio para login/cadastro.
    - Quando Supabase estiver pronto, o backend troca `DATA_PROVIDER=mock` para `DATA_PROVIDER=supabase`.
    - Redirecionar usuario por role: `mentor` para MentorPortal, `intern` para InternPortal.
    - Manter o vinculo `mentor_id` e `substitute_mentor_id` no perfil do intern.
 
 4. Migrar dados do MentorPortal
-   - Trocar `localStorage` e stores fake por chamadas ao backend.
+   - Manter dados de negocio em chamadas ao backend; fallback local deve ser apenas em memoria.
    - Prioridade: interns, courses, course_assignments, tasks, chat_messages, vacation_requests.
 
 5. Migrar dados do InternPortal
@@ -610,9 +605,9 @@ Regra importante: a IA deve gerar sugestoes. O padrinho revisa e publica.
 - `ActivityGenerator` agora possui os helpers de leitura de arquivo que faltavam e usa texto extraido de arquivos simples no planejamento local.
 - Padrinho/Estagiario foram renomeados tecnicamente para `MentorPortal` e `InternPortal`.
 - Login e LoadingPage foram convertidos para React.
-- Cadastro local agora cria mentors e interns, vinculando intern ao mentor principal e ao mentor substituto.
-- Login agora tenta usar `VITE_API_URL` quando configurado e volta para o fluxo local se a API ainda nao estiver disponivel.
-- MentorPortal e InternPortal ja tem clientes de API preparados para usar o token `ascenda_api_token`.
+- Cadastro via API agora cria mentors e interns, vinculando intern ao mentor principal e ao mentor substituto.
+- Login agora exige `VITE_API_URL` e usa sessao em cookie HttpOnly.
+- MentorPortal e InternPortal ja tem clientes de API preparados para usar cookie de sessao com `credentials: "include"`.
 - Backend recebeu headers defensivos, rate limit, validacao de payload e modo mock para desenvolvimento sem chaves reais.
 
 ## Proximos arquivos que precisam de migracao

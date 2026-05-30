@@ -86,7 +86,7 @@ export default function AscendaIAQuizzesPage() {
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
               <Sparkles className="h-5 w-5 text-white" aria-hidden="true" />
-              <span>Powered by AscendaIA mock service</span>
+              <span>Powered by AscendaIA</span>
             </div>
           </div>
         </motion.header>

@@ -46,16 +46,23 @@ export function filterInterns({ criteria, sort, limit, fallback }) {
   }, fallback);
 }
 
+export function listMentors(fallback = () => []) {
+  return withApiFallback(
+    () => apiRequest("/mentors"),
+    fallback,
+  );
+}
+
 export function updateIntern(id, updates, fallback) {
   return withApiFallback(async () => {
-    if (Object.keys(updates).length === 1 && updates.mentor_id) {
+    if (Object.hasOwn(updates, "mentor_id") && updates.mentor_id) {
       return apiRequest(`/interns/${id}/mentor`, {
         method: "PATCH",
         body: { mentorId: updates.mentor_id },
       });
     }
 
-    if (Object.keys(updates).length === 1 && Object.hasOwn(updates, "substitute_mentor_id")) {
+    if (Object.hasOwn(updates, "substitute_mentor_id")) {
       return apiRequest(`/interns/${id}/substitute-mentor`, {
         method: "PATCH",
         body: { substituteMentorId: updates.substitute_mentor_id || "" },

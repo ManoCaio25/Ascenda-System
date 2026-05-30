@@ -6,3 +6,11 @@ export function getCurrentSession(fallback) {
     fallback,
   );
 }
+
+export async function logoutSession() {
+  try {
+    await apiRequest("/auth/logout", { method: "POST" });
+  } catch (error) {
+    console.warn("Unable to close remote session", error);
+  }
+}

@@ -13,3 +13,11 @@ export function getCurrentIntern(fallback) {
     return Array.isArray(interns) ? interns[0] : null;
   }, fallback);
 }
+
+export async function logoutSession() {
+  try {
+    await apiRequest("/auth/logout", { method: "POST" });
+  } catch (error) {
+    console.warn("Unable to close remote session", error);
+  }
+}

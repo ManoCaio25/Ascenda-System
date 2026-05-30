@@ -273,15 +273,7 @@ export default function Profile() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const currentUser = await User.me().catch(() => ({
-        id: 'intern-1',
-        full_name: 'Caio Menezes',
-        email: 'caio.alvarenga@ascenda.com',
-        pontos_gamificacao: 2847,
-        avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face',
-        area_atuacao: 'Frontend Development',
-        equipped_tag: '🚀 Cosmic Explorer'
-      }));
+      const currentUser = await User.me().catch(() => null);
       setUser(currentUser);
 
       const [achievementsData, shopData] = await Promise.all([

@@ -52,13 +52,13 @@ http://localhost:4000/api
 - `DELETE /api/entities/:entity/:id`
 - `POST /api/ai/generate-activities`
 
-As rotas protegidas esperam:
+As rotas protegidas usam a sessao enviada em cookie HttpOnly:
 
 ```txt
-Authorization: Bearer <supabase_access_token>
+Cookie: ascenda_session=<token>
 ```
 
-Em `DATA_PROVIDER=mock`, o token vem de `POST /api/auth/login` e e salvo pelo Login em `localStorage` como `ascenda_api_token`.
+O frontend deve chamar a API com `credentials: "include"`. O token de sessao nao e exposto para JavaScript e nao deve ser salvo em `localStorage`.
 
 ## Camadas de seguranca ja preparadas
 
@@ -68,6 +68,7 @@ Em `DATA_PROVIDER=mock`, o token vem de `POST /api/auth/login` e e salvo pelo Lo
 - Validacao de payload antes de criar usuarios ou alterar vinculos.
 - `service_role` isolada no backend.
 - `DATA_PROVIDER=mock` para desenvolver sem chaves reais.
+- Auditoria `npm run audit:hardcode` para bloquear credenciais, personas demo e armazenamento local sensivel antes do build.
 
 ## Observacao
 

@@ -100,7 +100,14 @@ function LayoutContent() {
         const userData = await User.me();
         setUser(userData);
       } catch (error) {
-        console.log("User not loaded");
+        setUser(null);
+        try {
+          sessionStorage.setItem('nextUrl', portalUrl(LOGIN_PATH, 5173));
+          sessionStorage.removeItem('role');
+        } catch (storageError) {
+          console.warn('sessionStorage unavailable', storageError);
+        }
+        window.location.href = portalUrl(LOADING_PATH, 5174);
       }
     };
     loadUser();

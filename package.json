@@ -9,9 +9,10 @@
     "dev:loading": "npm --prefix AscendaSystem-React/LoadingPage run dev -- --host 127.0.0.1 --port 5174",
     "dev:mentor": "npm --prefix AscendaSystem-React/MentorPortal run dev -- --host 127.0.0.1 --port 5175",
     "dev:intern": "npm --prefix AscendaSystem-React/InternPortal run dev -- --host 127.0.0.1 --port 5176",
-    "build": "npm run build:frontend",
+    "audit:hardcode": "node scripts/audit-no-sensitive-storage.mjs",
+    "build": "npm run audit:hardcode && npm run build:frontend",
     "build:frontend": "node scripts/build-frontend.mjs",
-    "render:build": "npm run install:frontend && npm run build:frontend",
+    "render:build": "npm run install:frontend && npm run build",
     "start:backend": "npm --prefix AscendaSystem-Node start"
   }
 }

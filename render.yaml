@@ -23,6 +23,12 @@ services:
         value: 2mb
       - key: AUTH_TOKEN_TTL_HOURS
         value: "12"
+      - key: AUTH_COOKIE_NAME
+        value: ascenda_session
+      - key: AUTH_COOKIE_SAMESITE
+        value: none
+      - key: AUTH_COOKIE_SECURE
+        value: "true"
       - key: EXPOSE_ERROR_DETAILS
         value: "false"
       - key: ALLOW_PUBLIC_MENTOR_SIGNUP
@@ -47,8 +53,10 @@ services:
       - ascenda-system.is-a.dev
     envVars:
       - key: VITE_API_URL
-        value: https://ascenda-system-api.onrender.com/api
+        value: https://api.ascenda-system.is-a.dev/api
       - key: VITE_ALLOW_LOCAL_AUTH_FALLBACK
+        value: "false"
+      - key: VITE_ALLOW_LOCAL_DATA_FALLBACK
         value: "false"
       - key: VITE_LOGIN_BASE
         value: /

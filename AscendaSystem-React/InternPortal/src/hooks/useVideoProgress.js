@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 const PROGRESS_KEY = (id) => `progress-${id}`;
 const PROGRESS_TIME_KEY = (id) => `progress-time-${id}`;
 const COMPLETED_KEY = (id) => `completed-${id}`;
+const videoProgressStore = new Map();
 
 const clampNumber = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -12,21 +13,11 @@ const safeParseNumber = (value) => {
 };
 
 const safeReadStorage = (key) => {
-  if (typeof window === 'undefined') return null;
-  try {
-    return window.localStorage.getItem(key);
-  } catch (error) {
-    return null;
-  }
+  return videoProgressStore.get(key) ?? null;
 };
 
 const safeWriteStorage = (key, value) => {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(key, value);
-  } catch (error) {
-    // Silently ignore storage write issues (e.g., private browsing)
-  }
+  videoProgressStore.set(key, value);
 };
 
 export const formatVideoTime = (totalSeconds) => {

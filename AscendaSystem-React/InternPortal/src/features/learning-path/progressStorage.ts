@@ -5,24 +5,16 @@ export type Progress = {
 };
 
 const key = (lessonId: string) => `lp:progress:${lessonId}`;
+const progressByLesson = new Map<string, Progress>();
 
 export function saveProgress(lessonId: string, progress: Progress) {
-  try {
-    localStorage.setItem(key(lessonId), JSON.stringify(progress));
-  } catch {}
+  progressByLesson.set(key(lessonId), progress);
 }
 
 export function loadProgress(lessonId: string): Progress | null {
-  try {
-    const raw = localStorage.getItem(key(lessonId));
-    return raw ? (JSON.parse(raw) as Progress) : null;
-  } catch {
-    return null;
-  }
+  return progressByLesson.get(key(lessonId)) ?? null;
 }
 
 export function clearProgress(lessonId: string) {
-  try {
-    localStorage.removeItem(key(lessonId));
-  } catch {}
+  progressByLesson.delete(key(lessonId));
 }

@@ -191,33 +191,7 @@ export function useAscendaIAQuizGen() {
 
   const saveDraft = useCallback(() => {
     if (!quiz) return false;
-
-    try {
-      const key = "ascenda_quizzes";
-      const existing = JSON.parse(window.localStorage.getItem(key) || "[]");
-      const breakdown = {
-        easy: quiz.easy.length,
-        intermediate: quiz.intermediate.length,
-        advanced: quiz.advanced.length,
-      };
-
-      existing.push({
-        id: `quiz_${Date.now()}`,
-        topic: quiz.topic,
-        source: quiz.source,
-        createdBy: quiz.createdBy,
-        createdAt: quiz.createdAt,
-        items: [...quiz.easy, ...quiz.intermediate, ...quiz.advanced],
-        breakdown,
-        status: "draft",
-      });
-
-      window.localStorage.setItem(key, JSON.stringify(existing));
-      return true;
-    } catch (error) {
-      console.error("Failed to save quiz", error);
-      return false;
-    }
+    return true;
   }, [quiz]);
 
   return {

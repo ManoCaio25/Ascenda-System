@@ -1,12 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL || "";
-const API_TOKEN_KEY = "ascenda_api_token";
 
 export function isApiConfigured() {
   return Boolean(API_URL);
-}
-
-export function getApiToken() {
-  return window.localStorage.getItem(API_TOKEN_KEY);
 }
 
 export async function apiRequest(path, options = {}) {
@@ -14,16 +9,15 @@ export async function apiRequest(path, options = {}) {
     throw new Error("VITE_API_URL is not configured");
   }
 
-  const token = options.token ?? getApiToken();
   const headers = {
     Accept: "application/json",
     ...(options.body ? { "Content-Type": "application/json" } : {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
   const response = await fetch(`${API_URL}${path}`, {
     method: options.method || "GET",
+    credentials: "include",
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
   });

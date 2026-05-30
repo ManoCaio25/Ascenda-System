@@ -105,8 +105,16 @@ const requiredSupabaseValues = {
   "SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY": supabaseServiceRoleKey,
 };
 const hasSupabaseConfig = Object.values(requiredSupabaseValues).every(Boolean);
+const nodeEnv = process.env.NODE_ENV || "development";
 const requestedProvider = String(process.env.DATA_PROVIDER || "").trim().toLowerCase();
 const dataProvider = requestedProvider || (hasSupabaseConfig ? "supabase" : "mock");
+const authCookieSameSite = String(
+  process.env.AUTH_COOKIE_SAMESITE || (nodeEnv === "production" ? "none" : "lax"),
+).toLowerCase();
+
+if (!["strict", "lax", "none"].includes(authCookieSameSite)) {
+  throw new Error("AUTH_COOKIE_SAMESITE must be one of: strict, lax, none");
+}
 
 if (!["mock", "supabase"].includes(dataProvider)) {
   throw new Error("DATA_PROVIDER must be either 'mock' or 'supabase'");
@@ -126,7 +134,7 @@ if (dataProvider === "supabase") {
 
 export const env = {
   port: Number(process.env.PORT || 4000),
-  nodeEnv: process.env.NODE_ENV || "development",
+  nodeEnv,
   corsOrigin: parseCors(process.env.CORS_ORIGIN),
   dataProvider,
   hasSupabaseConfig,
@@ -137,16 +145,20 @@ export const env = {
   openaiModel: process.env.OPENAI_MODEL || "gpt-4.1-mini",
   jsonBodyLimit: process.env.JSON_BODY_LIMIT || "2mb",
   authTokenTtlHours: Number(process.env.AUTH_TOKEN_TTL_HOURS || 12),
+  authCookieName: process.env.AUTH_COOKIE_NAME || "ascenda_session",
+  authCookieDomain: readLegacyEnvValue("AUTH_COOKIE_DOMAIN"),
+  authCookieSecure: parseBoolean(process.env.AUTH_COOKIE_SECURE, nodeEnv === "production"),
+  authCookieSameSite,
   exposeErrorDetails: parseBoolean(
     process.env.EXPOSE_ERROR_DETAILS,
-    (process.env.NODE_ENV || "development") !== "production",
+    nodeEnv !== "production",
   ),
   allowPublicMentorSignup: parseBoolean(
     process.env.ALLOW_PUBLIC_MENTOR_SIGNUP,
-    (process.env.NODE_ENV || "development") !== "production",
+    nodeEnv !== "production",
   ),
   allowPublicInternSignup: parseBoolean(
     process.env.ALLOW_PUBLIC_INTERN_SIGNUP,
-    (process.env.NODE_ENV || "development") !== "production",
+    nodeEnv !== "production",
   ),
 };

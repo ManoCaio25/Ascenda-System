@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@padrinho/components/ui/button";
 import { Input } from "@padrinho/components/ui/input";
 import { Textarea } from "@padrinho/components/ui/textarea";
-import { fakeAscendaIAActivities } from "@padrinho/utils/fakeAscendaIAActivities";
+import { generateAscendaIAActivities } from "@padrinho/utils/ascendaIAActivities";
 import { Sparkles, Youtube, FileText, Trash2 } from "lucide-react";
 
 function formatTime(isoString) {
@@ -41,7 +41,7 @@ export function AscendaIAActivitiesSection({ youtubeUrl, uploadedFile, attachedA
     setLoading(true);
     setError("");
     try {
-      const data = await fakeAscendaIAActivities({
+      const data = await generateAscendaIAActivities({
         focus,
         goal,
         youtubeUrl: youtubeUrl || "",

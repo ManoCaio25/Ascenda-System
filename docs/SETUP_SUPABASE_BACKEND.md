@@ -37,17 +37,9 @@ O SQL cria:
 
 O perfil do intern possui `mentor_id` e `substitute_mentor_id`. O mentor substituto tambem tem acesso ao intern pelas policies de RLS.
 
-Seed opcional dos usuarios iniciais:
+Usuarios iniciais:
 
-1. Abra `AscendaSystem-Node/database/seed_ascenda_users.sql`.
-2. Cole no `SQL Editor`.
-3. Execute depois do schema principal.
-
-Esse seed cria:
-
-- `paulo.viera@ascenda.com` como mentor.
-- `iasmim@ascenda.com` como intern de `SAP HR`.
-- `caio.alvarenga@ascenda.com` como intern de `DEV WEB`.
+O repositório não versiona mais usuários ou senhas demo. Crie os usuários reais pelo Supabase Auth ou pelo fluxo de cadastro da aplicação. O arquivo `AscendaSystem-Node/database/seed_ascenda_users.sql` agora é apenas uma nota segura com o comando para promover o primeiro mentor.
 
 ## 3. Configurar Auth
 
@@ -123,6 +115,7 @@ Os frontends usam um unico arquivo em `AscendaSystem-React/.env`:
 ```txt
 VITE_API_URL=http://localhost:4000/api
 VITE_ALLOW_LOCAL_AUTH_FALLBACK=false
+VITE_ALLOW_LOCAL_DATA_FALLBACK=false
 ```
 
 ## 6. Fluxo esperado da IA
@@ -138,8 +131,8 @@ VITE_ALLOW_LOCAL_AUTH_FALLBACK=false
 1. Confirmar SQL rodando no Supabase.
 2. Rodar backend local.
 3. Implementar login real no frontend.
-4. Trocar `localStorage` das entidades por chamadas HTTP.
-5. Migrar tela por tela: login, usuarios, estagiarios, cursos, atividades, chat.
+4. Manter entidades e autenticacao via chamadas HTTP; `localStorage` fica restrito a preferencias visuais.
+5. Migrar tela por tela: usuarios, estagiarios, cursos, atividades, chat.
 6. Ligar gerador de IA na tela do padrinho.
 
 ## 8. Links oficiais

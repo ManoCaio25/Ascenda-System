@@ -66,9 +66,7 @@ const AvatarWithFallback = ({ user, size = "md" }) => {
   };
   const currentSizeClass = avatarSizeClasses[size] || avatarSizeClasses.md;
 
-  // Default avatar if user.avatar_url is null or empty
-  const defaultAvatarUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60&h=60&fit=crop&crop=face";
-  const imageUrl = user?.avatar_url || defaultAvatarUrl;
+  const imageUrl = user?.avatar_url || "";
 
   const getInitials = (fullName) => {
     if (!fullName) return "U";
@@ -104,15 +102,14 @@ export default function Layout({ children, currentPageName }) {
       currentUser = await ensureDefaultProfile(currentUser);
       setUser(currentUser);
     } catch (error) {
-      // User not logged in, create a default user
-      setUser({
-        full_name: "Caio Menezes",
-        email: "caio.alvarenga@ascenda.com",
-        pontos_gamificacao: 2847,
-        avatar_url: "", // Changed to empty string for fallback test
-        area_atuacao: t('defaultWorkArea'),
-        equipped_tag: `🚀 ${t('defaultEquippedTag')}`
-      });
+      setUser(null);
+      try {
+        sessionStorage.setItem("nextUrl", portalUrl(LOGIN_PATH, 5173));
+        sessionStorage.removeItem("role");
+      } catch (storageError) {
+        console.warn("sessionStorage unavailable", storageError);
+      }
+      window.location.href = portalUrl(LOADING_PATH, 5174);
     }
   }, [t]);
 

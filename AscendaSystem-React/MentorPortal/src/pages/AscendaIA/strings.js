@@ -69,8 +69,8 @@ export const ascendaIAStrings = {
   actions: {
     discard: "Discard",
     save: "Save quiz",
-    saved: "Quiz saved locally!",
-    saveError: "Unable to save the quiz locally.",
+    saved: "Quiz generation recorded.",
+    saveError: "Unable to confirm the quiz generation.",
   },
   feedback: {
     generationError: "Something went wrong while generating the quiz. Try again.",

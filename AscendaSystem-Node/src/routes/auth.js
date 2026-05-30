@@ -14,6 +14,43 @@ import {
 
 export const authRouter = Router();
 
+function authCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: env.authCookieSecure,
+    sameSite: env.authCookieSameSite,
+    path: "/",
+    maxAge: env.authTokenTtlHours * 60 * 60 * 1000,
+    ...(env.authCookieDomain ? { domain: env.authCookieDomain } : {}),
+  };
+}
+
+function clearAuthCookie(res) {
+  const { maxAge: _maxAge, ...options } = authCookieOptions();
+  res.clearCookie(env.authCookieName, {
+    ...options,
+  });
+}
+
+function sendAuthResult(res, result, status = 200) {
+  if (result.session?.access_token) {
+    res.cookie(env.authCookieName, result.session.access_token, authCookieOptions());
+  }
+
+  const safeResult = {
+    ...result,
+    session: result.session
+      ? {
+          token_type: result.session.token_type,
+          expires_at: result.session.expires_at,
+          provider: result.session.provider,
+        }
+      : null,
+  };
+
+  res.status(status).json({ data: safeResult });
+}
+
 function readLoginPayload(body) {
   const payload = assertObject(body);
   const role = readString(payload, "role", { required: false, max: 20 });
@@ -102,7 +139,7 @@ authRouter.post(
     if (payload.role && result.profile?.role !== payload.role) {
       throw unauthorized("Invalid credentials");
     }
-    res.json({ data: result });
+    sendAuthResult(res, result);
   }),
 );
 
@@ -113,7 +150,7 @@ authRouter.post(
     assertSignupAllowed(req, "mentor");
     const payload = readMentorPayload(req.body);
     const result = await dataAdapter.createMentor(payload);
-    res.status(201).json({ data: result });
+    sendAuthResult(res, result, 201);
   }),
 );
 
@@ -128,7 +165,15 @@ authRouter.post(
       profile: req.profile,
       db: req.db,
     });
-    res.status(201).json({ data: result });
+    sendAuthResult(res, result, 201);
+  }),
+);
+
+authRouter.post(
+  "/logout",
+  asyncHandler(async (_req, res) => {
+    clearAuthCookie(res);
+    res.status(204).send();
   }),
 );
 

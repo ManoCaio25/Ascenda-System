@@ -65,7 +65,7 @@ SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SECRET_KEY
 ```
 
-`OPENAI_API_KEY` ainda nao e obrigatoria. Sem ela, a rota de IA usa resposta mock para validar o fluxo.
+`OPENAI_API_KEY` e obrigatoria para IA em producao. Sem ela, a rota de IA responde `503`.
 
 ## Passo 3 - Validar as URLs temporarias do Render
 
@@ -138,7 +138,7 @@ https://ascenda-system.is-a.dev,https://ascenda-system-web.onrender.com
 Enquanto o dominio `is-a.dev` ainda nao estiver aprovado, no servico `ascenda-system-web` configure temporariamente:
 
 ```txt
-VITE_API_URL=https://ascenda-system-api.onrender.com/api
+VITE_API_URL=https://api.ascenda-system.is-a.dev/api
 ```
 
 Depois que `api.ascenda-system.is-a.dev` estiver funcionando, volte para:
@@ -303,5 +303,5 @@ Solucao:
 4. Confirme que `ascenda-system-web > Environment` aponta para a API correta:
 
 ```txt
-VITE_API_URL=https://ascenda-system-api.onrender.com/api
+VITE_API_URL=https://api.ascenda-system.is-a.dev/api
 ```

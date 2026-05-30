@@ -64,14 +64,7 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      // Load user data
-      const currentUser = await User.me().catch(() => ({
-        full_name: "Caio Menezes",
-        email: "caio.alvarenga@ascenda.com",
-        pontos_gamificacao: 2847,
-        avatar_url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
-        area_atuacao: "Frontend Development"
-      }));
+      const currentUser = await User.me().catch(() => null);
       setUser(currentUser);
 
       // Load tasks, learning paths, and content
@@ -91,10 +84,10 @@ export default function Dashboard() {
   };
 
   const stats = {
-    totalPoints: user?.pontos_gamificacao || 2847,
-    pendingTasks: tasks.filter(task => task.status_demanda === 'Pendente').length || 3,
-    completedCourses: content.filter(c => c.status_conclusao === 'Concluido').length || 12,
-    currentStreak: 7
+    totalPoints: user?.pontos_gamificacao ?? 0,
+    pendingTasks: tasks.filter(task => task.status_demanda === 'Pendente').length,
+    completedCourses: content.filter(c => c.status_conclusao === 'Concluido').length,
+    currentStreak: user?.current_streak ?? 0
   };
 
   return (
